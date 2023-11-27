@@ -13,5 +13,10 @@ public class MyExceptionHandler {
     return new ErrorResponse(e.getErrorCode());
   }
 
+  @ExceptionHandler(RecordException.class)
+  public ErrorResponse handleRecordException(RecordException e) {
+    return new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+  }
+
 
 }
