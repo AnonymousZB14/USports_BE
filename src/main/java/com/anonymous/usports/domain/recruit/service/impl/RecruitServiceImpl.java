@@ -2,8 +2,8 @@ package com.anonymous.usports.domain.recruit.service.impl;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
-import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
@@ -36,5 +36,13 @@ public class RecruitServiceImpl implements RecruitService {
         recruitRepository.save(Request.toEntity(request, memberEntity, sportsEntity));
 
     return RecruitDto.fromEntity(saved);
+  }
+
+  @Override
+  public RecruitDto getRecruit(Long recruitId) {
+    return RecruitDto.fromEntity(
+        recruitRepository.findById(recruitId)
+            .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND))
+    );
   }
 }
