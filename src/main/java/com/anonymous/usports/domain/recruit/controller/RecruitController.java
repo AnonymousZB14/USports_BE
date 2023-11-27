@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.recruit.controller;
 
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +32,7 @@ public class RecruitController {
   @ApiOperation("운동 모집 게시글 등록하기")
   @PostMapping("/recruit")
   public ResponseEntity<?> registerRecruit(@RequestBody RecruitRegister.Request request){
-    //수정
+    //@AuthenticationPrincipal 에서 memberId 불러오기
     Long memberId = 0L;
     RecruitDto result = recruitService.addRecruit(request, memberId);
 
@@ -42,6 +44,16 @@ public class RecruitController {
   public ResponseEntity<?> getRecruit(@PathVariable Long recruitId){
     RecruitDto result = recruitService.getRecruit(recruitId);
     return ResponseEntity.ok(result);
+  }
+
+  @ApiOperation("운동 모집 게시글")
+  @PutMapping("/recruit/{recruitId}")
+  public ResponseEntity<?> updateRecruit(@PathVariable Long recruitId,
+      @RequestBody RecruitUpdate.Request request){
+      //@AuthenticationPrincipal 에서 memberId 불러오기
+      Long memberId = 0L;
+      recruitService.updateRecruit(request, recruitId, memberId);
+      return ResponseEntity.ok(null);
   }
 
 }
