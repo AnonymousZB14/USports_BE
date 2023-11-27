@@ -2,7 +2,7 @@ package com.anonymous.usports.domain.recruit.service.impl;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
-import com.anonymous.usports.domain.recruit.dto.AddRecruit.Request;
+import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;

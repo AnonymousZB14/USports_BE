@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-public class AddRecruit {
+public class RecruitRegister {
 
   @Getter
   @Setter
