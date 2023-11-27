@@ -9,7 +9,12 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
   //Member 관련
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "회원을 찾을 수 없습니다."),
+
+  //Sports 관련
   SPORTS_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 종목을 찾을 수 없습니다."),
+
+  //Recruit 관련
+  RECRUIT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 종목을 찾을 수 없습니다."),
 
   //BASIC
   NO_AUTHORITY_ERROR(HttpStatus.FORBIDDEN.value(), "권한이 없습니다."),

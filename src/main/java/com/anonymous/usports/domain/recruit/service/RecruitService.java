@@ -8,4 +8,6 @@ public interface RecruitService {
 
   RecruitDto addRecruit(RecruitRegister.Request request, Long memberId);
 
+  RecruitDto getRecruit(Long recruitId);
+
 }
