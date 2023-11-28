@@ -2,6 +2,8 @@ package com.anonymous.usports.domain.participant.service.impl;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.participant.dto.JoinRecruitManage;
+import com.anonymous.usports.domain.participant.dto.JoinRecruitManage.Response;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
@@ -10,6 +12,7 @@ import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MyException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,5 +39,35 @@ public class ParticipantServiceImpl implements ParticipantService {
         participantRepository.save(new ParticipantEntity(memberEntity, recruitEntity));
 
     return ParticipantDto.fromEntity(saved);
+  }
+
+  @Override
+  @Transactional
+  public Response manageJoinRecruit(JoinRecruitManage.Request request, Long recruitId,
+      Long memberId) {
+    MemberEntity applicant = memberRepository.findById(request.getApplicantId())
+        .orElseThrow(() -> new MyException(ErrorCode.APPLICANT_MEMBER_NOT_FOUND));
+
+    RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
+        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+
+    if (!Objects.equals(recruitEntity.getMember().getMemberId(), memberId)) {
+      throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);
+    }
+
+    ParticipantEntity participantEntity =
+        participantRepository.findByMemberIdAndRecruitId(request.getApplicantId(), recruitId)
+            .orElseThrow(() -> new MyException(ErrorCode.PARTICIPANT_NOT_FOUND));
+
+    if (!request.isAccept()) {
+      //거절 시
+      participantRepository.delete(participantEntity);
+    } else {
+      //수락 시
+      participantEntity.confirm();
+      participantRepository.save(participantEntity);
+    }
+
+    return new JoinRecruitManage.Response(recruitId, applicant.getMemberId(), request.isAccept());
   }
 }

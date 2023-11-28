@@ -51,11 +51,11 @@ public class ParticipantEntity {
     this.registeredAt = LocalDateTime.now();
   }
 
-  public void confirmedNow(){
+  public void confirm(){
     this.confirmedAt = LocalDateTime.now();
   }
 
-  public void evaluationNow(){
+  public void evaluation(){
     this.evaluationAt = LocalDateTime.now();
   }
 }
