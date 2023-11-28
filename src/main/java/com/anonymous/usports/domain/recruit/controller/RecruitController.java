@@ -36,7 +36,7 @@ public class RecruitController {
   public ResponseEntity<?> registerRecruit(@RequestBody RecruitRegister.Request request) {
     //FIXME : @AuthenticationPrincipal 에서 memberId 불러오기
     Long memberId = 0L;
-    RecruitDto result = recruitService.addRecruit(request, memberId);
+    RecruitDto result = recruitService.registerRecruit(request, memberId);
 
     return ResponseEntity.ok(new RecruitRegister.Response(result));
   }
