@@ -5,22 +5,23 @@ import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @Entity(name = "participant")
 public class ParticipantEntity {
 
@@ -36,6 +37,7 @@ public class ParticipantEntity {
   @JoinColumn(name = "recruit_id", nullable = false)
   private RecruitEntity recruit;
 
+  @CreatedDate
   @Column(name = "registered_at", nullable = false)
   private LocalDateTime registeredAt;
 
@@ -48,14 +50,13 @@ public class ParticipantEntity {
   public ParticipantEntity(MemberEntity member, RecruitEntity recruit) {
     this.member = member;
     this.recruit = recruit;
-    this.registeredAt = LocalDateTime.now();
   }
 
-  public void confirm(){
+  public void confirm() {
     this.confirmedAt = LocalDateTime.now();
   }
 
-  public void evaluation(){
+  public void evaluation() {
     this.evaluationAt = LocalDateTime.now();
   }
 }
