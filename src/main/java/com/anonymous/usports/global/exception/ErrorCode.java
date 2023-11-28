@@ -12,8 +12,13 @@ public enum ErrorCode {
 
   //Sports 관련
   SPORTS_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 종목을 찾을 수 없습니다."),
+
   //Recruit 관련
-  RECRUIT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 종목을 찾을 수 없습니다."),
+  RECRUIT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 모집 게시글을 찾을 수 없습니다."),
+  APPLICANT_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "지원자 회원을 찾을 수 없습니다."),
+  PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "모집 글 참여 신청 건을 찾을 수 없습니다."),
+
+
 
   //Record 관련
   IMAGE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"이미지 저장 오류가 발생했습니다."),
