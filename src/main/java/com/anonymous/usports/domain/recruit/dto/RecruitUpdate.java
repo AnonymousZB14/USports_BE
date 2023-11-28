@@ -1,11 +1,7 @@
 package com.anonymous.usports.domain.recruit.dto;
 
-import com.anonymous.usports.domain.member.entity.MemberEntity;
-import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
-import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.RecruitStatus;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,8 +40,9 @@ public class RecruitUpdate {
     private Long recruitId;
     private String message;
 
-    public static Response fromDto(RecruitDto recruitDto){
-      return new Response(recruitDto.getRecruitId(), ResponseConstant.ADD_RECRUIT);
+    public Response(RecruitDto recruitDto){
+      this.recruitId = recruitDto.getRecruitId();
+      this.message = ResponseConstant.UPDATE_RECRUIT;
     }
   }
 

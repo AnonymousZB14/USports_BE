@@ -69,6 +69,19 @@ public class RecruitServiceImpl implements RecruitService {
     return RecruitDto.fromEntity(saved);
   }
 
+  @Override
+  public RecruitDto deleteRecruit(Long recruitId, Long memberId) {
+    RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
+        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+    MemberEntity memberEntity = recruitEntity.getMember(); //작성자
+
+    this.validateAuthority(memberEntity, memberId);
+
+    recruitRepository.delete(recruitEntity);
+
+    return RecruitDto.fromEntity(recruitEntity);
+  }
+
   private void validateAuthority(MemberEntity member, Long memberId){
     if(member.getMemberId() != memberId){
       throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);

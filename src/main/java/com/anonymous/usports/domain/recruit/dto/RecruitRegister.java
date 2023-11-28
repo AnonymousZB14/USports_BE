@@ -65,8 +65,9 @@ public class RecruitRegister {
     private Long recruitId;
     private String message;
 
-    public static Response fromDto(RecruitDto recruitDto){
-      return new Response(recruitDto.getRecruitId(), ResponseConstant.ADD_RECRUIT);
+    public Response(RecruitDto recruitDto){
+      this.recruitId = recruitDto.getRecruitId();
+      this.message = ResponseConstant.REGISTER_RECRUIT;
     }
   }
 
