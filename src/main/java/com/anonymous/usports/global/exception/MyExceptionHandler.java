@@ -18,5 +18,9 @@ public class MyExceptionHandler {
     return new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
   }
 
+  @ExceptionHandler(MemberException.class)
+  public ErrorResponse handleMemberException(MemberException e) {
+    return new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+  }
 
 }
