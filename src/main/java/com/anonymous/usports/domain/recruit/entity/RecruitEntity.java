@@ -1,6 +1,7 @@
 package com.anonymous.usports.domain.recruit.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
@@ -86,7 +87,20 @@ public class RecruitEntity {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
-
+  public void updateRecruit(RecruitUpdate.Request request, SportsEntity sports){
+    this.sports = sports;
+    this.title = request.getTitle();
+    this.content = request.getContent();
+    this.placeName = request.getPlaceName();
+    this.lat = request.getLat();
+    this.lnt = request.getLnt();
+    this.cost = request.getCost();
+    this.gender = request.getGender();
+    this.recruitCount = request.getRecruitCount();
+    this.meetingDate = request.getMeetingDate();
+    this.gradeFrom = request.getGradeFrom();
+    this.gradeTo = request.getGradeTo();
+  }
 
 
 }
