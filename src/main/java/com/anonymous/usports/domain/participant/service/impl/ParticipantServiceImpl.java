@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +43,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
     Page<ParticipantEntity> findPage =
-        participantRepository.findAllByRecruitId(recruitId, pageRequest);
+        participantRepository.findAllByRecruitIdOOrderByParticipantId(recruitId, pageRequest);
 
     return ParticipantListDto.fromEntityPage(findPage);
   }
