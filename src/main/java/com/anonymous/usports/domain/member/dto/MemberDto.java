@@ -1,8 +1,6 @@
 package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
-import com.anonymous.usports.global.exception.ErrorCode;
-import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.Role;
@@ -103,20 +101,14 @@ public class MemberDto implements UserDetails {
 
         List<GrantedAuthority> auth = new ArrayList<>();
 
-        if (this.role == Role.ADMIN) {
-            auth.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        } else if (this.role == Role.USER) {
-            auth.add(new SimpleGrantedAuthority("ROLE_USER"));
-        } else {
-            throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
-        }
+        auth.add(new SimpleGrantedAuthority("ROLE" + this.role));
 
         return auth;
     }
 
     @Override
     public String getUsername() {
-        return null;
+        return this.accountName;
     }
 
     @Override

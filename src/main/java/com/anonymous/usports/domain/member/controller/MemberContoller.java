@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.member.controller;
 import com.anonymous.usports.domain.member.dto.*;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.MemberService;
+import com.anonymous.usports.global.constant.TokenConstant;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +47,7 @@ public class MemberContoller {
         MemberDto memberDto = memberService.loginMember(request);
 
         TokenDto tokenDto = TokenDto.builder()
-                .tokenType("Bearer ")
+                .tokenType(TokenConstant.BEARER)
                 .accessToken(tokenProvider.generateToken(
                         memberDto.getEmail(),
                         String.valueOf(memberDto.getRole())
