@@ -13,4 +13,7 @@ public interface RecruitService {
   RecruitDto getRecruit(Long recruitId);
 
   RecruitDto updateRecruit(RecruitUpdate.Request request, Long recruitId, Long memberId);
+
+  RecruitDto deleteRecruit(Long recruitId, Long memberId);
+
 }
