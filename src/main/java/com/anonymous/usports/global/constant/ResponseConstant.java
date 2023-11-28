@@ -12,7 +12,8 @@ public class ResponseConstant {
 
 
 
-
+  // 맴버 관련
+  public static final String MEMBER_DELETE_SUCCESS = "회원 탈퇴를 성공적으로 했습니다";
 
 
   // 기록 관련
