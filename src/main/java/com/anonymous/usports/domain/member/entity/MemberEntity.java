@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.member.entity;
 
+import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.Role;
@@ -90,9 +91,31 @@ public class MemberEntity {
     private Long teamworkScore;
 
     @Column(name = "evaluation_count")
-    private Long evaulationCount;
+    private Long evaluationCount;
 
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    public void updateMember(MemberUpdate.Request request) {
+
+        String profileOpen = request.getProfileOpen().toLowerCase();
+
+        if (profileOpen.equals("open")) {
+            this.profileOpen = true;
+        } else {
+            this.profileOpen = false;
+        }
+
+        this.accountName = request.getAccountName();
+        this.name = request.getName();
+        this.email = request.getEmail();
+        this.phoneNumber = request.getPhoneNumber();
+        this.birthDate = request.getBirthDate();
+        this.gender = request.getGender();
+        this.profileContent = request.getProfileContent();
+        this.profileImage = request.getProfileImage();
+        this.addrCity = request.getAddrCity();
+        this.addrDistrict = request.getAddrDistrict();
+    }
 }
