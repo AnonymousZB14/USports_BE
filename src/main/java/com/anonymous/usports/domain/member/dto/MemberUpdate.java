@@ -12,7 +12,9 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
-public class MemberRegister {
+public class MemberUpdate {
+
+    //todo : 관심 운동 추가하기
 
     @Getter
     @Setter
@@ -32,11 +34,6 @@ public class MemberRegister {
                 regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}$")
         private String email;
 
-        @NotBlank(message="비밀번호는 필수 입력 사항입니다")
-        @Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[!@#$%^*+=-]).{8,100}$",
-                message = "비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요.")
-        private String password;
-
         @NotBlank(message="전화번호는 필수 입력 사항입니다")
         @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$",
                 message = "010-0000-0000 형식으로 입력해주세요")
@@ -53,7 +50,15 @@ public class MemberRegister {
         @NotBlank(message="공개 비공개 여부를 입력해주세요, open 또는 close을 입력해주세요")
         private String profileOpen;
 
-        public static MemberEntity toEntity(MemberRegister.Request request){
+        private String profileContent;
+
+        private String profileImage;
+
+        private String addrCity;
+
+        private String addrDistrict;
+
+        public static MemberEntity toEntity(MemberUpdate.Request request){
 
             String profileOpen = request.getProfileOpen().toLowerCase();
             boolean po = false;
@@ -68,13 +73,16 @@ public class MemberRegister {
                     .accountName(request.getAccountName())
                     .name(request.getName())
                     .email(request.getEmail())
-                    .password(request.getPassword())
                     .phoneNumber(request.getPhoneNumber())
                     .birthDate(request.getBirthDate())
                     .gender(request.getGender())
-                    .status(MemberStatus.NEED_UPDATE)
+                    .status(MemberStatus.NEED_UPDATE) // todo : 관심 종목을 넣으면 ACTIVE으로 바꾸기
                     .role(Role.USER)
                     .profileOpen(po)
+                    .profileContent(request.getProfileContent())
+                    .profileImage(request.getProfileImage())
+                    .addrCity(request.getAddrCity())
+                    .addrDistrict(request.getAddrDistrict())
                     .build();
         }
     }
@@ -89,8 +97,8 @@ public class MemberRegister {
         private String email;
         private boolean profileOpen;
 
-        public static Response fromEntity(MemberEntity memberEntity) {
-            return Response.builder()
+        public static MemberUpdate.Response fromEntity(MemberEntity memberEntity) {
+            return MemberUpdate.Response.builder()
                     .accountName(memberEntity.getAccountName())
                     .email(memberEntity.getEmail())
                     .profileOpen(memberEntity.isProfileOpen())
@@ -98,5 +106,4 @@ public class MemberRegister {
         }
 
     }
-
 }

@@ -1,9 +1,12 @@
 package com.anonymous.usports.domain.member.service.impl;
 
-import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberUpdate;
+import com.anonymous.usports.domain.member.dto.MemberWithdraw;
+import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.MemberService;
+import com.anonymous.usports.global.type.Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
@@ -44,18 +47,31 @@ public class MemberServiceImpl implements MemberService {
         return saveMember(request);
     }
 
-    @Override
-    public MemberDto getMember() {
-        return null;
+    public MemberEntity passwordCheck(Long memberId, String password) {
+
+        MemberEntity memberEntity = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("계정이 존재하지 않습니다"));
+
+        if (!memberEntity.getPassword().equals(password))
+            throw new RuntimeException("비밀번호가 일치하지 않습니다");
+
+        return memberEntity;
     }
 
     @Override
-    public MemberDto updateMember() {
-        return null;
+    public MemberWithdraw.Response deleteMember(MemberWithdraw.Request request, Long memberId) {
+
+        memberRepository.delete(passwordCheck( memberId, request.getPassword()));
+
+        return MemberWithdraw.Response.builder()
+                .message(Message.DELETE_SUCCESS.getDescription())
+                .build();
     }
 
     @Override
-    public MemberDto deleteMember() {
+    public MemberUpdate.Response updateMember(MemberUpdate.Request request, Long memberId) {
         return null;
     }
+
+
 }
