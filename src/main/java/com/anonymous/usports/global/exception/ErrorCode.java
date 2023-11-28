@@ -35,6 +35,8 @@ public enum ErrorCode {
   IMAGE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"이미지 저장 오류가 발생했습니다."),
   TOO_MANY_IMAGES(HttpStatus.BAD_REQUEST.value(), "이미지 저장 갯수를 초과했습니다."),
 
+  //Follow 관련
+  FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND.value(),"팔로우를 찾을 수 없습니다."),
 
   //BASIC
   NO_AUTHORITY_ERROR(HttpStatus.FORBIDDEN.value(), "권한이 없습니다."),

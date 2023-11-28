@@ -23,4 +23,9 @@ public class MyExceptionHandler {
     return new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
   }
 
+  @ExceptionHandler(FollowException.class)
+  public ErrorResponse handleRecordException(FollowException e) {
+    return new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+  }
+
 }
