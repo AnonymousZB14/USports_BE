@@ -4,7 +4,7 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordImageDto;
-import com.anonymous.usports.domain.record.dto.RecordRegisterDto;
+import com.anonymous.usports.domain.record.dto.RecordRegister;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
 import com.anonymous.usports.domain.record.entity.RecordImageEntity;
 import com.anonymous.usports.domain.record.repository.RecordImageRepository;
@@ -38,14 +38,14 @@ public class RecordServiceImpl implements RecordService {
    */
   @Override
   @Transactional
-  public RecordDto saveRecord(RecordRegisterDto.Request request, Long memberId) {
+  public RecordDto saveRecord(RecordRegister.Request request, Long memberId) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
     SportsEntity sports = sportsRepository.findById(request.getSportsId())
         .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND));
 
     RecordEntity recordEntity = recordRepository.save(
-        RecordRegisterDto.Request.toEntity(request, member, sports));
+        RecordRegister.Request.toEntity(request, member, sports));
 
     List<RecordImageEntity> recordImages = saveImages(recordEntity, request.getImages());
 
@@ -64,7 +64,7 @@ public class RecordServiceImpl implements RecordService {
     try {
       for (MultipartFile image : images) {
         String uniqueFilename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-        // S3에 파일 저장 로직 구현
+        //FIXME S3에 파일 저장 로직 구현
         String imageAddress = "파일 저장 경로" + uniqueFilename;
 
         RecordImageEntity recordImage = RecordImageDto.toEntity(recordEntity, imageAddress);
