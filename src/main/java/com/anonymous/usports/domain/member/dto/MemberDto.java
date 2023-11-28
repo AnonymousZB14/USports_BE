@@ -93,7 +93,7 @@ public class MemberDto implements UserDetails {
                 .kindnessScore(memberEntity.getKindnessScore())
                 .passionScore(memberEntity.getPassionScore())
                 .teamworkScore(memberEntity.getTeamworkScore())
-                .evaulationCount(memberEntity.getEvaulationCount())
+                .evaulationCount(memberEntity.getEvaluationCount())
                 .role(memberEntity.getRole())
                 .build();
     }

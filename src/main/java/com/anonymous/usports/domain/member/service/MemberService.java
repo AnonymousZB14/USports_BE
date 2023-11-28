@@ -20,13 +20,13 @@ public interface MemberService {
     /**
      * 회원 삭제
      */
-    MemberWithdraw.Response deleteMember(MemberWithdraw.Request request, Long memberId);
+    MemberWithdraw.Response deleteMember(MemberDto memberDto, MemberWithdraw.Request request, Long memberId);
 
 
     /**
      * 회원 수정
      */
-    MemberUpdate.Response updateMember(MemberUpdate.Request request ,Long memberId);
+    MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId);
 
 
 

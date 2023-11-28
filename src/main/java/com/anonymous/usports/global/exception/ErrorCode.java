@@ -9,10 +9,12 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
   //Member 관련
   MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "회원을 찾을 수 없습니다."),
+  MEMBER_ID_UNMATCH(HttpStatus.BAD_REQUEST.value(), "유저ID가 일치하지 않습니다"),
   ACCOUNT_ALREADY_EXISTS(HttpStatus.BAD_REQUEST.value(), "닉네임이 이미 존재합니다"),
   EMAIL_ALREADY_EXISTS(HttpStatus.BAD_REQUEST.value(), "이메일이 이미 존재합니다"),
   PHONE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST.value(), "핸드폰 번호가 이미 존재합니다"),
   PASSWORD_UNMATCH(HttpStatus.BAD_REQUEST.value(), "비밀번호가 일치하지 않습니다"),
+  NEED_AT_LEAST_ONE_SPORTS(HttpStatus.BAD_REQUEST.value(), "최소 하나의 관심 운동이 필요합니다"),
 
   //Sports 관련
   SPORTS_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 종목을 찾을 수 없습니다."),

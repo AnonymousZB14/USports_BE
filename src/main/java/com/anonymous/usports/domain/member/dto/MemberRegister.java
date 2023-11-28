@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
 
@@ -42,12 +43,10 @@ public class MemberRegister {
                 message = "010-0000-0000 형식으로 입력해주세요")
         private String phoneNumber;
 
-        @NotBlank(message="생년월일을 입력해주세요")
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate birthDate;
 
-        @NotBlank(message="성별을 입력해주세요")
-        @Pattern(regexp = "male|female", message = "male 또는 female을 입력해주세요")
+        @NotNull(message="성별을 입력해주세요")
         private Gender gender;
 
         @NotBlank(message="공개 비공개 여부를 입력해주세요, open 또는 close을 입력해주세요")
