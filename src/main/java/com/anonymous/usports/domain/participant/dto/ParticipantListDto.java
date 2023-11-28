@@ -30,7 +30,7 @@ public class ParticipantListDto {
 
   public static ParticipantListDto fromEntityPage(Page<ParticipantEntity> participantEntityPage) {
     return ParticipantListDto.builder()
-        .currentPage(participantEntityPage.getNumber())
+        .currentPage(participantEntityPage.getNumber() + 1)
         .pageSize(participantEntityPage.getSize())
         .totalPages(participantEntityPage.getTotalPages())
         .totalElements((int) participantEntityPage.getTotalElements())
