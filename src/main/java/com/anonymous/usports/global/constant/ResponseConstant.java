@@ -5,7 +5,8 @@ public class ResponseConstant {
   public static final String UPDATE_RECRUIT = "모임이 수정 되었습니다.";
   public static final String DELETE_RECRUIT = "모임이 삭제 되었습니다.";
 
-
+  // 맴버 관련
+  public static final String MEMBER_DELETE_SUCCESS = "회원 탈퇴를 성공적으로 했습니다";
 
 
   // 기록 관련
