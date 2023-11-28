@@ -26,7 +26,7 @@ public class RecordDto {
 
   private String recordContent;
 
-  private LocalDateTime registerdAt;
+  private LocalDateTime registeredAt;
 
   private LocalDateTime updatedAt;
 
@@ -43,7 +43,7 @@ public class RecordDto {
         .memberId(recordEntity.getMember().getMemberId())
         .sportsId(recordEntity.getSports().getSportsId())
         .recordContent(recordEntity.getRecordContent())
-        .registerdAt(recordEntity.getRegisterdAt())
+        .registeredAt(recordEntity.getRegisteredAt())
         .updatedAt(recordEntity.getUpdatedAt())
         .images(imageAddresses)
         .build();
