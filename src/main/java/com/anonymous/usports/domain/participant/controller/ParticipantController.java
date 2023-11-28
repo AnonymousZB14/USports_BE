@@ -1,7 +1,7 @@
 package com.anonymous.usports.domain.participant.controller;
 
-import com.anonymous.usports.domain.participant.dto.JoinRecruitManage;
-import com.anonymous.usports.domain.participant.dto.JoinRecruitResponse;
+import com.anonymous.usports.domain.participant.dto.ParticipantManage;
+import com.anonymous.usports.domain.participant.dto.ParticipantResponse;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.service.ParticipantService;
 import io.swagger.annotations.ApiOperation;
@@ -28,17 +28,17 @@ public class ParticipantController {
 
     ParticipantDto result = participantService.joinRecruit(memberId, recruitId);
 
-    return ResponseEntity.ok(new JoinRecruitResponse(result));
+    return ResponseEntity.ok(new ParticipantResponse(result));
   }
 
   @ApiOperation("지원자 참여 요청 수락 / 거절")
   @PostMapping("/recruit/{recruitId}/manage")
   public ResponseEntity<?> manageJoinRecruit(@PathVariable Long recruitId,
-      @RequestBody JoinRecruitManage.Request request) {
+      @RequestBody ParticipantManage.Request request) {
 
     Long memberId = 0L;//FIXME : @AuthenticationPrincipal 에서 memberId 불러오기
 
-    JoinRecruitManage.Response result = participantService.manageJoinRecruit(request, recruitId, memberId);
+    ParticipantManage.Response result = participantService.manageJoinRecruit(request, recruitId, memberId);
 
     return ResponseEntity.ok(result);
   }

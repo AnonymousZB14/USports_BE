@@ -2,8 +2,8 @@ package com.anonymous.usports.domain.participant.service.impl;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
-import com.anonymous.usports.domain.participant.dto.JoinRecruitManage;
-import com.anonymous.usports.domain.participant.dto.JoinRecruitManage.Response;
+import com.anonymous.usports.domain.participant.dto.ParticipantManage;
+import com.anonymous.usports.domain.participant.dto.ParticipantManage.Response;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
@@ -43,7 +43,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 
   @Override
   @Transactional
-  public Response manageJoinRecruit(JoinRecruitManage.Request request, Long recruitId,
+  public Response manageJoinRecruit(ParticipantManage.Request request, Long recruitId,
       Long memberId) {
     MemberEntity applicant = memberRepository.findById(request.getApplicantId())
         .orElseThrow(() -> new MyException(ErrorCode.APPLICANT_MEMBER_NOT_FOUND));
@@ -68,6 +68,6 @@ public class ParticipantServiceImpl implements ParticipantService {
       participantRepository.save(participantEntity);
     }
 
-    return new JoinRecruitManage.Response(recruitId, applicant.getMemberId(), request.isAccept());
+    return new ParticipantManage.Response(recruitId, applicant.getMemberId(), request.isAccept());
   }
 }

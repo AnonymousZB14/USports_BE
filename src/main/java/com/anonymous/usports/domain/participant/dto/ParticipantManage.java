@@ -1,14 +1,12 @@
 package com.anonymous.usports.domain.participant.dto;
 
-import com.anonymous.usports.domain.member.entity.MemberEntity;
-import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-public class JoinRecruitManage {
+public class ParticipantManage {
 
   @Getter
   @Setter
