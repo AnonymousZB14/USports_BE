@@ -6,7 +6,9 @@ import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.MemberService;
-import com.anonymous.usports.global.type.Message;
+import com.anonymous.usports.global.constant.ResponseConstant;
+import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.MemberException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 
@@ -16,17 +18,17 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
 
-    private void checkRepitition(String accountName, String email, String phoneNumber){
+    private void checkDuplication(String accountName, String email, String phoneNumber){
         if (memberRepository.existsByAccountName(accountName)) {
-            throw new RuntimeException("닉네임이 존재합니다");
+            throw new MemberException(ErrorCode.ACCOUNT_ALREADY_EXISTS);
         }
 
         if (memberRepository.existsByEmail(email)) {
-            throw new RuntimeException("이메일이 존재합니다");
+            throw new MemberException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new RuntimeException("핸드폰 번호가 이미 존재합니다");
+            throw new MemberException(ErrorCode.PHONE_ALREADY_EXISTS);
         }
     }
 
@@ -42,7 +44,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberRegister.Response registerMember(MemberRegister.Request request) {
 
-        checkRepitition(request.getAccountName(), request.getEmail(), request.getPhoneNumber());
+        checkDuplication(request.getAccountName(), request.getEmail(), request.getPhoneNumber());
 
         return saveMember(request);
     }
@@ -50,10 +52,10 @@ public class MemberServiceImpl implements MemberService {
     public MemberEntity passwordCheck(Long memberId, String password) {
 
         MemberEntity memberEntity = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("계정이 존재하지 않습니다"));
+                .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
         if (!memberEntity.getPassword().equals(password))
-            throw new RuntimeException("비밀번호가 일치하지 않습니다");
+            throw new MemberException(ErrorCode.PASSWORD_UNMATCH);
 
         return memberEntity;
     }
@@ -64,7 +66,7 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.delete(passwordCheck( memberId, request.getPassword()));
 
         return MemberWithdraw.Response.builder()
-                .message(Message.DELETE_SUCCESS.getDescription())
+                .message(ResponseConstant.MEMBER_DELETE_SUCCESS)
                 .build();
     }
 
