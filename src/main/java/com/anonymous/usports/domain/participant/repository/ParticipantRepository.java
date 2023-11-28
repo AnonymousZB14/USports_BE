@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ParticipantRepository extends JpaRepository<ParticipantEntity, Long> {
   Optional<ParticipantEntity> findByMemberIdAndRecruitId(Long memberId, Long recruitId);
-  Page<ParticipantEntity> findAllByRecruitId(Long recruitId, Pageable pageable);
+  Page<ParticipantEntity> findAllByRecruitIdOOrderByParticipantId(Long recruitId, Pageable pageable);
 }
