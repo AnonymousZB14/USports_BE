@@ -44,9 +44,9 @@ public class RecordEntity {
   @Column(name = "content", nullable = false)
   private String recordContent;
 
-  @Column(name = "registerd_at", nullable = false)
+  @Column(name = "registered_at", nullable = false)
   @CreatedDate
-  private LocalDateTime registerdAt;
+  private LocalDateTime registeredAt;
 
   @Column(name = "updated_at", nullable = false)
   @LastModifiedDate

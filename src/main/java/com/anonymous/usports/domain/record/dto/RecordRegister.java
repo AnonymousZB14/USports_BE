@@ -23,7 +23,6 @@ public class RecordRegister {
 
     private Long sportsId;
     private String content;
-    private List<MultipartFile> images;
 
     public static RecordEntity toEntity(RecordRegister.Request request, MemberEntity member,
         SportsEntity sports) {
