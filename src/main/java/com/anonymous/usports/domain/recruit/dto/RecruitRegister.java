@@ -50,8 +50,6 @@ public class RecruitRegister {
           .recruitStatus(RecruitStatus.RECRUITING)
           .gradeFrom(request.getGradeFrom())
           .gradeTo(request.getGradeTo())
-          .registeredAt(LocalDateTime.now())
-          .updatedAt(LocalDateTime.now())
           .build();
     }
 
