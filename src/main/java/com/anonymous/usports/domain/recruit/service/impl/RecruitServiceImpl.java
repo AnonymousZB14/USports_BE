@@ -28,7 +28,7 @@ public class RecruitServiceImpl implements RecruitService {
 
   @Override
   @Transactional
-  public RecruitDto addRecruit(Request request, Long memberId) {
+  public RecruitDto registerRecruit(Request request, Long memberId) {
     MemberEntity memberEntity = memberRepository.findById(memberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
 
