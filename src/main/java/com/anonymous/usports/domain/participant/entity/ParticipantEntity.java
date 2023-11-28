@@ -20,9 +20,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Entity(name = "participant")
 public class ParticipantEntity {
 
@@ -46,6 +44,12 @@ public class ParticipantEntity {
 
   @Column(name = "evaluation_at")
   private LocalDateTime evaluationAt; //타인 평가 일시
+
+  public ParticipantEntity(MemberEntity member, RecruitEntity recruit) {
+    this.member = member;
+    this.recruit = recruit;
+    this.registeredAt = LocalDateTime.now();
+  }
 
   public void confirmedNow(){
     this.confirmedAt = LocalDateTime.now();
