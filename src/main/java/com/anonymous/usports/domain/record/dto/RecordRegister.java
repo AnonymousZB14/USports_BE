@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
 
-public class RecordRegisterDto {
+public class RecordRegister {
 
   @Getter
   @Setter
@@ -25,7 +25,7 @@ public class RecordRegisterDto {
     private String content;
     private List<MultipartFile> images;
 
-    public static RecordEntity toEntity(RecordRegisterDto.Request request, MemberEntity member,
+    public static RecordEntity toEntity(RecordRegister.Request request, MemberEntity member,
         SportsEntity sports) {
       return RecordEntity.builder()
           .member(member)
