@@ -1,9 +1,7 @@
 package com.anonymous.usports.domain.member.service;
 
 
-import com.anonymous.usports.domain.member.dto.MemberRegister;
-import com.anonymous.usports.domain.member.dto.MemberUpdate;
-import com.anonymous.usports.domain.member.dto.MemberWithdraw;
+import com.anonymous.usports.domain.member.dto.*;
 
 public interface MemberService {
 
@@ -12,6 +10,12 @@ public interface MemberService {
      * 회원 가입
      */
     MemberRegister.Response registerMember(MemberRegister.Request request);
+
+    /**
+     * 회원 로그인
+     */
+    MemberDto loginMember(MemberLogin.Request request);
+
 
     /**
      * 회원 삭제
