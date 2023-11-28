@@ -1,6 +1,8 @@
 package com.anonymous.usports.domain.member.security;
 
+import com.anonymous.usports.global.constant.TokenConstant;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -16,12 +18,10 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     public static final String TOKEN_HEADER = "Authorization";
-
-    //인증 타입
-    public static final String TOKEN_PREFIX = "Bearer ";
 
     private final TokenProvider tokenProvider;
 
@@ -44,8 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = request.getHeader(TOKEN_HEADER);
 
         // 토큰의 형태가 존재하면
-        if (!ObjectUtils.isEmpty(token) && token.startsWith(TOKEN_PREFIX)) {
-            return token.substring(TOKEN_PREFIX.length());
+        if (!ObjectUtils.isEmpty(token) && token.startsWith(TokenConstant.BEARER)) {
+            return token.substring(TokenConstant.BEARER.length());
+        } else {
+            log.info("토큰의 형태가 존재하지 않습니다");
         }
 
         return null;

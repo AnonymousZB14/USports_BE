@@ -1,10 +1,9 @@
 package com.anonymous.usports.domain.member.security;
 
 import com.anonymous.usports.domain.member.service.impl.MemberServiceImpl;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.anonymous.usports.global.constant.TokenConstant;
+import com.anonymous.usports.global.exception.ErrorCode;
+import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,8 +19,6 @@ import java.util.Date;
 public class TokenProvider {
 
     private final MemberServiceImpl memberServiceImpl;
-    private static final String KEY_ROLES = "role";
-    private static final long VALIDATE_TIME = 1 * 60 * 60 * 1000L; // 1시간
 
     @Value("${spring.jwt.secret.key}")
     private String secretKey;
@@ -29,10 +26,10 @@ public class TokenProvider {
     // 토큰 생성 매서드
     public String generateToken(String email, String role) {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put(KEY_ROLES, role);
+        claims.put(TokenConstant.KEY_ROLES, role);
 
         Date now = new Date();
-        Date expiredDate = new Date(now.getTime() + VALIDATE_TIME);
+        Date expiredDate = new Date(now.getTime() + TokenConstant.ACCESS_TOKEN_VALID_TIME);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -65,7 +62,13 @@ public class TokenProvider {
             return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
             // 파싱하는 과정에서 토큰 만료 시간이 지날 수 있다, 만료된 토큰을 확인할 때에
         } catch (ExpiredJwtException e) {
-            return e.getClaims();
+            throw new JwtException(ErrorCode.JWT_EXPIRED.getDescription());
+            // 토큰 형식에 문제가 있을 때
+        } catch (SignatureException e) {
+            throw new JwtException(ErrorCode.JWT_TOKEN_WRONG_TYPE.getDescription());
+            // 토큰이 변조되었을 때
+        } catch (MalformedJwtException e) {
+            throw new JwtException(ErrorCode.JWT_TOKEN_MALFORMED.getDescription());
         }
     }
 
