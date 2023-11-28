@@ -9,8 +9,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.List;
 
 public class MemberUpdate {
 
@@ -39,12 +41,10 @@ public class MemberUpdate {
                 message = "010-0000-0000 형식으로 입력해주세요")
         private String phoneNumber;
 
-        @NotBlank(message="생년월일을 입력해주세요")
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         private LocalDate birthDate;
 
-        @NotBlank(message="성별을 입력해주세요")
-        @Pattern(regexp = "male|female", message = "male 또는 female을 입력해주세요")
+        @NotNull(message="성별을 입력해주세요")
         private Gender gender;
 
         @NotBlank(message="공개 비공개 여부를 입력해주세요, open 또는 close을 입력해주세요")
@@ -54,9 +54,13 @@ public class MemberUpdate {
 
         private String profileImage;
 
+        @NotBlank(message="자주 활동하는 '시'를 꼭 입력해주세요")
         private String addrCity;
 
+        @NotBlank(message="자주 활동하는 '동'을 꼭 입력해주세요")
         private String addrDistrict;
+
+        private List<Long> interestedSports;
 
         public static MemberEntity toEntity(MemberUpdate.Request request){
 
@@ -76,7 +80,7 @@ public class MemberUpdate {
                     .phoneNumber(request.getPhoneNumber())
                     .birthDate(request.getBirthDate())
                     .gender(request.getGender())
-                    .status(MemberStatus.NEED_UPDATE) // todo : 관심 종목을 넣으면 ACTIVE으로 바꾸기
+                    .status(MemberStatus.ACTIVE)
                     .role(Role.USER)
                     .profileOpen(po)
                     .profileContent(request.getProfileContent())
@@ -94,14 +98,31 @@ public class MemberUpdate {
     @Builder
     public static class Response {
         private String accountName;
+        private String name;
         private String email;
+        private String phoneNumber;
+        private LocalDate birthDate;
+        private Gender gender;
         private boolean profileOpen;
+        private String profileContent;
+        private String profileImage;
+        private String addrCity;
+        private String addrDistrict;
+        private List<String> interestedSports;
 
         public static MemberUpdate.Response fromEntity(MemberEntity memberEntity) {
             return MemberUpdate.Response.builder()
                     .accountName(memberEntity.getAccountName())
                     .email(memberEntity.getEmail())
                     .profileOpen(memberEntity.isProfileOpen())
+                    .name(memberEntity.getName())
+                    .phoneNumber(memberEntity.getPhoneNumber())
+                    .birthDate(memberEntity.getBirthDate())
+                    .gender(memberEntity.getGender())
+                    .profileContent(memberEntity.getProfileContent())
+                    .profileImage(memberEntity.getProfileImage())
+                    .addrCity(memberEntity.getAddrCity())
+                    .addrDistrict(memberEntity.getAddrDistrict())
                     .build();
         }
 
