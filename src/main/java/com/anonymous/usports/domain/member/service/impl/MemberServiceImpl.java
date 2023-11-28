@@ -1,8 +1,6 @@
 package com.anonymous.usports.domain.member.service.impl;
 
-import com.anonymous.usports.domain.member.dto.MemberRegister;
-import com.anonymous.usports.domain.member.dto.MemberUpdate;
-import com.anonymous.usports.domain.member.dto.MemberWithdraw;
+import com.anonymous.usports.domain.member.dto.*;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.MemberService;
@@ -10,13 +8,20 @@ import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-@Controller
+@Slf4j
+@Service
 @RequiredArgsConstructor
-public class MemberServiceImpl implements MemberService {
+public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private void checkDuplication(String accountName, String email, String phoneNumber){
         if (memberRepository.existsByAccountName(accountName)) {
@@ -34,6 +39,10 @@ public class MemberServiceImpl implements MemberService {
 
     private MemberRegister.Response saveMember(MemberRegister.Request request) {
 
+        request.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        log.info(request.getPassword());
+
         memberRepository.save(MemberRegister.Request.toEntity(request));
 
         return MemberRegister.Response.fromEntity(
@@ -47,6 +56,18 @@ public class MemberServiceImpl implements MemberService {
         checkDuplication(request.getAccountName(), request.getEmail(), request.getPhoneNumber());
 
         return saveMember(request);
+    }
+
+    @Override
+    public MemberDto loginMember(MemberLogin.Request request) {
+
+        MemberDto memberDto = (MemberDto) loadUserByUsername(request.getEmail());
+
+        if (!passwordEncoder.matches(request.getPassword(), memberDto.getPassword())) {
+            throw new MemberException(ErrorCode.PASSWORD_UNMATCH);
+        }
+
+        return memberDto;
     }
 
     public MemberEntity passwordCheck(Long memberId, String password) {
@@ -76,4 +97,9 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return MemberDto.fromEntity(memberRepository.findByEmail(username)
+                .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND)));
+    }
 }

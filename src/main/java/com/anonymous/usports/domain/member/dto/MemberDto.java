@@ -1,20 +1,28 @@
 package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberDto {
+public class MemberDto implements UserDetails {
 
     private Long memberId;
 
@@ -88,5 +96,46 @@ public class MemberDto {
                 .evaulationCount(memberEntity.getEvaulationCount())
                 .role(memberEntity.getRole())
                 .build();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+
+        List<GrantedAuthority> auth = new ArrayList<>();
+
+        if (this.role == Role.ADMIN) {
+            auth.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else if (this.role == Role.USER) {
+            auth.add(new SimpleGrantedAuthority("ROLE_USER"));
+        } else {
+            throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
+        }
+
+        return auth;
+    }
+
+    @Override
+    public String getUsername() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
     }
 }
