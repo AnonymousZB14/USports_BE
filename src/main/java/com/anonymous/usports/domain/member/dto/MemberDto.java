@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.member.dto;
 
+import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.Role;
@@ -60,4 +61,32 @@ public class MemberDto {
     private Long evaulationCount;
 
     private Role role;
+
+    public static MemberDto fromEntity(MemberEntity memberEntity){
+        return MemberDto.builder()
+                .memberId(memberEntity.getMemberId())
+                .accountName(memberEntity.getAccountName())
+                .name(memberEntity.getName())
+                .email(memberEntity.getEmail())
+                .password(memberEntity.getPassword())
+                .phoneNumber(memberEntity.getPhoneNumber())
+                .birthDate(memberEntity.getBirthDate())
+                .gender(memberEntity.getGender())
+                .profileContent(memberEntity.getProfileContent())
+                .profileImage(memberEntity.getProfileImage())
+                .status(memberEntity.getStatus())
+                .registeredAt(memberEntity.getRegisteredAt())
+                .updatedAt(memberEntity.getUpdatedAt())
+                .emailAuthAt(memberEntity.getEmailAuthAt())
+                .addrCity(memberEntity.getAddrCity())
+                .addrDistrict(memberEntity.getAddrDistrict())
+                .profileOpen(memberEntity.isProfileOpen())
+                .mannerScore(memberEntity.getMannerScore())
+                .kindnessScore(memberEntity.getKindnessScore())
+                .passionScore(memberEntity.getPassionScore())
+                .teamworkScore(memberEntity.getTeamworkScore())
+                .evaulationCount(memberEntity.getEvaulationCount())
+                .role(memberEntity.getRole())
+                .build();
+    }
 }
