@@ -4,13 +4,15 @@ import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "Member")
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
@@ -24,19 +26,19 @@ public class MemberEntity {
     @Column(name = "member_id", nullable = false)
     private Long memberId;
 
-    @Column(name = "account_name", nullable = false, unique = true)
+    @Column(name = "account_name", nullable = false, unique = true, length = 100)
     private String accountName;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true)
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "phone_number", nullable = false, unique = true)
+    @Column(name = "phone_number", nullable = false, unique = true, length = 100)
     private String phoneNumber;
 
     @Column(name = "birth_date", nullable = false)
@@ -46,7 +48,7 @@ public class MemberEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @Column(name = "profile_content")
+    @Column(name = "profile_content", length = 100)
     private String profileContent;
 
     @Column(name = "profile_image")
@@ -56,18 +58,20 @@ public class MemberEntity {
     private MemberStatus status;
 
     @Column(name = "registered_at", nullable = false)
+    @CreatedDate
     private LocalDateTime registeredAt;
 
     @Column(name = "updated_at", nullable = false)
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Column(name = "email_auth_at", nullable = false)
+    @Column(name = "email_auth_at")
     private LocalDateTime emailAuthAt;
 
-    @Column(name = "address_city")
+    @Column(name = "address_city", length = 100)
     private String addrCity;
 
-    @Column(name = "address_district")
+    @Column(name = "address_district", length = 100)
     private String addrDistrict;
 
     @Column(name = "profile_open", nullable = false)
