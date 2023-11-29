@@ -30,15 +30,14 @@ public class FollowServiceImpl implements FollowService {
 
     Optional<FollowEntity> existingFollow = followRepository.findByFromMemberAndToMember(fromMember, toMember);
 
-    FollowEntity followEntity = FollowEntity.builder()
-        .fromMember(fromMember)
-        .toMember(toMember)
-        .build();
-
     if (existingFollow.isPresent()) {
       followRepository.delete(existingFollow.get());
       return null;
     }
+    FollowEntity followEntity = FollowEntity.builder()
+        .fromMember(fromMember)
+        .toMember(toMember)
+        .build();
     followRepository.save(followEntity);
     return FollowDto.fromEntity(followEntity);
   }
