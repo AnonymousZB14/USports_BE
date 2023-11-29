@@ -5,16 +5,18 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage.Response;
-import com.anonymous.usports.domain.participant.dto.ParticipantDto;
+import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.domain.participant.service.ParticipantService;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
+import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MyException;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -48,16 +50,30 @@ public class ParticipantServiceImpl implements ParticipantService {
 
   @Override
   @Transactional
-  public ParticipantDto joinRecruit(Long memberId, Long recruitId) {
+  public ParticipateResponse joinRecruit(Long memberId, Long recruitId) {
     MemberEntity memberEntity = memberRepository.findById(memberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
         .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
 
-    ParticipantEntity saved =
-        participantRepository.save(new ParticipantEntity(memberEntity, recruitEntity));
+    Optional<ParticipantEntity> optionalParticipant =
+        participantRepository.findByMemberAndRecruit(memberEntity, recruitEntity);
 
-    return ParticipantDto.fromEntity(saved);
+    if (optionalParticipant.isPresent()) {
+      ParticipantEntity participantEntity = optionalParticipant.get();
+      //신청 진행 중
+      if (Objects.isNull(participantEntity.getConfirmedAt())) {
+        return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ING);
+      }
+      //이미 수락 된 상태
+      return new ParticipateResponse(
+          recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ALREADY_CONFIRMED);
+    }
+
+    //신청 가능 -> 신청
+    participantRepository.save(new ParticipantEntity(memberEntity, recruitEntity));
+
+    return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETED);
   }
 
   @Override
@@ -87,7 +103,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     return new ParticipantManage.Response(recruitId, applicant.getMemberId(), request.isAccept());
   }
 
-  private void validateAuthority(RecruitEntity recruit, Long loginMemberId){
+  private void validateAuthority(RecruitEntity recruit, Long loginMemberId) {
     if (!Objects.equals(recruit.getMember().getMemberId(), loginMemberId)) {
       throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);
     }
