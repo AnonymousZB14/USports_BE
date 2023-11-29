@@ -1,6 +1,7 @@
 package com.anonymous.usports.domain.follow.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,5 +36,9 @@ public class FollowEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "to_member_id", nullable = false)
   private MemberEntity toMember;
+
+  @Column(name = "consent_date")
+  private LocalDateTime consentDate;
+
 
 }

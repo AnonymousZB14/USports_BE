@@ -1,7 +1,6 @@
 package com.anonymous.usports.domain.follow.dto;
 
 import com.anonymous.usports.domain.follow.entity.FollowEntity;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,19 +12,20 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FollowDto {
-
+public class FollowMemberDetail {
   private Long followId;
   private Long fromMemberId;
   private Long toMemberId;
-  private LocalDateTime consentDate;
+  private String fromMemberAccountName;
+  private String toMemberAccountName;
 
-  public static FollowDto fromEntity(FollowEntity followEntity) {
-    return FollowDto.builder()
+  public static FollowMemberDetail fromEntity(FollowEntity followEntity) {
+    return FollowMemberDetail.builder()
         .followId(followEntity.getFollowId())
         .fromMemberId(followEntity.getFromMember().getMemberId())
         .toMemberId(followEntity.getToMember().getMemberId())
-        .consentDate(followEntity.getConsentDate())
+        .fromMemberAccountName(followEntity.getFromMember().getAccountName())
+        .toMemberAccountName(followEntity.getToMember().getAccountName())
         .build();
   }
 }
