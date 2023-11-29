@@ -9,6 +9,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.FollowException;
 import com.anonymous.usports.global.exception.MyException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,31 +21,25 @@ public class FollowServiceImpl implements FollowService {
 
 
   @Override
-  public FollowDto followMember(Long fromMemberId, Long toMemberId) {
+  public FollowDto changeFollow(Long fromMemberId, Long toMemberId) {
     MemberEntity fromMember = memberRepository.findById(fromMemberId)
         .orElseThrow(()->new MyException(ErrorCode.MEMBER_NOT_FOUND));
 
     MemberEntity toMember = memberRepository.findById(toMemberId)
         .orElseThrow(()->new MyException(ErrorCode.MEMBER_NOT_FOUND));
 
+    Optional<FollowEntity> existingFollow = followRepository.findByFromMemberAndToMember(fromMember, toMember);
 
-    FollowEntity followEntity = followRepository.save(FollowEntity.builder()
+    FollowEntity followEntity = FollowEntity.builder()
         .fromMember(fromMember)
         .toMember(toMember)
-        .build());
+        .build();
 
-    return FollowDto.fromEntity(followEntity);
-  }
-
-  @Override
-  public FollowDto deleteFollow(Long followId, Long memberId) {
-    FollowEntity follow = followRepository.findById(followId)
-        .orElseThrow(()->new FollowException(ErrorCode.FOLLOW_NOT_FOUND));
-    if(!follow.getFromMember().getMemberId().equals(memberId)){
-      throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);
+    if (existingFollow.isPresent()) {
+      followRepository.delete(existingFollow.get());
+      return null;
     }
-    followRepository.delete(follow);
-
-    return FollowDto.fromEntity(follow);
+    followRepository.save(followEntity);
+    return FollowDto.fromEntity(followEntity);
   }
 }

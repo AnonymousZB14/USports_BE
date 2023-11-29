@@ -25,13 +25,12 @@ public class FollowRegister {
   @Setter
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class Response {
+  public static class Response extends FollowResponse{
     private Long followId;
-    private String message;
 
     public Response(FollowDto followDto) {
+      super(ResponseConstant.REGISTER_FOLLOW);
       this.followId = followDto.getFollowId();
-      this.message = ResponseConstant.REGISTER_FOLLOW;
     }
   }
 
