@@ -20,6 +20,7 @@ public enum ErrorCode {
   JWT_EXPIRED(HttpStatus.FORBIDDEN.value(), "JWT가 만료되었습니다"),
   JWT_TOKEN_WRONG_TYPE(HttpStatus.FORBIDDEN.value(),"JWT 토큰 형식에 문제가 생겼습니다"),
   JWT_TOKEN_MALFORMED(HttpStatus.FORBIDDEN.value(), "토큰이 변조가 되었습니다"),
+  JWT_REFRESH_TOKEN_NOT_FOUND(HttpStatus.FORBIDDEN.value(), "Refresh 토큰을 찾을 수 없습니다"),
 
   //Sports 관련
   SPORTS_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 종목을 찾을 수 없습니다."),
@@ -42,7 +43,7 @@ public enum ErrorCode {
   BAD_REQUEST_ERROR(HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST"),
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "내부 서버 오류가 발생 했습니다.");
 
-  private final int statusCode;
+   private final int statusCode;
   private final String description;
 
 }

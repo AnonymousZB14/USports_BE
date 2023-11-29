@@ -8,9 +8,11 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.ResponseConstant;
+import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.redis.token.repository.RefreshTokenRepository;
 import com.anonymous.usports.global.type.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +36,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     private final InterestedSportsRepository interestedSportsRepository;
     private final SportsRepository sportsRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     private void checkDuplication(String accountName, String email, String phoneNumber){
         if (memberRepository.existsByAccountName(accountName)) {
@@ -78,6 +81,18 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         }
 
         return memberDto;
+    }
+
+    @Override
+    public String logoutMember(String accessToken, String email) {
+
+        boolean result = refreshTokenRepository.deleteToken(email);
+
+        if(!result) return TokenConstant.LOGOUT_NOT_SUCCESSFUL;
+
+        refreshTokenRepository.addBlackListAccessToken(accessToken);
+
+        return TokenConstant.LOGOUT_SUCCESSFUL;
     }
 
     public MemberEntity passwordCheck(MemberDto memberDto, Long memberId, String password) {
