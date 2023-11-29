@@ -27,6 +27,7 @@ public class ParticipantEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "participant_id", nullable = false)
   private Long participantId;
 
   @ManyToOne(fetch = FetchType.LAZY)
