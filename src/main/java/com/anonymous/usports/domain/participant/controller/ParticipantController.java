@@ -4,7 +4,7 @@ import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
-import com.anonymous.usports.domain.participant.dto.ParticipantResponse;
+import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 import com.anonymous.usports.domain.participant.service.ParticipantService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +40,10 @@ public class ParticipantController {
   public ResponseEntity<?> joinRecruit(@PathVariable Long recruitId,
       @AuthenticationPrincipal MemberDto loginMember) {
 
-    ParticipantDto result = participantService.joinRecruit(loginMember.getMemberId(), recruitId);
+    ParticipateResponse result = participantService.joinRecruit(
+        loginMember.getMemberId(), recruitId);
 
-    return ResponseEntity.ok(new ParticipantResponse(result));
+    return ResponseEntity.ok(result);
   }
 
   @ApiOperation("지원자 참여 요청 수락 / 거절")
@@ -51,7 +52,8 @@ public class ParticipantController {
       @RequestBody ParticipantManage.Request request,
       @AuthenticationPrincipal MemberDto loginMember) {
 
-    ParticipantManage.Response result = participantService.manageJoinRecruit(request, recruitId,
+    ParticipantManage.Response result =
+        participantService.manageJoinRecruit(request, recruitId,
         loginMember.getMemberId());
 
     return ResponseEntity.ok(result);

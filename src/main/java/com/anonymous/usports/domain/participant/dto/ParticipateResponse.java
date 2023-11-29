@@ -11,17 +11,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ParticipantResponse {
+@AllArgsConstructor
+public class ParticipateResponse {
   private Long recruitId;
   private Long memberId;
   private String message;
-
-  public ParticipantResponse(ParticipantDto participantDto) {
-    this.recruitId = participantDto.getRecruitId();
-    this.memberId = participantDto.getMemberId();
-    this.message = ResponseConstant.JOIN_RECRUIT;
-  }
 }
