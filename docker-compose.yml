@@ -18,7 +18,7 @@ services:
       MARIADB_DATABASE: usports
       MARIADB_USER: usports
       MARIADB_PASSWORD: a1234
-      MARIADB_ROOT_PASSWORD: qwer1234
+      MARIADB_ROOT_PASSWORD: a1234
     networks:
       - backend
     restart: always

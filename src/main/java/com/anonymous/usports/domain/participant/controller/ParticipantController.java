@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.participant.controller;
 
+import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,19 +28,19 @@ public class ParticipantController {
   @ApiOperation(value = "운동 모집 글 지원자 조회", notes = "page는 1부터 시작한다.")
   @GetMapping("/recruit/{recruitId}/applicants")
   public ResponseEntity<?> getApplicants(@PathVariable Long recruitId,
-      @RequestParam(name = "page", defaultValue = "1") int page) {
-    Long memberId = 0L;//FIXME : @AuthenticationPrincipal 에서 memberId 불러오기
-    ParticipantListDto result = participantService.getParticipants(recruitId, page, memberId);
+      @RequestParam(name = "page", defaultValue = "1") int page,
+      @AuthenticationPrincipal MemberDto loginMember) {
+    ParticipantListDto result = participantService.getParticipants(recruitId, page,
+        loginMember.getMemberId());
     return ResponseEntity.ok(result);
   }
 
   @ApiOperation(value = "운동 모집 게시글에 참여 신청 넣기", notes = "Participant entity 생성")
   @PostMapping("/recruit/{recruitId}/join")
-  public ResponseEntity<?> joinRecruit(@PathVariable Long recruitId) {
+  public ResponseEntity<?> joinRecruit(@PathVariable Long recruitId,
+      @AuthenticationPrincipal MemberDto loginMember) {
 
-    Long memberId = 0L;//FIXME : @AuthenticationPrincipal 에서 memberId 불러오기
-
-    ParticipantDto result = participantService.joinRecruit(memberId, recruitId);
+    ParticipantDto result = participantService.joinRecruit(loginMember.getMemberId(), recruitId);
 
     return ResponseEntity.ok(new ParticipantResponse(result));
   }
@@ -46,12 +48,11 @@ public class ParticipantController {
   @ApiOperation("지원자 참여 요청 수락 / 거절")
   @PostMapping("/recruit/{recruitId}/manage")
   public ResponseEntity<?> manageJoinRecruit(@PathVariable Long recruitId,
-      @RequestBody ParticipantManage.Request request) {
-
-    Long memberId = 0L;//FIXME : @AuthenticationPrincipal 에서 memberId 불러오기
+      @RequestBody ParticipantManage.Request request,
+      @AuthenticationPrincipal MemberDto loginMember) {
 
     ParticipantManage.Response result = participantService.manageJoinRecruit(request, recruitId,
-        memberId);
+        loginMember.getMemberId());
 
     return ResponseEntity.ok(result);
   }
