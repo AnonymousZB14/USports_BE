@@ -21,6 +21,7 @@ public class SportsEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "sports_id", nullable = false)
   private Long sportsId;
 
   @Column(name = "sports_name", nullable = false, unique = true)
