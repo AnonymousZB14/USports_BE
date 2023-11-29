@@ -39,6 +39,7 @@ public class RecruitEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "recruit_id", nullable = false)
   private Long recruitId;
 
   @ManyToOne(fetch = FetchType.LAZY)
