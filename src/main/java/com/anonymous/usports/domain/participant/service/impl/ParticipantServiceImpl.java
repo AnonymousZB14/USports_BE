@@ -14,13 +14,11 @@ import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MyException;
-import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +41,7 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
     Page<ParticipantEntity> findPage =
-        participantRepository.findAllByRecruitIdOOrderByParticipantId(recruitId, pageRequest);
+        participantRepository.findAllByRecruitOrderByParticipantId(recruitEntity, pageRequest);
 
     return ParticipantListDto.fromEntityPage(findPage);
   }
@@ -74,7 +72,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     this.validateAuthority(recruitEntity, loginMemberId);
 
     ParticipantEntity participantEntity =
-        participantRepository.findByMemberIdAndRecruitId(request.getApplicantId(), recruitId)
+        participantRepository.findByMemberAndRecruit(applicant, recruitEntity)
             .orElseThrow(() -> new MyException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
     if (!request.isAccept()) {
