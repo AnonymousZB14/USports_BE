@@ -16,9 +16,9 @@ public class FollowResponse {
   private Long id;
   private String message;
 
-  public static FollowResponse Response(Long folowId, String message) {
+  public static FollowResponse Response(Long followId, String message) {
     return FollowResponse.builder()
-        .id(folowId)
+        .id(followId)
         .message(message)
         .build();
   }
