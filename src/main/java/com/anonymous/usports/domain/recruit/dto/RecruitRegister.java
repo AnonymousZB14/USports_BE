@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 public class RecruitRegister {
 
@@ -29,7 +30,10 @@ public class RecruitRegister {
     private String lnt;
     private int cost;
     private int recruitCount;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime meetingDate;
+
     private Gender gender;
     private int gradeFrom;
     private int gradeTo;
