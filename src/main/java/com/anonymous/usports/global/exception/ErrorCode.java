@@ -20,7 +20,6 @@ public enum ErrorCode {
   JWT_EXPIRED(HttpStatus.FORBIDDEN.value(), "JWT가 만료되었습니다"),
   JWT_TOKEN_WRONG_TYPE(HttpStatus.FORBIDDEN.value(),"JWT 토큰 형식에 문제가 생겼습니다"),
   JWT_TOKEN_MALFORMED(HttpStatus.FORBIDDEN.value(), "토큰이 변조가 되었습니다"),
-  JWT_REFRESH_TOKEN_NOT_FOUND(HttpStatus.FORBIDDEN.value(), "Refresh 토큰을 찾을 수 없습니다"),
 
   //Sports 관련
   SPORTS_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 종목을 찾을 수 없습니다."),
@@ -36,6 +35,9 @@ public enum ErrorCode {
   IMAGE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"이미지 저장 오류가 발생했습니다."),
   TOO_MANY_IMAGES(HttpStatus.BAD_REQUEST.value(), "이미지 저장 갯수를 초과했습니다."),
 
+  //Follow 관련
+  FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND.value(),"팔로우를 찾을 수 없습니다."),
+  UNABLE_MANAGE_FOLLOW(HttpStatus.BAD_REQUEST.value(), "이미 팔로우 상태입니다."),
 
   //BASIC
   NO_AUTHORITY_ERROR(HttpStatus.FORBIDDEN.value(), "권한이 없습니다."),
@@ -43,7 +45,7 @@ public enum ErrorCode {
   BAD_REQUEST_ERROR(HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST"),
   INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(), "내부 서버 오류가 발생 했습니다.");
 
-   private final int statusCode;
+  private final int statusCode;
   private final String description;
 
 }

@@ -1,8 +1,10 @@
 package com.anonymous.usports.domain.follow.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.global.type.FollowStatus;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -27,12 +29,16 @@ public class FollowEntity {
   @Column(name = "follow_id", nullable = false)
   private Long followId;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "from_member_id", nullable = false)
   private MemberEntity fromMember;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "to_member_id", nullable = false)
   private MemberEntity toMember;
+
+  @Column(name = "follow_status")
+  private FollowStatus followStatus;
+
 
 }
