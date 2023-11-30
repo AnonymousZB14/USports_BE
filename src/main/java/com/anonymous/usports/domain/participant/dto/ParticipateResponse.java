@@ -1,6 +1,8 @@
-package com.anonymous.usports.domain.recruit.dto;
+package com.anonymous.usports.domain.participant.dto;
+
 
 import com.anonymous.usports.global.constant.ResponseConstant;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,17 +11,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class RecruitDeleteResponse {
-
+@AllArgsConstructor
+public class ParticipateResponse {
   private Long recruitId;
+  private Long memberId;
   private String message;
-
-  public RecruitDeleteResponse(RecruitDto recruitDto) {
-    this.recruitId = recruitDto.getRecruitId();
-    this.message = ResponseConstant.DELETE_RECRUIT;
-  }
-
 }
