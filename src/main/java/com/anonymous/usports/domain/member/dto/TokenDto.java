@@ -9,5 +9,6 @@ import lombok.*;
 @Builder
 public class TokenDto {
     private String accessToken;
+    private String refreshToken;
     private String tokenType;
 }

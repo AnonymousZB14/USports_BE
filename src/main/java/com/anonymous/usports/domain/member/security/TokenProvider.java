@@ -1,8 +1,10 @@
 package com.anonymous.usports.domain.member.security;
 
+import com.anonymous.usports.domain.member.dto.TokenDto;
 import com.anonymous.usports.domain.member.service.impl.MemberServiceImpl;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import io.jsonwebtoken.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,17 +21,17 @@ import java.util.Date;
 public class TokenProvider {
 
     private final MemberServiceImpl memberServiceImpl;
+    private final TokenRepository refreshTokenRepository;
 
     @Value("${spring.jwt.secret.key}")
     private String secretKey;
 
     // 토큰 생성 매서드
-    public String generateToken(String email, String role) {
+    public String generateToken(String email, Long expireTime) {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put(TokenConstant.KEY_ROLES, role);
 
         Date now = new Date();
-        Date expiredDate = new Date(now.getTime() + TokenConstant.ACCESS_TOKEN_VALID_TIME);
+        Date expiredDate = new Date(now.getTime() + expireTime);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -37,6 +39,39 @@ public class TokenProvider {
                 .setExpiration(expiredDate) // 토큰 만료 시간
                 .signWith(SignatureAlgorithm.HS512, this.secretKey) // 사용할 암호화 알고리즘, 비밀키
                 .compact();
+    }
+
+    public TokenDto regenerateToken(String refreshToken){
+
+        if(!validateToken(refreshToken)) {
+            throw new JwtException(ErrorCode.JWT_EXPIRED.getDescription());
+        }
+
+        Claims claims = parseClaims(refreshToken);
+
+        String email = claims.getSubject();
+
+        String findToken = refreshTokenRepository.getToken(email);
+
+        if (!refreshToken.equals(findToken)) {
+            throw new JwtException(ErrorCode.JWT_REFRESH_TOKEN_NOT_FOUND.getDescription());
+        }
+
+        return saveTokenInRedis(email);
+    }
+
+    public TokenDto saveTokenInRedis(String email){
+        String accessToken = generateToken(email, TokenConstant.ACCESS_TOKEN_VALID_TIME);
+
+        String refreshToken = generateToken(email, TokenConstant.REFRESH_TOKEN_VALID_TIME);
+
+        refreshTokenRepository.saveToken(refreshToken, email);
+
+        return TokenDto.builder()
+                .tokenType(TokenConstant.BEARER)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public Authentication getAuthentication(String jwt) {
@@ -54,6 +89,23 @@ public class TokenProvider {
 
         Claims claims = parseClaims(token);
         return !claims.getExpiration().before(new Date()); //토큰 만료 시간이 현재보다 이전인지 아닌지 만료 여부 확인
+    }
+
+    /**
+     * access token이 redis denied map에 포함되었는지 확인
+     */
+    public boolean isAccessTokenDenied(String accessToken) {
+        return refreshTokenRepository.existsBlackListAccessToken(accessToken);
+    }
+
+    /**
+     * 헤더로 받은 값에서 PREFIX("Bearer ") 제거
+     */
+    public String resolveTokenFromRequest(String token) {
+        if (StringUtils.hasText(token) && token.startsWith(TokenConstant.BEARER)) {
+            return token.substring(TokenConstant.BEARER.length());
+        }
+        return null;
     }
 
     // 토큰이 유효한지 확인하는 메서드

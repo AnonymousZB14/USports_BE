@@ -16,6 +16,10 @@ public interface MemberService {
      */
     MemberDto loginMember(MemberLogin.Request request);
 
+    /**
+     * 회원 로그아웃
+     */
+    String logoutMember(String accessToken, String email);
 
     /**
      * 회원 삭제
