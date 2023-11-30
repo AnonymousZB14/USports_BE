@@ -76,11 +76,11 @@ public class FollowServiceImpl implements FollowService {
 
     Page<FollowEntity> findPage;
     if (type == FollowListType.FOLLOWING) {
-      findPage = followRepository.findAllByFromMemberAndFollowStatus(member, FollowStatus.ACTIVE,pageRequest);
+      findPage = followRepository.findAllByFromMemberAndFollowStatusOrderByFollowDateDesc(member, FollowStatus.ACTIVE,pageRequest);
     } else if (type == FollowListType.REQUESTED_FOLLOW) {
       findPage = followRepository.findAllByToMemberAndFollowStatus(member, FollowStatus.WAITING ,pageRequest);
     } else {
-      findPage = followRepository.findAllByToMemberAndFollowStatus(member, FollowStatus.ACTIVE, pageRequest);
+      findPage = followRepository.findAllByToMemberAndFollowStatusOrderByFollowDateDesc(member, FollowStatus.ACTIVE, pageRequest);
     }
     return FollowListDto.fromEntityPage(findPage);
   }
