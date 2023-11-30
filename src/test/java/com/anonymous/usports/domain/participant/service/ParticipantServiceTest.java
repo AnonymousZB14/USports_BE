@@ -12,6 +12,9 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
+import com.anonymous.usports.domain.participant.dto.ParticipantManage;
+import com.anonymous.usports.domain.participant.dto.ParticipantManage.Request;
+import com.anonymous.usports.domain.participant.dto.ParticipantManage.Response;
 import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
@@ -232,8 +235,108 @@ class ParticipantServiceTest {
     }
   }
 
-  @Test
-  void manageJoinRecruit() {
-    //TODO
+  @Nested
+  @DisplayName("참여 신청 수락/거절")
+  class ManageJoinRecruit{
+    @Test
+    @DisplayName("수락")
+    void manageJoinRecruit_JOIN_RECRUIT_ACCEPTED(){
+      ParticipantManage.Request request =
+          new Request(true, member.getMemberId());
+      ParticipantEntity participant = ParticipantEntity.builder()
+          .participantId(1L)
+          .member(member)
+          .recruit(recruit)
+          .registeredAt(LocalDateTime.now().minusHours(1L))
+          .confirmedAt(LocalDateTime.now())
+          .build();
+
+      MemberEntity applicant = MemberEntity.builder()
+          .memberId(2L)
+          .accountName(TEST_STRING)
+          .name(TEST_STRING)
+          .email("test@test.com")
+          .password(TEST_STRING)
+          .phoneNumber("010-1111-2222")
+          .birthDate(LocalDate.now())
+          .gender(Gender.MALE)
+          .status(MemberStatus.NEED_UPDATE)
+          .role(Role.USER)
+          .profileOpen(true)
+          .build();
+
+      //given
+      when(memberRepository.findById(anyLong()))
+          .thenReturn(Optional.of(applicant));
+      when(recruitRepository.findById(anyLong()))
+          .thenReturn(Optional.of(recruit));
+      when(participantRepository
+          .findByMemberAndRecruit(any(MemberEntity.class), any(RecruitEntity.class)))
+          .thenReturn(Optional.of(participant));
+
+      //when
+      ParticipantManage.Response response =
+          participantService.manageJoinRecruit(
+              request, recruit.getRecruitId(), member.getMemberId());
+
+      //then
+      verify(participantRepository, never()).delete(any(ParticipantEntity.class));
+      verify(participantRepository, times(1)).save(any(ParticipantEntity.class));
+
+      assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
+      assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
+      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ACCEPTED);
+    }
+
+    @Test
+    @DisplayName("거절")
+    void manageJoinRecruit_JOIN_RECRUIT_REJECTED(){
+      ParticipantManage.Request request =
+          new Request(false, member.getMemberId());
+      ParticipantEntity participant = ParticipantEntity.builder()
+          .participantId(1L)
+          .member(member)
+          .recruit(recruit)
+          .registeredAt(LocalDateTime.now().minusHours(1L))
+          .confirmedAt(LocalDateTime.now())
+          .build();
+
+      MemberEntity applicant = MemberEntity.builder()
+          .memberId(2L)
+          .accountName(TEST_STRING)
+          .name(TEST_STRING)
+          .email("test@test.com")
+          .password(TEST_STRING)
+          .phoneNumber("010-1111-2222")
+          .birthDate(LocalDate.now())
+          .gender(Gender.MALE)
+          .status(MemberStatus.NEED_UPDATE)
+          .role(Role.USER)
+          .profileOpen(true)
+          .build();
+
+      //given
+      when(memberRepository.findById(anyLong()))
+          .thenReturn(Optional.of(applicant));
+      when(recruitRepository.findById(anyLong()))
+          .thenReturn(Optional.of(recruit));
+      when(participantRepository
+          .findByMemberAndRecruit(any(MemberEntity.class), any(RecruitEntity.class)))
+          .thenReturn(Optional.of(participant));
+
+      //when
+      ParticipantManage.Response response =
+          participantService.manageJoinRecruit(
+              request, recruit.getRecruitId(), member.getMemberId());
+
+      //then
+      verify(participantRepository, times(1)).delete(any(ParticipantEntity.class));
+      verify(participantRepository, never()).save(any(ParticipantEntity.class));
+
+      assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
+      assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
+      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_REJECTED);
+    }
   }
+
 }
