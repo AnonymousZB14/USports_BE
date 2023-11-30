@@ -41,6 +41,8 @@ dependencies {
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
 
     annotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok' // 테스트 롬복
+    testAnnotationProcessor 'org.projectlombok:lombok' // 테스트 롬복
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 }
