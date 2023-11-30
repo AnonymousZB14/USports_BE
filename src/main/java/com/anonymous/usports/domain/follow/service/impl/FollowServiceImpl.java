@@ -53,6 +53,7 @@ public class FollowServiceImpl implements FollowService {
         .build());
     if(fromMember.isProfileOpen()){
       follow.setFollowStatus(FollowStatus.ACTIVE);
+      follow.setFollowDate(LocalDateTime.now());
     } else {
       follow.setFollowStatus(FollowStatus.WAITING);
     }
@@ -102,9 +103,8 @@ public class FollowServiceImpl implements FollowService {
       return FollowResponse.Response(null, ResponseConstant.REFUSE_FOLLOW);
     }
     follow.setFollowStatus(FollowStatus.ACTIVE);
+    follow.setFollowDate(LocalDateTime.now());
     followRepository.save(follow);
     return FollowResponse.Response(follow.getFollowId(), ResponseConstant.ACCEPT_FOLLOW);
   }
-
-
 }
