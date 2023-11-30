@@ -37,6 +37,7 @@ public enum ErrorCode {
 
   //Follow 관련
   FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND.value(),"팔로우를 찾을 수 없습니다."),
+  UNABLE_MANAGE_FOLLOW(HttpStatus.BAD_REQUEST.value(), "이미 팔로우 상태입니다."),
 
   //BASIC
   NO_AUTHORITY_ERROR(HttpStatus.FORBIDDEN.value(), "권한이 없습니다."),

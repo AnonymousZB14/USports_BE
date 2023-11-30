@@ -14,6 +14,7 @@ import com.anonymous.usports.global.exception.FollowException;
 import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.type.FollowDecisionType;
 import com.anonymous.usports.global.type.FollowListType;
+import com.anonymous.usports.global.type.FollowStatus;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +40,8 @@ public class FollowServiceImpl implements FollowService {
     MemberEntity toMember = memberRepository.findById(toMemberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
 
-    Optional<FollowEntity> existingFollow = followRepository.findByFromMemberAndToMemberAndConsentDateIsNotNull(
-        fromMember, toMember);
+    Optional<FollowEntity> existingFollow = followRepository.findByFromMemberAndToMemberAndFollowStatus(
+        fromMember, toMember, FollowStatus.ACTIVE);
 
     if (existingFollow.isPresent()) {
       followRepository.delete(existingFollow.get());
@@ -49,8 +50,13 @@ public class FollowServiceImpl implements FollowService {
     FollowEntity follow = followRepository.save(FollowEntity.builder()
         .fromMember(fromMember)
         .toMember(toMember)
-        .consentDate(null)
         .build());
+    if(fromMember.isProfileOpen()){
+      follow.setFollowStatus(FollowStatus.ACTIVE);
+    } else {
+      follow.setFollowStatus(FollowStatus.WAITING);
+    }
+
     return FollowResponse.Response(follow.getFollowId(), ResponseConstant.REGISTER_FOLLOW);
   }
 
@@ -61,7 +67,7 @@ public class FollowServiceImpl implements FollowService {
    * FOLLOWER: 나를 FOLLOW 하는 리스트
    */
   @Override
-  public FollowListDto getFollowList(FollowListType type, int page, Long memberId) {
+  public FollowListDto getFollowPage(FollowListType type, int page, Long memberId) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -69,12 +75,12 @@ public class FollowServiceImpl implements FollowService {
 
     Page<FollowEntity> findPage;
     if (type == FollowListType.FOLLOWING) {
-      findPage = followRepository.findAllByFromMemberAndConsentDateIsNotNull(member, pageRequest);
+      findPage = followRepository.findAllByFromMemberAndFollowStatus(member, FollowStatus.ACTIVE,pageRequest);
     } else if (type == FollowListType.REQUESTED_FOLLOW) {
-      findPage = followRepository.findAllByToMemberAndConsentDateIsNull(member, pageRequest);
+      findPage = followRepository.findAllByToMemberAndFollowStatus(member, FollowStatus.WAITING ,pageRequest);
+    } else {
+      findPage = followRepository.findAllByToMemberAndFollowStatus(member, FollowStatus.ACTIVE, pageRequest);
     }
-    findPage = followRepository.findAllByToMemberAndConsentDateIsNotNull(member, pageRequest);
-
     return FollowListDto.fromEntityPage(findPage);
   }
 
@@ -82,17 +88,20 @@ public class FollowServiceImpl implements FollowService {
    * 팔로우 신청 수락 / 거절 메서드
    */
   @Override
-  public FollowResponse manageFollow(Long followId, Long memberId, FollowDecisionType decision) {
-    FollowEntity follow = followRepository.findById(followId)
+  public FollowResponse manageFollow(Long fromMemberId, Long toMemberId, FollowDecisionType decision) {
+    FollowEntity follow = followRepository.findByFromMemberAndToMember(fromMemberId,toMemberId)
         .orElseThrow(() -> new FollowException(ErrorCode.FOLLOW_NOT_FOUND));
-    if (!follow.getToMember().equals(memberId)) {
+    if (!follow.getToMember().equals(toMemberId)) {
       throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);
+    }
+    if(follow.getFollowStatus()==FollowStatus.ACTIVE){
+      throw new FollowException(ErrorCode.UNABLE_MANAGE_FOLLOW);
     }
     if (decision == FollowDecisionType.REFUSE) {
       followRepository.delete(follow);
       return FollowResponse.Response(null, ResponseConstant.REFUSE_FOLLOW);
     }
-    follow.setConsentDate(LocalDateTime.now());
+    follow.setFollowStatus(FollowStatus.ACTIVE);
     followRepository.save(follow);
     return FollowResponse.Response(follow.getFollowId(), ResponseConstant.ACCEPT_FOLLOW);
   }

@@ -38,17 +38,17 @@ public class FollowController {
       @PathVariable FollowListType type,
       @RequestParam("page") int page,
       @AuthenticationPrincipal MemberDto member) {
-    FollowListDto followList = followService.getFollowList(type, page, member.getMemberId());
+    FollowListDto followList = followService.getFollowPage(type, page, member.getMemberId());
     return ResponseEntity.ok(followList);
   }
 
   @ApiOperation("팔로우 신청 수락 / 거절")
-  @PostMapping("/follow/{followId}/manage")
+  @PostMapping("/follow/{fromMemberId}/manage")
   public ResponseEntity<FollowResponse> manageFollow(
-      @PathVariable Long followId,
+      @PathVariable Long fromMemberId,
       @AuthenticationPrincipal MemberDto member,
       @RequestParam("decision") FollowDecisionType decision) {
-    FollowResponse result = followService.manageFollow(followId, member.getMemberId(), decision);
+    FollowResponse result = followService.manageFollow(fromMemberId, member.getMemberId(), decision);
     return ResponseEntity.ok(result);
   }
 

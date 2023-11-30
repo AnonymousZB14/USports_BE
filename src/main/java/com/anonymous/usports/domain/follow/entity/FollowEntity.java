@@ -1,7 +1,7 @@
 package com.anonymous.usports.domain.follow.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
-import java.time.LocalDateTime;
+import com.anonymous.usports.global.type.FollowStatus;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -37,8 +37,8 @@ public class FollowEntity {
   @JoinColumn(name = "to_member_id", nullable = false)
   private MemberEntity toMember;
 
-  @Column(name = "consent_date")
-  private LocalDateTime consentDate;
+  @Column(name = "follow_status")
+  private FollowStatus followStatus;
 
 
 }
