@@ -73,7 +73,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     //신청 가능 -> 신청
     participantRepository.save(new ParticipantEntity(memberEntity, recruitEntity));
 
-    return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETED);
+    return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETE);
   }
 
   @Override

@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.recruit.controller;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitDeleteResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
@@ -73,5 +74,16 @@ public class RecruitController {
     RecruitDto result = recruitService.deleteRecruit(recruitId, loginMember.getMemberId());
     return ResponseEntity.ok(new RecruitDeleteResponse(result));
   }
+
+  @ApiOperation("운동 모집 마감 / 마감 취소")
+  @PutMapping ("/recruit/{recruitId}/end")
+  public ResponseEntity<?> recruitList(@PathVariable Long recruitId,
+      @AuthenticationPrincipal MemberDto loginMember) {
+
+    RecruitEndResponse response = recruitService.endRecruit(recruitId,
+        loginMember.getMemberId());
+    return ResponseEntity.ok(response);
+  }
+
 
 }

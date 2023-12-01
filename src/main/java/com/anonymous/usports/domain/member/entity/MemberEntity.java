@@ -97,6 +97,7 @@ public class MemberEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+
     public void updateMember(MemberUpdate.Request request) {
 
         String profileOpen = request.getProfileOpen().toLowerCase();

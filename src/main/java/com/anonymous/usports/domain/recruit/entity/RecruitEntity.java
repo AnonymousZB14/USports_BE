@@ -72,12 +72,16 @@ public class RecruitEntity {
   @Column(name = "gender", nullable = false)
   private Gender gender;
 
+  @Column(name = "current_count", nullable = false)
+  private int currentCount;
+
   @Column(name = "recruit_count", nullable = false)
   private int recruitCount;
 
   @Column(name = "meeting_date", nullable = false)
   private LocalDateTime meetingDate;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "recruit_status", nullable = false)
   private RecruitStatus recruitStatus;
 
@@ -108,6 +112,18 @@ public class RecruitEntity {
     this.meetingDate = request.getMeetingDate();
     this.gradeFrom = request.getGradeFrom();
     this.gradeTo = request.getGradeTo();
+  }
+
+  public void statusToEnd(){
+    this.recruitStatus = RecruitStatus.END;
+  }
+
+  public void statusToRecruiting(){
+    this.recruitStatus = RecruitStatus.RECRUITING;
+  }
+
+  public void statusToAlmostFinished(){
+    this.recruitStatus = RecruitStatus.ALMOST_FINISHED;
   }
 
 
