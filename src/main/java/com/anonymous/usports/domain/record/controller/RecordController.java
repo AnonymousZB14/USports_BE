@@ -1,36 +1,60 @@
 package com.anonymous.usports.domain.record.controller;
 
+import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.record.dto.RecordDto;
+import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister;
+import com.anonymous.usports.domain.record.dto.RecordRegister.Response;
 import com.anonymous.usports.domain.record.service.RecordService;
+import com.anonymous.usports.global.type.RecordType;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/record")
 public class RecordController {
 
   private final RecordService recordService;
 
-  @PostMapping("")
+  @ApiOperation("기록 작성 페이지")
+  @GetMapping("/record")
+  public ResponseEntity<?> registerRecordPage() {
+    //TODO
+    return ResponseEntity.ok(null);
+  }
+
+  @ApiOperation("팔로우, 추천 기록 내용 보기")
+  @GetMapping("/home/{recordType}")
+  public ResponseEntity<RecordListDto> getRecordList(
+      @PathVariable RecordType recordType,
+      @RequestParam("page") int page,
+      @AuthenticationPrincipal MemberDto member) {
+    RecordListDto records = recordService.getRecordsPage(recordType, page, member.getMemberId());
+    return ResponseEntity.ok(records);
+  }
+
+
+  @ApiOperation("기록 등록하기")
+  @PostMapping("/record")
   public ResponseEntity<RecordRegister.Response> registerRecord(
-      @RequestPart("request") RecordRegister.Request request, @RequestPart("images")List<MultipartFile> images
-      //FIXME ,@AuthenticationPrincipal MemberDTO member
+      @RequestPart("request") RecordRegister.Request request,
+      @RequestPart("images") List<MultipartFile> images,
+      @AuthenticationPrincipal MemberDto member
   ) {
-    Long memberId = 1L;
-    request.setSportsId(1L);
 
-    RecordDto savedRecord = recordService.saveRecord(request, memberId, images);
+    RecordDto savedRecord = recordService.saveRecord(request, member.getMemberId(), images);
 
-    return ResponseEntity.ok(RecordRegister.Response.fromDto(savedRecord));
+    return ResponseEntity.ok(new Response(savedRecord));
   }
 
 }

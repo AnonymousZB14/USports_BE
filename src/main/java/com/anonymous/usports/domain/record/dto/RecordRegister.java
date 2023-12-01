@@ -44,8 +44,9 @@ public class RecordRegister {
     private Long recordId;
     private String message;
 
-    public static Response fromDto(RecordDto recordDto) {
-      return new Response(recordDto.getRecordId(), ResponseConstant.CREATE_RECORD);
+    public Response(RecordDto recordDto) {
+      this.recordId = recordDto.getRecordId();
+      this.message = ResponseConstant.CREATE_RECORD;;
     }
   }
 

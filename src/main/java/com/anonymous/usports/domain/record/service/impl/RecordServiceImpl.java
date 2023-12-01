@@ -5,11 +5,17 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.anonymous.usports.domain.follow.entity.FollowEntity;
+import com.anonymous.usports.domain.follow.repository.FollowRepository;
+import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordImageDto;
+import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister;
+import com.anonymous.usports.domain.record.dto.RecordRegister.Request;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
 import com.anonymous.usports.domain.record.entity.RecordImageEntity;
 import com.anonymous.usports.domain.record.repository.RecordImageRepository;
@@ -21,16 +27,19 @@ import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.RecordException;
-import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
-import com.anonymous.usports.global.type.Role;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import com.anonymous.usports.global.type.FollowStatus;
+import com.anonymous.usports.global.type.RecordType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +52,8 @@ public class RecordServiceImpl implements RecordService {
   private final RecordRepository recordRepository;
   private final SportsRepository sportsRepository;
   private final RecordImageRepository recordImageRepository;
+  private final InterestedSportsRepository interestedSportsRepository;
+  private final FollowRepository followRepository;
   private final AmazonS3 amazonS3;
   @Value("${cloud.aws.s3.bucketName}")
   private String bucketName;
@@ -52,49 +63,26 @@ public class RecordServiceImpl implements RecordService {
    */
   @Override
   @Transactional
-  public RecordDto saveRecord(RecordRegister.Request request, Long memberId, List<MultipartFile> images) {
+  public RecordDto saveRecord(Request request, Long memberId,
+      List<MultipartFile> images) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
     SportsEntity sports = sportsRepository.findById(request.getSportsId())
         .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND));
 
-    //테스트용
-//    MemberEntity member = MemberEntity.builder()
-//        .memberId(memberId)
-//        .accountName("aaa")
-//        .name("aaa")
-//        .email("aaa@gmail.com")
-//        .password("1234")
-//        .phoneNumber("01011112222")
-//        .birthDate(LocalDate.now())
-//        .gender(Gender.MALE)
-//        .status(MemberStatus.ING)
-//        .registeredAt(LocalDateTime.now())
-//        .updatedAt(LocalDateTime.now())
-//        .emailAuthAt(LocalDateTime.now())
-//        .profileOpen(true)
-//        .role(Role.USER)
-//        .build();
-//    memberRepository.save(member);
-
-//    SportsEntity sports = SportsEntity.builder()
-//        .sportsId(request.getSportsId())
-//        .sportsName("축구")
-//        .build();
-//    sportsRepository.save(sports);
-
     RecordEntity recordEntity = recordRepository.save(
-        RecordRegister.Request.toEntity(request, member, sports));
+        Request.toEntity(request, member, sports));
 
-    List<RecordImageEntity> recordImages = saveImages(recordEntity, images);
+    List<RecordImageEntity> recordImageEntities = saveImages(recordEntity, images);
 
-    return RecordDto.fromEntity(recordEntity, recordImages);
+    return RecordDto.fromEntity(recordEntity, recordImageEntities);
   }
 
   /**
    * 기록 게시글 이미지 저장 메서드
    */
-  public List<RecordImageEntity> saveImages(RecordEntity recordEntity, List<MultipartFile> images) {
+  private List<RecordImageEntity> saveImages(RecordEntity recordEntity,
+      List<MultipartFile> images) {
     // 이미지 수 체크
     validateImageCount(images);
 
@@ -104,7 +92,7 @@ public class RecordServiceImpl implements RecordService {
       for (MultipartFile image : images) {
         String storedImagePath = uploadImageToS3(image);
 
-        RecordImageEntity recordImage = RecordImageDto.toEntity(recordEntity, storedImagePath );
+        RecordImageEntity recordImage = RecordImageDto.toEntity(recordEntity, storedImagePath);
 
         RecordImageEntity savedImage = recordImageRepository.save(recordImage);
         recordImages.add(savedImage);
@@ -148,7 +136,7 @@ public class RecordServiceImpl implements RecordService {
   /**
    * 저장할 이미지 수 체크
    */
-  public void validateImageCount(List<MultipartFile> images) {
+  private void validateImageCount(List<MultipartFile> images) {
     if (images.size() > NumberConstant.MAX_IMAGE_COUNT) {
       throw new RecordException(ErrorCode.TOO_MANY_IMAGES);
     }
@@ -156,8 +144,40 @@ public class RecordServiceImpl implements RecordService {
 
 
   @Override
-  public List<RecordDto> getRecordsList() {
-    return null;
+  public RecordListDto getRecordsPage(RecordType recordType, int page, Long memberId) {
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+
+    Page<RecordEntity> recordEntityPage;
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT,
+        Sort.by(Sort.Direction.DESC, "updatedAt"));
+
+    if(recordType==RecordType.RECOMMENDATION){
+      List<InterestedSportsEntity> interestedSportsEntityList = interestedSportsRepository.findAllByMemberEntity(member);
+      List<SportsEntity> sportsList = interestedSportsEntityList.stream()
+          .map(InterestedSportsEntity::getSports)
+          .collect(Collectors.toList());
+      for(SportsEntity num :sportsList){
+        System.out.println(num.getSportsId());
+      }
+      recordEntityPage = recordRepository.findAllBySportsIn(sportsList, pageRequest);
+    } else {
+      List<FollowEntity> followings  = followRepository.findAllByFromMemberAndFollowStatus(member, FollowStatus.ACTIVE);
+
+      List<MemberEntity> followingsMembers = followings.stream()
+          .map(FollowEntity::getToMember)
+          .collect(Collectors.toList());
+      List<RecordEntity> followRecords = recordRepository.findAllByMemberIn(followingsMembers);
+      recordEntityPage = new PageImpl<>(followRecords, pageRequest, followRecords.size());
+    }
+
+    RecordListDto recordListDto = new RecordListDto(recordEntityPage);
+    List<RecordDto> recordDtos = new ArrayList<>();
+    for (RecordEntity r : recordEntityPage.getContent()){
+      recordDtos.add(RecordDto.fromEntity(r, recordImageRepository.findAllByRecord(r)));
+    }
+    recordListDto.setList(recordDtos);
+    return recordListDto;
   }
 
   @Override

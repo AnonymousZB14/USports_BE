@@ -16,6 +16,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -27,6 +29,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @Builder
 @EntityListeners(AuditingEntityListener.class)
+@DynamicInsert //TODO @ColumnDefault가 create할 때 작동하기 때문에 넣었습니다. 나중에 제거할 생각입니다.
 public class RecordEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -51,4 +54,8 @@ public class RecordEntity {
   @Column(name = "updated_at", nullable = false)
   @LastModifiedDate
   private LocalDateTime updatedAt;
+
+  @Column(name = "count_comment", nullable = false)
+  @ColumnDefault("0")
+  private Long countComment;
 }
