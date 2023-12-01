@@ -186,7 +186,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         // 하는 김에 MemberEntity 가지고 오기
         MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
 
-        if (memberDto.getRole() == Role.UNAUTH) {
+        if (memberDto.getRole() == Role.UNAUTH && memberDto.getEmailAuthAt() == null) {
             int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(request.getEmail());
 
             if (redisEmailAuthNumber != request.getEmailAuthNumber()) {
