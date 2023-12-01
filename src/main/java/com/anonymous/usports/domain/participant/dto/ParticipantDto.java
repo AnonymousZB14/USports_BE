@@ -1,6 +1,7 @@
 package com.anonymous.usports.domain.participant.dto;
 
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,7 +24,9 @@ public class ParticipantDto {
 
   private LocalDateTime registeredAt;
 
-  private LocalDateTime confirmedAt; //모집 수락 받은 시간
+  private LocalDateTime confirmedAt; //모집 확인 받은 시간
+
+  private ParticipantStatus status;
 
   private LocalDateTime evaluationAt; //타인 평가 일시
 
@@ -34,6 +37,7 @@ public class ParticipantDto {
         .recruitId(participant.getRecruit().getRecruitId())
         .registeredAt(participant.getRegisteredAt())
         .confirmedAt(participant.getConfirmedAt())
+        .status(participant.getStatus())
         .evaluationAt(participant.getEvaluationAt())
         .build();
   }
