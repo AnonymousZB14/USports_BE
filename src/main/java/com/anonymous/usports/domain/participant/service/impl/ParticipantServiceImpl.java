@@ -103,8 +103,14 @@ public class ParticipantServiceImpl implements ParticipantService {
       //참여 수락 상태로 변경
       participantEntity.confirm();
       participantRepository.save(participantEntity);
+
       //Recruit의 currentCount + 1
       recruitEntity.participantAdded();
+
+      //마감
+      if(recruitEntity.getCurrentCount() == recruitEntity.getRecruitCount()){
+        recruitEntity.statusToEnd();
+      }
       recruitRepository.save(recruitEntity);
     }
 
