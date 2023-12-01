@@ -8,7 +8,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.MailService;
 import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
-import com.anonymous.usports.global.constant.EmailConstant;
+import com.anonymous.usports.global.constant.MailConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
@@ -67,7 +67,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         mailService.sendEmailAuthMail(request.getEmail());
 
         return MemberRegister.Response.fromEntity(
-                MemberRegister.Request.toEntity(request), EmailConstant.AUTH_EMAIL_SEND
+                MemberRegister.Request.toEntity(request), MailConstant.AUTH_EMAIL_SEND
         );
     }
 
@@ -103,7 +103,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         return TokenConstant.LOGOUT_SUCCESSFUL;
     }
 
-    public MemberEntity passwordCheck(MemberDto memberDto, Long memberId, String password) {
+    public MemberEntity passwordCheckAndGetMember(MemberDto memberDto, Long memberId, String password) {
 
         if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
@@ -112,7 +112,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         MemberEntity memberEntity = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (!memberEntity.getPassword().equals(password))
+        if (!passwordEncoder.matches(password, memberEntity.getPassword()))
             throw new MemberException(ErrorCode.PASSWORD_UNMATCH);
 
         return memberEntity;
@@ -121,7 +121,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     @Override
     public MemberWithdraw.Response deleteMember(MemberDto memberDto, MemberWithdraw.Request request, Long memberId) {
 
-        memberRepository.delete(passwordCheck(memberDto, memberId, request.getPassword()));
+        memberRepository.delete(passwordCheckAndGetMember(memberDto, memberId, request.getPassword()));
 
         return MemberWithdraw.Response.builder()
                 .message(ResponseConstant.MEMBER_DELETE_SUCCESS)
@@ -219,6 +219,43 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         response.setInterestedSports(sportsList);
 
         return response;
+    }
+
+
+
+    @Override
+    public PasswordUpdate.Response updatePassword(PasswordUpdate.Request request, Long id, MemberDto memberDto) {
+
+        // 기존 비밀번호와 일치하는지 확인
+        MemberEntity memberEntity = passwordCheckAndGetMember(memberDto, id, request.getCurrentPassword());
+
+        if (!request.getNewPassword().equals(request.getNewPasswordCheck())) {
+            throw new MemberException(ErrorCode.NEW_PASSWORD_UNMATCH);
+        }
+
+        memberEntity.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        memberRepository.save(memberEntity);
+
+        return PasswordUpdate.Response.builder()
+                .message(ResponseConstant.PASSWORD_CHANGE_SUCCESS)
+                .build();
+    }
+
+    @Override
+    public MailResponse resendEmailAuth(MemberDto memberDto, Long memberId) {
+
+        if (memberDto.getMemberId() != memberId)
+            throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
+
+        if (!memberRepository.existsById(memberId))
+            throw new MemberException(ErrorCode.MEMBER_NOT_FOUND);
+
+        mailService.sendEmailAuthMail(memberDto.getEmail());
+
+        return MailResponse.builder()
+                .message(MailConstant.AUTH_EMAIL_SEND)
+                .build();
     }
 
     @Override

@@ -109,4 +109,33 @@ public class MemberContoller {
         return memberService.updateMember(request, memberDto, id);
     }
 
+    /**
+     * 회원 비밀번호 수정
+     * http://localhost:8080/member/{memberId}/edit-password
+     */
+    @PutMapping("/{memberId}/edit-password")
+    @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_USER')")
+    @ApiOperation(value="회원 비밀번호 수정", notes="회원 기존 비밀번호를 입력하고, 새로운 비밀번호와 그 비밀번호와 일치하는지 확인을 한다")
+    public PasswordUpdate.Response changePassword(
+            @RequestBody @Valid PasswordUpdate.Request request,
+            @PathVariable("memberId") Long id,
+            @AuthenticationPrincipal MemberDto memberDto
+    ) {
+        return memberService.updatePassword(request, id, memberDto);
+    }
+
+    /**
+     * 회원 인증 번호 재전송
+     * http://localhost:8080/member/{memberId}/resend-email-auth
+     */
+    @PreAuthorize("hasAnyRole('ROLE_UNAUTH')")
+    @GetMapping("/{memberId}/resend-email-auth")
+    @ApiOperation(value="회원 인증 번호 재전송", notes="이메일 인증이 만료 되었을 때 회원 인증 번호 재전송")
+    public MailResponse resendEmailAuth(
+            @PathVariable("memberId") Long id,
+            @AuthenticationPrincipal MemberDto memberDto
+    ) {
+        return memberService.resendEmailAuth(memberDto, id);
+    }
+
 }

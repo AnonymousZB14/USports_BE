@@ -6,7 +6,6 @@ import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -28,7 +27,7 @@ public class MemberRegister {
         private String name;
 
         @NotBlank(message="이메일은 필수 입력 사항입니다")
-        @Email(message="이메일 형식에 맞지 않습니다",
+        @Pattern(message="이메일 형식에 맞지 않습니다",
                 regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}$")
         private String email;
 

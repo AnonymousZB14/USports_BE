@@ -1,7 +1,7 @@
 package com.anonymous.usports.domain.member.service.impl;
 
 import com.anonymous.usports.domain.member.service.MailService;
-import com.anonymous.usports.global.constant.EmailConstant;
+import com.anonymous.usports.global.constant.MailConstant;
 import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -32,7 +32,7 @@ public class MailServiceImpl implements MailService {
 
         try {
             message.setRecipients(MimeMessage.RecipientType.TO, mail);
-            message.setSubject(EmailConstant.MEMBER_TITLE);
+            message.setSubject(MailConstant.MEMBER_TITLE);
             String body = "";
             body += "<h3>" + "요청하신 USports 회원 인증 번호입니다" + "<h3>";
             body += "<h3>" + number + "<h3>";
