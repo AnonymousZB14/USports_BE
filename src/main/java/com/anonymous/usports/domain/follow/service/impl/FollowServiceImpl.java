@@ -95,7 +95,6 @@ public class FollowServiceImpl implements FollowService {
 
     MemberEntity toMember = memberRepository.findById(toMemberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
-    System.out.println("체크1");
     FollowEntity follow = followRepository.findByFromMemberAndToMember(fromMember,toMember)
         .orElseThrow(() -> new FollowException(ErrorCode.FOLLOW_NOT_FOUND));
     if (!follow.getFromMember().equals(fromMember)) {
@@ -105,11 +104,9 @@ public class FollowServiceImpl implements FollowService {
       throw new FollowException(ErrorCode.UNABLE_MANAGE_FOLLOW);
     }
     if (decision == FollowDecisionType.REFUSE) {
-      System.out.println("체크2");
       followRepository.delete(follow);
       return FollowResponse.Response(null, ResponseConstant.REFUSE_FOLLOW);
     }
-    System.out.println("체크3");
     follow.setFollowStatus(FollowStatus.ACTIVE);
     follow.setFollowDate(LocalDateTime.now());
     followRepository.save(follow);
