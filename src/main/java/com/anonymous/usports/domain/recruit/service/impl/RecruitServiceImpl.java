@@ -114,6 +114,13 @@ public class RecruitServiceImpl implements RecruitService {
 
   }
 
+  @Override
+  @Transactional
+  public void getRecruitsByConditions(int page, String search, String place, String sports,
+      String gender, String close) {
+
+  }
+
   private void validateAuthority(MemberEntity member, Long memberId){
     if(!Objects.equals(member.getMemberId(), memberId)){
       throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);

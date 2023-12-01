@@ -33,4 +33,10 @@ public interface RecruitService {
    */
   RecruitEndResponse endRecruit(Long recruitId, Long loginMemberId);
 
+  /**
+   * 여러 조건에 따른 Recruit 리스트 반환
+   */
+  void getRecruitsByConditions(
+      int page, String search, String place, String sports, String gender, String close);
+
 }
