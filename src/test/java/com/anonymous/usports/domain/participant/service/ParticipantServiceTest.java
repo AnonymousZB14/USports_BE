@@ -14,7 +14,6 @@ import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage.Request;
-import com.anonymous.usports.domain.participant.dto.ParticipantManage.Response;
 import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
@@ -167,7 +166,7 @@ class ParticipantServiceTest {
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMemberId()).isEqualTo(member.getMemberId());
-      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_COMPLETED);
+      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_COMPLETE);
 
     }
 
