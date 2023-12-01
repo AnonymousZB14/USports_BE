@@ -26,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -181,17 +182,19 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
         }
 
+        // 닉네임, 이메일, 핸드폰 번호를 수정 할 때, 겹치지 않게
+        // 하는 김에 MemberEntity 가지고 오기
+        MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
+
         if (memberDto.getRole() == Role.UNAUTH) {
             int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(request.getEmail());
 
             if (redisEmailAuthNumber != request.getEmailAuthNumber()) {
                 throw new MemberException(ErrorCode.EMAIL_AUTH_NUMBER_UNMATCH);
             }
-        }
 
-        // 닉네임, 이메일, 핸드폰 번호를 수정 할 때, 겹치지 않게
-        // 하는 김에 MemberEntity 가지고 오기
-        MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
+            memberEntity.setEmailAuthAt(LocalDateTime.now());
+        }
 
         // 관심 운동이 아예 없으면 안 된다
         if (request.getInterestedSports().size() == 0) {
