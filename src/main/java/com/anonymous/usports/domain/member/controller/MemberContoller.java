@@ -26,7 +26,7 @@ public class MemberContoller {
      */
     @PostMapping("/register")
     @ApiOperation(value = "회원 가입하기", notes = "회원 Entity 생성")
-    public ResponseEntity<?> registerMember(
+    public ResponseEntity<MemberRegister.Response> registerMember(
             @RequestBody @Valid MemberRegister.Request request
     ) {
         return ResponseEntity.ok(memberService.registerMember(request));
@@ -39,7 +39,7 @@ public class MemberContoller {
      */
     @PostMapping("/login")
     @ApiOperation(value = "회원 로그인 하기", notes = "access token과 refresh token 생성")
-    public ResponseEntity<?> login(
+    public ResponseEntity<MemberLogin.Response> login(
             @RequestBody MemberLogin.Request request
     ){
 
@@ -57,7 +57,7 @@ public class MemberContoller {
      */
     @PostMapping("/login/reissue")
     @ApiOperation(value = "Access token 재발급하기", notes = "refresh token 확인 후, Access token 재발급하기")
-    public ResponseEntity<?> reissueAccessToken(
+    public ResponseEntity<TokenDto> reissueAccessToken(
         @RequestHeader("RefreshToken") String refreshToken
     ){
         return ResponseEntity.ok(tokenProvider.regenerateToken(refreshToken));
@@ -70,7 +70,7 @@ public class MemberContoller {
     @PostMapping("/logout")
     @ApiOperation(value="로그아웃", notes="refreshToken을 삭제하고, access token을 blackList로 돌린다")
     @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<?> memberLogout(
+    public ResponseEntity<String> memberLogout(
             @AuthenticationPrincipal MemberDto memberDto,
             @RequestHeader("Authorization") String accessToken
     ) {
