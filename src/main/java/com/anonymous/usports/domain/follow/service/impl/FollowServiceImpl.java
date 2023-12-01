@@ -51,13 +51,13 @@ public class FollowServiceImpl implements FollowService {
         .fromMember(fromMember)
         .toMember(toMember)
         .build());
-    if(fromMember.isProfileOpen()){
+    if(toMember.isProfileOpen()){
       follow.setFollowStatus(FollowStatus.ACTIVE);
       follow.setFollowDate(LocalDateTime.now());
     } else {
       follow.setFollowStatus(FollowStatus.WAITING);
     }
-
+    follow = followRepository.save(follow);
     return FollowResponse.Response(follow.getFollowId(), ResponseConstant.REGISTER_FOLLOW);
   }
 
@@ -90,9 +90,14 @@ public class FollowServiceImpl implements FollowService {
    */
   @Override
   public FollowResponse manageFollow(Long fromMemberId, Long toMemberId, FollowDecisionType decision) {
-    FollowEntity follow = followRepository.findByFromMemberAndToMember(fromMemberId,toMemberId)
+    MemberEntity fromMember = memberRepository.findById(fromMemberId)
+        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+
+    MemberEntity toMember = memberRepository.findById(toMemberId)
+        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+    FollowEntity follow = followRepository.findByFromMemberAndToMember(fromMember,toMember)
         .orElseThrow(() -> new FollowException(ErrorCode.FOLLOW_NOT_FOUND));
-    if (!follow.getToMember().equals(toMemberId)) {
+    if (!follow.getFromMember().equals(fromMember)) {
       throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);
     }
     if(follow.getFollowStatus()==FollowStatus.ACTIVE){

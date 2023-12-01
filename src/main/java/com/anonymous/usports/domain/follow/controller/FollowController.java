@@ -25,10 +25,10 @@ public class FollowController {
   @ApiOperation("팔로우 신청/ 취소")
   @PostMapping("/follow/{toMemberId}")
   public ResponseEntity<FollowResponse> changeFollow(
-      @PathVariable Long toMemberID,
+      @PathVariable Long toMemberId,
       @AuthenticationPrincipal MemberDto member) {
 
-    FollowResponse result = followService.changeFollow(member.getMemberId(), toMemberID);
+    FollowResponse result = followService.changeFollow(member.getMemberId(), toMemberId);
     return ResponseEntity.ok(result);
   }
 
