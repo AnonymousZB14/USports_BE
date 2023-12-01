@@ -15,6 +15,7 @@ import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.util.Objects;
 import java.util.Optional;
@@ -44,7 +45,8 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
     Page<ParticipantEntity> findPage =
-        participantRepository.findAllByRecruitOrderByParticipantId(recruitEntity, pageRequest);
+        participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
+            recruitEntity, ParticipantStatus.ING, pageRequest);
 
     return ParticipantListDto.fromEntityPage(findPage);
   }
@@ -57,18 +59,17 @@ public class ParticipantServiceImpl implements ParticipantService {
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
         .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
 
-    Optional<ParticipantEntity> optionalParticipant =
-        participantRepository.findByMemberAndRecruit(memberEntity, recruitEntity);
-
-    if (optionalParticipant.isPresent()) {
-      ParticipantEntity participantEntity = optionalParticipant.get();
-      //신청 진행 중
-      if (Objects.isNull(participantEntity.getConfirmedAt())) {
-        return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ING);
-      }
-      //이미 수락 된 상태
-      return new ParticipateResponse(
-          recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ALREADY_CONFIRMED);
+    //신청 진행중
+    Optional<ParticipantEntity> ingParticipant =
+        participantRepository.findByMemberAndRecruitAndStatus(memberEntity, recruitEntity, ParticipantStatus.ING);
+    if(ingParticipant.isPresent()){
+      return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ING);
+    }
+    //이미 수락된 상태
+    Optional<ParticipantEntity> acceptedParticipant =
+        participantRepository.findByMemberAndRecruitAndStatus(memberEntity, recruitEntity, ParticipantStatus.ACCEPTED);
+    if(acceptedParticipant.isPresent()){
+      return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ALREADY_ACCEPTED);
     }
 
     //신청 가능 -> 신청
@@ -92,7 +93,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     }
 
     ParticipantEntity participantEntity =
-        participantRepository.findByMemberAndRecruit(applicant, recruitEntity)
+        participantRepository.findByMemberAndRecruitAndStatus(applicant, recruitEntity, ParticipantStatus.ING)
             .orElseThrow(() -> new MyException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
     //거절

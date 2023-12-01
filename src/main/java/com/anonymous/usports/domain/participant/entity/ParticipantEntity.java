@@ -62,6 +62,7 @@ public class ParticipantEntity {
   public ParticipantEntity(MemberEntity member, RecruitEntity recruit) {
     this.member = member;
     this.recruit = recruit;
+    this.status = ParticipantStatus.ING;
   }
 
   public void confirm() {
