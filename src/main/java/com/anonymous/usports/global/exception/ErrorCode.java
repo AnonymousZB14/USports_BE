@@ -31,7 +31,6 @@ public enum ErrorCode {
   PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "모집 글 참여 신청 건을 찾을 수 없습니다."),
 
 
-
   //Record 관련
   IMAGE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR.value(),"이미지 저장 오류가 발생했습니다."),
   TOO_MANY_IMAGES(HttpStatus.BAD_REQUEST.value(), "이미지 저장 갯수를 초과했습니다."),

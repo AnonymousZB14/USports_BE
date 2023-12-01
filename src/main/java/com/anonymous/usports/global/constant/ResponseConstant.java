@@ -12,7 +12,8 @@ public class ResponseConstant {
   public static final String JOIN_RECRUIT_ACCEPTED = "참여 신청이 수락되었습니다.";
   public static final String JOIN_RECRUIT_REJECTED = "참여 신청이 거절되었습니다.";
   public static final String END_RECRUIT_COMPLETE = "모집 마감이 완료되었습니다.";
-  public static final String  END_RECRUIT_CANCELED= "모집 마감이 취소되고, 다시 등록되었습니다.";
+  public static final String END_RECRUIT_CANCELED = "모집 마감이 취소되고, 다시 등록되었습니다.";
+  public static final String END_RECRUIT_CANCEL_REFUSED = "인원 수가 가득 차서 마감을 취소할 수 없습니다.";
 
 
 

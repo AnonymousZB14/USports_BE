@@ -97,12 +97,19 @@ public class RecruitServiceImpl implements RecruitService {
 
     this.validateAuthority(memberEntity, loginMemberId);
 
+    //인원이 가득 찬 상태 -> 모집 마감 취소 불가
+    if(recruitEntity.getCurrentCount() == recruitEntity.getRecruitCount()){
+      return new RecruitEndResponse(recruitId, ResponseConstant.END_RECRUIT_CANCEL_REFUSED);
+    }
+
     //END -> 모집 중 상태로 변경 모집 인원수에 따라 RECRUITING 또는 ALMOST_FINISHED로 수정
     if(recruitEntity.getRecruitStatus() == RecruitStatus.END){
       double ratio = (double) recruitEntity.getCurrentCount() / recruitEntity.getRecruitCount();
+
+      //인원이 70% 이상 차서, ALMOST_FINISHED 상태로 변경
       if(ratio >= 0.7){
         recruitEntity.statusToAlmostFinished();
-      }else{
+      }else{ //RECRUITING으로 변경
         recruitEntity.statusToRecruiting();
       }
       return new RecruitEndResponse(recruitId, ResponseConstant.END_RECRUIT_CANCELED);
