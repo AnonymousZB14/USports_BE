@@ -4,6 +4,10 @@ public class TokenConstant {
 
     public static final String BEARER = "Bearer ";
 
+    public static final String REFRESH_TOKEN_PREFIX = "rtk-";
+
+    public static final String ACCESS_TOKEN_PREFIX = "atk-";
+
     public static final String REFRESH_TOKEN = "refreshToken";
 
     public static final String ACCESS_TOKEN = "accessToken";

@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.member.service.impl;
 
 import com.anonymous.usports.domain.member.service.MailService;
 import com.anonymous.usports.global.constant.EmailConstant;
+import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import javax.mail.internet.MimeMessage;
 public class MailServiceImpl implements MailService {
 
     private final JavaMailSender javaMailSender;
+    private final AuthRedisRepository authRedisRepository;
     private static final String senderEmail = "jejoonproject@gmail.com";
 
     private static int number;
@@ -49,6 +51,8 @@ public class MailServiceImpl implements MailService {
 
         MimeMessage message = createMail(email);
         javaMailSender.send(message);
+
+        authRedisRepository.saveEmailAuthNumber(email, String.valueOf(number));
 
         return number;
     }

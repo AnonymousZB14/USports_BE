@@ -2,7 +2,6 @@ package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -71,8 +70,7 @@ public class MemberRegister {
                     .phoneNumber(request.getPhoneNumber())
                     .birthDate(request.getBirthDate())
                     .gender(request.getGender())
-                    .status(MemberStatus.NEED_UPDATE)
-                    .role(Role.USER)
+                    .role(Role.UNAUTH)
                     .profileOpen(po)
                     .build();
         }
@@ -87,12 +85,14 @@ public class MemberRegister {
         private String accountName;
         private String email;
         private boolean profileOpen;
+        private String message;
 
-        public static Response fromEntity(MemberEntity memberEntity) {
+        public static Response fromEntity(MemberEntity memberEntity, String message) {
             return Response.builder()
                     .accountName(memberEntity.getAccountName())
                     .email(memberEntity.getEmail())
                     .profileOpen(memberEntity.isProfileOpen())
+                    .message(message)
                     .build();
         }
 

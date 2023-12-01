@@ -5,14 +5,16 @@ import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.member.service.MailService;
 import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
+import com.anonymous.usports.global.constant.EmailConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
-import com.anonymous.usports.global.redis.token.repository.RefreshTokenRepository;
+import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +38,8 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     private final InterestedSportsRepository interestedSportsRepository;
     private final SportsRepository sportsRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenRepository tokenRepository;
+    private final MailService mailService;
 
     private void checkDuplication(String accountName, String email, String phoneNumber){
         if (memberRepository.existsByAccountName(accountName)) {
@@ -58,8 +61,10 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         memberRepository.save(MemberRegister.Request.toEntity(request));
 
+        mailService.sendEmailAuthMail(request.getEmail());
+
         return MemberRegister.Response.fromEntity(
-                MemberRegister.Request.toEntity(request)
+                MemberRegister.Request.toEntity(request), EmailConstant.AUTH_EMAIL_SEND
         );
     }
 
@@ -86,11 +91,11 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     @Override
     public String logoutMember(String accessToken, String email) {
 
-        boolean result = refreshTokenRepository.deleteToken(email);
+        boolean result = tokenRepository.deleteToken(email);
 
         if(!result) return TokenConstant.LOGOUT_NOT_SUCCESSFUL;
 
-        refreshTokenRepository.addBlackListAccessToken(accessToken);
+        tokenRepository.addBlackListAccessToken(accessToken);
 
         return TokenConstant.LOGOUT_SUCCESSFUL;
     }

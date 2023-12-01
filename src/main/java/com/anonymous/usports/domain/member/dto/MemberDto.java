@@ -2,7 +2,6 @@ package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,8 +41,6 @@ public class MemberDto implements UserDetails {
 
     private String profileImage;
 
-    private MemberStatus status;
-
     private LocalDateTime registeredAt;
 
     private LocalDateTime updatedAt;
@@ -80,7 +77,6 @@ public class MemberDto implements UserDetails {
                 .gender(memberEntity.getGender())
                 .profileContent(memberEntity.getProfileContent())
                 .profileImage(memberEntity.getProfileImage())
-                .status(memberEntity.getStatus())
                 .registeredAt(memberEntity.getRegisteredAt())
                 .updatedAt(memberEntity.getUpdatedAt())
                 .emailAuthAt(memberEntity.getEmailAuthAt())

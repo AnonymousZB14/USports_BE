@@ -21,19 +21,15 @@ import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.RecordException;
-import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
-import com.anonymous.usports.global.type.Role;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -68,7 +64,6 @@ public class RecordServiceImpl implements RecordService {
 //        .phoneNumber("01011112222")
 //        .birthDate(LocalDate.now())
 //        .gender(Gender.MALE)
-//        .status(MemberStatus.ING)
 //        .registeredAt(LocalDateTime.now())
 //        .updatedAt(LocalDateTime.now())
 //        .emailAuthAt(LocalDateTime.now())
