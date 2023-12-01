@@ -69,6 +69,7 @@ public class MemberContoller {
      */
     @PostMapping("/logout")
     @ApiOperation(value="로그아웃", notes="refreshToken을 삭제하고, access token을 blackList로 돌린다")
+    @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<?> memberLogout(
             @AuthenticationPrincipal MemberDto memberDto,
             @RequestHeader("Authorization") String accessToken
@@ -84,7 +85,7 @@ public class MemberContoller {
      */
     @PostMapping("/{memberId}/withdraw")
     @ApiOperation(value = "회원 탈퇴하기", notes = "회원 삭제하기. ADMIN은 아무나 삭제가 가능해서 URI에 pathVariable로 memberId 넣기")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
     public MemberWithdraw.Response deleteMember(
             @PathVariable("memberId") Long id,
             @AuthenticationPrincipal MemberDto memberDto,
@@ -99,7 +100,7 @@ public class MemberContoller {
      */
     @PutMapping("/{memberId}")
     @ApiOperation(value = "회원 정보 수정하기", notes = "ADMIN은 아무나 삭제가 가능해서 URI에 pathVariable로 memberId 넣기")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
     public MemberUpdate.Response updateMember(
             @PathVariable("memberId") Long id,
             @RequestBody @Valid MemberUpdate.Request request,

@@ -36,6 +36,7 @@ public class MailServiceImpl implements MailService {
             String body = "";
             body += "<h3>" + "요청하신 USports 회원 인증 번호입니다" + "<h3>";
             body += "<h3>" + number + "<h3>";
+            body += "<h3>" + "로그인 후, 10분 이내로 인증 부탁드립니다" + "<h3>";
             body += "<h3>" + "인증 후 추가 회원 설정을 부탁드립니다!" + "<h3>";
             body += "<h3>" + "감사합니다!" + "<h3>";
             message.setText(body, "UTF-8", "html");

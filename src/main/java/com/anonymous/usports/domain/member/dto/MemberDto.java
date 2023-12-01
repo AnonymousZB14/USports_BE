@@ -97,7 +97,7 @@ public class MemberDto implements UserDetails {
 
         List<GrantedAuthority> auth = new ArrayList<>();
 
-        auth.add(new SimpleGrantedAuthority("ROLE" + this.role));
+        auth.add(new SimpleGrantedAuthority("ROLE_" + this.role));
 
         return auth;
     }

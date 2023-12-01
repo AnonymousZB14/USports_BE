@@ -14,6 +14,7 @@ import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.Role;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     private final SportsRepository sportsRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepository;
+    private final AuthRedisRepository authRedisRepository;
     private final MailService mailService;
 
     private void checkDuplication(String accountName, String email, String phoneNumber){
@@ -177,6 +179,14 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
+        }
+
+        if (memberDto.getRole() == Role.UNAUTH) {
+            int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(request.getEmail());
+
+            if (redisEmailAuthNumber != request.getEmailAuthNumber()) {
+                throw new MemberException(ErrorCode.EMAIL_AUTH_NUMBER_UNMATCH);
+            }
         }
 
         // 닉네임, 이메일, 핸드폰 번호를 수정 할 때, 겹치지 않게

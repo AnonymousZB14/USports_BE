@@ -113,5 +113,6 @@ public class MemberEntity {
         this.profileImage = request.getProfileImage();
         this.addrCity = request.getAddrCity();
         this.addrDistrict = request.getAddrDistrict();
+        this.role = Role.USER;
     }
 }
