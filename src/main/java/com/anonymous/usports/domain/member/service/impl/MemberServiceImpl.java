@@ -243,6 +243,30 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     }
 
     @Override
+    public PasswordLostResponse.Response lostPassword(PasswordLostResponse.Request request) {
+        MemberEntity memberEntity = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!memberEntity.getPhoneNumber().equals(request.getPhoneNumber())) {
+            throw new MemberException(ErrorCode.PHONE_NUMBER_UNMATCH);
+        }
+
+        if (!memberEntity.getName().equals(request.getName())) {
+            throw new MemberException(ErrorCode.NAME_UNMATCH);
+        }
+
+        String tempPassword = mailService.sendTempPassword(request.getEmail());
+
+        memberEntity.setPassword(passwordEncoder.encode(tempPassword));
+
+        memberRepository.save(memberEntity);
+
+        return PasswordLostResponse.Response.builder()
+                .message(request.getEmail() + MailConstant.TEMP_PASSWORD_SUCCESSFULLY_SENT)
+                .build();
+    }
+
+    @Override
     public MailResponse resendEmailAuth(MemberDto memberDto, Long memberId) {
 
         if (memberDto.getMemberId() != memberId)

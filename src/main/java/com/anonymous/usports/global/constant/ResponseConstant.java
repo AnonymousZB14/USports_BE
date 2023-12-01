@@ -20,7 +20,6 @@ public class ResponseConstant {
 
   public static final String PASSWORD_CHANGE_SUCCESS = "비밀번호를 성공적으로 변경했습니다";
 
-
   // 기록 관련
   public static final String CREATE_RECORD = "기록이 저장되었습니다.";
 

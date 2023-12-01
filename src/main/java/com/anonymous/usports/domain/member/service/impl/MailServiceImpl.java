@@ -4,14 +4,20 @@ import com.anonymous.usports.domain.member.service.MailService;
 import com.anonymous.usports.global.constant.MailConstant;
 import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MailServiceImpl implements MailService {
 
     private final JavaMailSender javaMailSender;
@@ -20,25 +26,38 @@ public class MailServiceImpl implements MailService {
 
     private static int number;
 
+    private static String[] PASSWORD_UPPER_CHARACTERS = new String[]{
+            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"
+            , "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"
+    };
+
+    private static String[] PASSWORD_LOWER_CHARACTERS = new String[]{
+            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m"
+            , "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
+    };
+
+    private static String[] PASSWORD_NUMBERS = new String[]{
+            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"
+    };
+
+    private static String[] PASSWORD_SPECIAL_SYMBOLS = new String[] {
+            "@", "$", "!", "%", "*", "?", "&"
+    };
+
     private static int createNumber() {
         number = (int)(Math.random() * (9000)) + 100000;
         return number;
     }
 
-    public MimeMessage createMail(String mail) {
-        int number = createNumber();
+    public MimeMessage createMail(String mail, String value, String title, String content) {
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try {
             message.setRecipients(MimeMessage.RecipientType.TO, mail);
-            message.setSubject(MailConstant.MEMBER_TITLE);
-            String body = "";
-            body += "<h3>" + "요청하신 USports 회원 인증 번호입니다" + "<h3>";
-            body += "<h3>" + number + "<h3>";
-            body += "<h3>" + "로그인 후, 10분 이내로 인증 부탁드립니다" + "<h3>";
-            body += "<h3>" + "인증 후 추가 회원 설정을 부탁드립니다!" + "<h3>";
-            body += "<h3>" + "감사합니다!" + "<h3>";
+            message.setSubject(title);
+            String body = "<h1>" + value + "<h1>";
+            body += content;
             message.setText(body, "UTF-8", "html");
         } catch(MessagingException e) {
             e.printStackTrace();
@@ -50,11 +69,60 @@ public class MailServiceImpl implements MailService {
     @Override
     public int sendEmailAuthMail(String email) {
 
-        MimeMessage message = createMail(email);
+        String number = String.valueOf(createNumber());
+        String title = MailConstant.MEMBER_EMAIL_AUTH_TITLE;
+        String content = MailConstant.AUTH_EMAIL_CONTENT;
+
+        MimeMessage message = createMail(email, number, title, content);
         javaMailSender.send(message);
 
         authRedisRepository.saveEmailAuthNumber(email, String.valueOf(number));
 
-        return number;
+        return Integer.parseInt(number);
+    }
+
+    private String createPassword(){
+        Random random = new Random();
+        String newTempPassword = "";
+
+        for (int i = 0; i < 4; i ++) {
+            String upper = PASSWORD_UPPER_CHARACTERS[random.nextInt(26)];
+            newTempPassword += upper;
+        }
+
+        for (int i = 0; i < 4; i ++) {
+            String lower = PASSWORD_LOWER_CHARACTERS[random.nextInt(26)];
+            newTempPassword += lower;
+        }
+
+        for (int i = 0; i < 4; i ++) {
+            String num = PASSWORD_NUMBERS[random.nextInt(10)];
+            newTempPassword += num;
+        }
+
+        for (int i = 0; i < 2; i ++) {
+            String symbol = PASSWORD_SPECIAL_SYMBOLS[random.nextInt(6)];
+            newTempPassword += symbol;
+        }
+
+        String[] splitPass = newTempPassword.split("");
+        List<String> passList = Arrays.asList(splitPass);
+
+        Collections.shuffle(passList);
+
+        return String.join("", passList);
+    }
+
+    @Override
+    public String sendTempPassword(String email) {
+
+        String tempPassword = createPassword();
+        String title = MailConstant.TEMP_PASSWORD_EMAIL_TITLE;
+        String content = MailConstant.TEMP_PASSWORD_EMAIL_CONTENT;
+
+        MimeMessage message = createMail(email, tempPassword, title, content);
+        javaMailSender.send(message);
+
+        return tempPassword;
     }
 }

@@ -38,6 +38,11 @@ public interface MemberService {
     PasswordUpdate.Response updatePassword(PasswordUpdate.Request request, Long id, MemberDto memberDto);
 
     /**
+     * 비밀번호 잃어버림
+     */
+    PasswordLostResponse.Response lostPassword(PasswordLostResponse.Request request);
+
+    /**
      * 회원 이메일 인증 번호 재전송
      */
     MailResponse resendEmailAuth(MemberDto memberDto, Long memberId);

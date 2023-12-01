@@ -125,6 +125,18 @@ public class MemberContoller {
     }
 
     /**
+     * 회원이 비밀번호를 잃어버렸을 경우
+     * http://localhost:8080/member/password-lost
+     */
+    @PostMapping("/password-lost")
+    @ApiOperation(value="비밀번호를 잃어버렸을 경우", notes="이메일과 핸드폰번호를 확인한 후, 이메일로 임시비밀번호를 보내준다")
+    public PasswordLostResponse.Response passwordLost(
+            @RequestBody PasswordLostResponse.Request request
+    ) {
+        return memberService.lostPassword(request);
+    }
+
+    /**
      * 회원 인증 번호 재전송
      * http://localhost:8080/member/{memberId}/resend-email-auth
      */

@@ -18,6 +18,8 @@ public enum ErrorCode {
   EMAIL_AUTH_NUMBER_EXPIRED(HttpStatus.FORBIDDEN.value(), "회원 이매일 인증번호가 만료가 되었습니다. 재발급해주세요."),
   EMAIL_AUTH_NUMBER_UNMATCH(HttpStatus.BAD_REQUEST.value(), "이매일 인증 번호가 다릅니다. 다시 입력해주세요"),
   NEW_PASSWORD_UNMATCH(HttpStatus.BAD_REQUEST.value(), "새로 입력한 비밀번호가 일치하지 않습니다"),
+  PHONE_NUMBER_UNMATCH(HttpStatus.BAD_REQUEST.value(), "입력한 핸드폰 번호가 일치하지 않습니다"),
+  NAME_UNMATCH(HttpStatus.BAD_REQUEST.value(), "입력한 이름이 일치하지 않습니다"),
 
   // jwt 관련
   JWT_EXPIRED(HttpStatus.FORBIDDEN.value(), "JWT가 만료되었습니다"),
