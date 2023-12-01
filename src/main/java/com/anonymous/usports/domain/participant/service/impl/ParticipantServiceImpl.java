@@ -15,6 +15,7 @@ import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.type.RecruitStatus;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -86,6 +87,9 @@ public class ParticipantServiceImpl implements ParticipantService {
         .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
 
     this.validateAuthority(recruitEntity, loginMemberId);
+    if(recruitEntity.getRecruitStatus() == RecruitStatus.END){
+      throw new MyException(ErrorCode.RECRUIT_ALREADY_END);
+    }
 
     ParticipantEntity participantEntity =
         participantRepository.findByMemberAndRecruit(applicant, recruitEntity)
@@ -96,8 +100,12 @@ public class ParticipantServiceImpl implements ParticipantService {
       participantRepository.delete(participantEntity);
     } else {
       //수락 시
+      //참여 수락 상태로 변경
       participantEntity.confirm();
       participantRepository.save(participantEntity);
+      //Recruit의 currentCount + 1
+      recruitEntity.participantAdded();
+      recruitRepository.save(recruitEntity);
     }
 
     return new ParticipantManage.Response(recruitId, applicant.getMemberId(), request.isAccept());

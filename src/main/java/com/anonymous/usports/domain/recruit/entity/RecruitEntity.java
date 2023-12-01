@@ -114,6 +114,10 @@ public class RecruitEntity {
     this.gradeTo = request.getGradeTo();
   }
 
+  public void participantAdded(){
+    this.currentCount = this.currentCount + 1;
+  }
+
   public void statusToEnd(){
     this.recruitStatus = RecruitStatus.END;
   }

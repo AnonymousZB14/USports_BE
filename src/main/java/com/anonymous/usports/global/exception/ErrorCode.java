@@ -29,6 +29,7 @@ public enum ErrorCode {
   RECRUIT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "운동 모집 게시글을 찾을 수 없습니다."),
   APPLICANT_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "지원자 회원을 찾을 수 없습니다."),
   PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "모집 글 참여 신청 건을 찾을 수 없습니다."),
+  RECRUIT_ALREADY_END(HttpStatus.NOT_FOUND.value(), "모집 글 참여 신청 건을 찾을 수 없습니다."),
 
 
   //Record 관련
