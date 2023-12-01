@@ -3,7 +3,7 @@ package com.anonymous.usports.domain.follow.repository;
 import com.anonymous.usports.domain.follow.entity.FollowEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.FollowStatus;
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,4 +25,6 @@ public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
   Page<FollowEntity> findAllByToMemberAndFollowStatus(MemberEntity member, FollowStatus followStatus, Pageable pageable);
 
   Optional<FollowEntity> findByFromMemberAndToMember(Long fromMemberId, Long toMemberId);
+
+  List<FollowEntity> findAllByFromMemberAndFollowStatus(MemberEntity member, FollowStatus followStatus);
 }

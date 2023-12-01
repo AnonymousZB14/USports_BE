@@ -5,6 +5,8 @@ import com.anonymous.usports.global.type.FollowStatus;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -38,6 +40,7 @@ public class FollowEntity {
   @JoinColumn(name = "to_member_id", nullable = false)
   private MemberEntity toMember;
 
+  @Enumerated(EnumType.STRING)
   @Column(name = "follow_status")
   private FollowStatus followStatus;
 
