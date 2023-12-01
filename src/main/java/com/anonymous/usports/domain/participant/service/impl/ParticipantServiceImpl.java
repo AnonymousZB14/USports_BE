@@ -94,21 +94,22 @@ public class ParticipantServiceImpl implements ParticipantService {
     ParticipantEntity participantEntity =
         participantRepository.findByMemberAndRecruit(applicant, recruitEntity)
             .orElseThrow(() -> new MyException(ErrorCode.PARTICIPANT_NOT_FOUND));
+
     //거절
     if (!request.isAccept()) {
-
-      participantRepository.delete(participantEntity);
+      participantEntity.refuse();
+      participantRepository.save(participantEntity);
       return new ParticipantManage.Response(recruitId, applicant.getMemberId(),false);
     }
+
     //수락 시
     //참여 수락 상태로 변경
     participantEntity.confirm();
     participantRepository.save(participantEntity);
 
-    //Recruit의 currentCount + 1
-    recruitEntity.participantAdded();
+    recruitEntity.participantAdded();//Recruit의 currentCount + 1
 
-    //마감
+    //수락 후 마감됨
     if(recruitEntity.getCurrentCount() == recruitEntity.getRecruitCount()){
       recruitEntity.statusToEnd();
     }

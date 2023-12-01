@@ -2,10 +2,13 @@ package com.anonymous.usports.domain.participant.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,7 +50,11 @@ public class ParticipantEntity {
   private LocalDateTime registeredAt;
 
   @Column(name = "confirmed_at")
-  private LocalDateTime confirmedAt; //모집 수락 받은 시간
+  private LocalDateTime confirmedAt; //모집 확인 받은 시간
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "participant_status", nullable = false)
+  private ParticipantStatus status;
 
   @Column(name = "evaluation_at")
   private LocalDateTime evaluationAt; //타인 평가 일시
@@ -59,6 +66,12 @@ public class ParticipantEntity {
 
   public void confirm() {
     this.confirmedAt = LocalDateTime.now();
+    this.status = ParticipantStatus.ACCEPTED;
+  }
+
+  public void refuse(){
+    this.confirmedAt = LocalDateTime.now();
+    this.status = ParticipantStatus.REFUSED;
   }
 
   public void evaluation() {

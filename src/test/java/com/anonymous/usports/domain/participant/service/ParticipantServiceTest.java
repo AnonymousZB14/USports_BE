@@ -25,6 +25,7 @@ import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.MemberStatus;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
 import java.time.LocalDate;
@@ -285,6 +286,7 @@ class ParticipantServiceTest {
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ACCEPTED);
+      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.ACCEPTED);
     }
 
     @Test
@@ -329,12 +331,13 @@ class ParticipantServiceTest {
               request, recruit.getRecruitId(), member.getMemberId());
 
       //then
-      verify(participantRepository, times(1)).delete(any(ParticipantEntity.class));
-      verify(participantRepository, never()).save(any(ParticipantEntity.class));
+      verify(participantRepository, times(1)).save(any(ParticipantEntity.class));
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_REJECTED);
+      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.REFUSED);
+
     }
   }
 
