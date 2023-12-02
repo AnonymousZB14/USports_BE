@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.participant.service;
 
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
+import com.anonymous.usports.domain.participant.dto.ParticipateCancel;
 import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 
 public interface ParticipantService {
@@ -20,5 +21,11 @@ public interface ParticipantService {
   /**
    * 참여 신청 수락 or 거절
    */
-  ParticipantManage.Response manageJoinRecruit(ParticipantManage.Request request, Long recruitId, Long loginMemberId);
+  ParticipantManage.Response manageJoinRecruit(ParticipantManage.Request request, Long recruitId,
+      Long loginMemberId);
+
+  /**
+   * 참여 신청 취소
+   */
+  ParticipateCancel cancelJoinRecruit(Long recruitId, Long memberId);
 }
