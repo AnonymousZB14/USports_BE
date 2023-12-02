@@ -103,7 +103,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         return TokenConstant.LOGOUT_SUCCESSFUL;
     }
 
-    public MemberEntity passwordCheckAndGetMember(MemberDto memberDto, Long memberId, String password) {
+    private MemberEntity passwordCheckAndGetMember(MemberDto memberDto, Long memberId, String password) {
 
         if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
