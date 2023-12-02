@@ -6,6 +6,7 @@ import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -68,6 +69,7 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
+    @Async
     public int sendEmailAuthMail(String email) {
 
         String number = String.valueOf(createNumber());
@@ -115,6 +117,7 @@ public class MailServiceImpl implements MailService {
     }
 
     @Override
+    @Async
     public String sendTempPassword(String email) {
 
         String tempPassword = createPassword();
