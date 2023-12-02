@@ -49,16 +49,17 @@ public class MailServiceImpl implements MailService {
         return number;
     }
 
-    public MimeMessage createMail(String mail, String value, String title, String content) {
+    public MimeMessage createMail(String mail, String value, String title, StringBuilder content) {
 
         MimeMessage message = javaMailSender.createMimeMessage();
 
         try {
+            StringBuilder body = new StringBuilder();
+            body.append("<h1>").append(value).append("<h1>").append(content);
+
             message.setRecipients(MimeMessage.RecipientType.TO, mail);
             message.setSubject(title);
-            String body = "<h1>" + value + "<h1>";
-            body += content;
-            message.setText(body, "UTF-8", "html");
+            message.setText(String.valueOf(body), "UTF-8", "html");
         } catch(MessagingException e) {
             e.printStackTrace();
         }
@@ -71,7 +72,7 @@ public class MailServiceImpl implements MailService {
 
         String number = String.valueOf(createNumber());
         String title = MailConstant.MEMBER_EMAIL_AUTH_TITLE;
-        String content = MailConstant.AUTH_EMAIL_CONTENT;
+        StringBuilder content = MailConstant.AUTH_EMAIL_CONTENT;
 
         MimeMessage message = createMail(email, number, title, content);
         javaMailSender.send(message);
@@ -118,7 +119,7 @@ public class MailServiceImpl implements MailService {
 
         String tempPassword = createPassword();
         String title = MailConstant.TEMP_PASSWORD_EMAIL_TITLE;
-        String content = MailConstant.TEMP_PASSWORD_EMAIL_CONTENT;
+        StringBuilder content = MailConstant.TEMP_PASSWORD_EMAIL_CONTENT;
 
         MimeMessage message = createMail(email, tempPassword, title, content);
         javaMailSender.send(message);
