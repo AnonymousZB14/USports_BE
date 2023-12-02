@@ -123,9 +123,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         memberRepository.delete(passwordCheckAndGetMember(memberDto, memberId, request.getPassword()));
 
-        return MemberWithdraw.Response.builder()
-                .message(ResponseConstant.MEMBER_DELETE_SUCCESS)
-                .build();
+        return new MemberWithdraw.Response(ResponseConstant.MEMBER_DELETE_SUCCESS);
     }
 
 
@@ -237,9 +235,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         memberRepository.save(memberEntity);
 
-        return PasswordUpdate.Response.builder()
-                .message(ResponseConstant.PASSWORD_CHANGE_SUCCESS)
-                .build();
+        return new PasswordUpdate.Response(ResponseConstant.PASSWORD_CHANGE_SUCCESS);
     }
 
     @Override
@@ -261,9 +257,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         memberRepository.save(memberEntity);
 
-        return PasswordLostResponse.Response.builder()
-                .message(request.getEmail() + MailConstant.TEMP_PASSWORD_SUCCESSFULLY_SENT)
-                .build();
+        return new PasswordLostResponse.Response(request.getEmail() + MailConstant.TEMP_PASSWORD_SUCCESSFULLY_SENT);
     }
 
     @Override
@@ -277,9 +271,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         mailService.sendEmailAuthMail(memberDto.getEmail());
 
-        return MailResponse.builder()
-                .message(MailConstant.AUTH_EMAIL_SEND)
-                .build();
+        return new MailResponse(MailConstant.AUTH_EMAIL_SEND);
     }
 
     @Override
