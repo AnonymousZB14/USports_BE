@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.record.service.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
@@ -14,7 +15,6 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordImageDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
-import com.anonymous.usports.domain.record.dto.RecordRegister;
 import com.anonymous.usports.domain.record.dto.RecordRegister.Request;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
 import com.anonymous.usports.domain.record.entity.RecordImageEntity;
@@ -29,9 +29,12 @@ import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.RecordException;
 import com.anonymous.usports.global.type.FollowStatus;
 import com.anonymous.usports.global.type.RecordType;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -152,17 +155,16 @@ public class RecordServiceImpl implements RecordService {
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT,
         Sort.by(Sort.Direction.DESC, "updatedAt"));
 
-    if(recordType==RecordType.RECOMMENDATION){
-      List<InterestedSportsEntity> interestedSportsEntityList = interestedSportsRepository.findAllByMemberEntity(member);
+    if (recordType == RecordType.RECOMMENDATION) {
+      List<InterestedSportsEntity> interestedSportsEntityList = interestedSportsRepository.findAllByMemberEntity(
+          member);
       List<SportsEntity> sportsList = interestedSportsEntityList.stream()
           .map(InterestedSportsEntity::getSports)
           .collect(Collectors.toList());
-      for(SportsEntity num :sportsList){
-        System.out.println(num.getSportsId());
-      }
       recordEntityPage = recordRepository.findAllBySportsIn(sportsList, pageRequest);
     } else {
-      List<FollowEntity> followings  = followRepository.findAllByFromMemberAndFollowStatus(member, FollowStatus.ACTIVE);
+      List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
+          FollowStatus.ACTIVE);
 
       List<MemberEntity> followingsMembers = followings.stream()
           .map(FollowEntity::getToMember)
@@ -173,7 +175,7 @@ public class RecordServiceImpl implements RecordService {
 
     RecordListDto recordListDto = new RecordListDto(recordEntityPage);
     List<RecordDto> recordDtos = new ArrayList<>();
-    for (RecordEntity r : recordEntityPage.getContent()){
+    for (RecordEntity r : recordEntityPage.getContent()) {
       recordDtos.add(RecordDto.fromEntity(r, recordImageRepository.findAllByRecord(r)));
     }
     recordListDto.setList(recordDtos);
@@ -185,8 +187,73 @@ public class RecordServiceImpl implements RecordService {
 
   }
 
+  /**
+   * 기록 게시글 삭제
+   *
+   * @param recordId 기록 게시글 번호
+   * @param memberId 로그인한 회원 ID
+   * @return RecordDto 형태로 반환
+   */
   @Override
-  public void deleteRecord() {
+  public RecordDto deleteRecord(Long recordId, Long loginMemberId) {
+    RecordEntity recordEntity = recordRepository.findById(recordId)
+        .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+    if (recordEntity.getMember().getMemberId() != loginMemberId) {
+      throw new RecordException(ErrorCode.NO_AUTHORITY_ERROR);
+    }
 
+    List<RecordImageEntity> recordImageEntities = deleteRecordImages(recordEntity);
+
+    recordRepository.delete(recordEntity);
+
+    return RecordDto.fromEntity(recordEntity, recordImageEntities);
+  }
+
+  /**
+   * 기록 게시글에 연관된 이미지 삭제
+   *
+   * @param recordEntity 기록 게시글 엔티티
+   * @return List<RecordImageEntity> 해당 기록 게시글의 이미지 리스트를 반환
+   */
+  private List<RecordImageEntity> deleteRecordImages(RecordEntity recordEntity) {
+    List<RecordImageEntity> recordImages = recordImageRepository.findAllByRecord(recordEntity);
+
+    for (RecordImageEntity recordImage : recordImages) {
+      deleteImageFromS3(recordImage.getImageAddress());
+      recordImageRepository.delete(recordImage);
+    }
+    return recordImages;
+  }
+
+  /**
+   * S3에서 저장된 객체를 제거하는 메서드
+   *
+   * @param imageAddress DB에 저장되어 있던 이미지 URL
+   */
+  private void deleteImageFromS3(String imageAddress) {
+    String key = extractKeyFromImageUrl(imageAddress);
+    try {
+      amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
+    } catch (Exception e) {
+      throw new RecordException(ErrorCode.IMAGE_DELETE_ERROR);
+    }
+  }
+
+  /**
+   * 이미지 URL에서 key 추출하는 메서드
+   *
+   * @param imageUrl 삭제해야할 이미지 URL
+   * @return 추출된 key 값을 반환
+   */
+  private String extractKeyFromImageUrl(String imageUrl) {
+    try {
+      URL url = new URL(imageUrl);
+      String Decoding = URLDecoder.decode(url.getPath(), "UTF-8"); // 파일명에 한글이 있을 경우 Decode 필요
+      return Decoding.substring(1);
+    } catch (MalformedURLException e) {
+      throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
+    } catch (UnsupportedEncodingException e) {
+      throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
+    }
   }
 }

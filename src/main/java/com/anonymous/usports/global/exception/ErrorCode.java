@@ -35,6 +35,9 @@ public enum ErrorCode {
   //Record 관련
   IMAGE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"이미지 저장 오류가 발생했습니다."),
   TOO_MANY_IMAGES(HttpStatus.BAD_REQUEST, "이미지 저장 갯수를 초과했습니다."),
+  IMAGE_DELETE_ERROR(HttpStatus.BAD_REQUEST,"이미지 삭제 오류가 발생했습니다."),
+  RECORD_NOT_FOUND(HttpStatus.NOT_FOUND,"기록을 찾을 수 없습니다."),
+  INVALID_IMAGE_URL(HttpStatus.BAD_REQUEST,"이용할 수 없는 이미지 URL입니다."),
 
   //Follow 관련
   FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND,"팔로우를 찾을 수 없습니다."),

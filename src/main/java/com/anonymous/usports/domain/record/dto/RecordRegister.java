@@ -46,7 +46,7 @@ public class RecordRegister {
 
     public Response(RecordDto recordDto) {
       this.recordId = recordDto.getRecordId();
-      this.message = ResponseConstant.CREATE_RECORD;;
+      this.message = ResponseConstant.CREATE_RECORD;
     }
   }
 

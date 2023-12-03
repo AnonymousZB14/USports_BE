@@ -21,6 +21,7 @@ public class ResponseConstant {
 
   // 기록 관련
   public static final String CREATE_RECORD = "기록이 저장되었습니다.";
+  public static final String DELETE_RECORD = "기록이 삭제되었습니다.";
 
   //팔로우 관련
   public static final String REGISTER_FOLLOW = "팔로우를 신청했습니다.";
