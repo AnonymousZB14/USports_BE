@@ -215,7 +215,7 @@ class ParticipantServiceTest {
           participantService.joinRecruit(member.getMemberId(), recruit.getRecruitId());
 
       //then
-      verify(participantRepository, times(1)).save(any(ParticipantEntity.class));
+      verify(participantRepository, times(1)).save(new ParticipantEntity(member, recruit));
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMemberId()).isEqualTo(member.getMemberId());
