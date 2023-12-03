@@ -1,8 +1,7 @@
 package com.anonymous.usports.domain.recruit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.anyLong;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,6 +11,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
+import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
@@ -19,15 +19,18 @@ import com.anonymous.usports.domain.recruit.service.impl.RecruitServiceImpl;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.ResponseConstant;
+import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.MemberException;
+import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.exception.RecruitException;
+import com.anonymous.usports.global.exception.SportsException;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,43 +53,34 @@ class RecruitServiceTest {
   @InjectMocks
   private RecruitServiceImpl recruitService;
 
-  static final String TEST_STRING = "test";
-  static MemberEntity member;
-  static SportsEntity sports;
-  static RecruitEntity recruit;
-
-  @BeforeEach
-  void init() {
-    member = MemberEntity.builder()
-        .memberId(1L)
-        .accountName(TEST_STRING)
-        .name(TEST_STRING)
+  private MemberEntity createMember(Long id) {
+    return MemberEntity.builder()
+        .memberId(id)
+        .accountName("accountName" + id)
+        .name("name" + id)
         .email("test@test.com")
-        .password(TEST_STRING)
+        .password("password" + id)
         .phoneNumber("010-1111-2222")
         .birthDate(LocalDate.now())
         .gender(Gender.MALE)
         .role(Role.USER)
         .profileOpen(true)
         .build();
+  }
 
-    sports = SportsEntity.builder()
-        .sportsId(1L)
-        .sportsName(TEST_STRING)
-        .build();
-
-    recruit = RecruitEntity.builder()
-        .recruitId(1L)
+  private RecruitEntity createRecruit(Long id, MemberEntity member, SportsEntity sports) {
+    return RecruitEntity.builder()
+        .recruitId(id)
         .sports(sports)
         .member(member)
-        .title(TEST_STRING)
-        .content(TEST_STRING)
-        .placeName(TEST_STRING)
+        .title("title" + id)
+        .content("content" + id)
+        .placeName("placeName" + id)
         .lat("111")
-        .lnt("11")
+        .lnt("100")
         .cost(10000)
         .gender(Gender.MALE)
-        .currentCount(3)
+        .currentCount(1)
         .recruitCount(10)
         .meetingDate(LocalDateTime.now())
         .recruitStatus(RecruitStatus.RECRUITING)
@@ -95,143 +89,350 @@ class RecruitServiceTest {
         .build();
   }
 
-  @Test
-  @DisplayName("Recruit 등록")
-  void registerRecruit() {
-    RecruitRegister.Request request =
-        RecruitRegister.Request.builder()
-            .sportsId(sports.getSportsId())
-            .title(TEST_STRING)
-            .content(TEST_STRING)
-            .placeName(TEST_STRING)
-            .lat("111")
-            .lnt("11")
-            .cost(10000)
-            .recruitCount(10)
-            .meetingDate(LocalDateTime.now())
-            .gender(Gender.MALE)
-            .gradeFrom(1)
-            .gradeTo(10)
-            .build();
-
-    //given
-    when(memberRepository.findById(anyLong()))
-        .thenReturn(Optional.of(member));
-    when(sportsRepository.findById(anyLong()))
-        .thenReturn(Optional.of(sports));
-    when(recruitRepository.save(any(RecruitEntity.class)))
-        .thenReturn(recruit);
-
-    //when
-    RecruitDto result = recruitService.registerRecruit(request, member.getMemberId());
-
-    //then
-    assertThat(result.getSportsId()).isEqualTo(sports.getSportsId());
-    assertThat(result.getRecruitStatus()).isEqualTo(RecruitStatus.RECRUITING);
-  }
-
-  @Test
-  @DisplayName("Recruit 한 건 조회")
-  void getRecruit() {
-    Long recruitId = recruit.getRecruitId();
-    //given
-    when(recruitRepository.findById(anyLong()))
-        .thenReturn(Optional.of(recruit));
-
-    //when
-    RecruitDto result = recruitService.getRecruit(recruitId);
-
-    //then
-    verify(recruitRepository, times(1)).findById(recruitId);
-
-    assertThat(result.getRecruitId()).isEqualTo(recruit.getRecruitId());
-
-  }
-
-  @Test
-  @DisplayName("Recruit 수정")
-  void updateRecruit() {
-    String UPDATE_STRING = "updated";
-    RecruitUpdate.Request request =
-        RecruitUpdate.Request.builder()
-            .sportsId(sports.getSportsId())
-            .title(TEST_STRING + UPDATE_STRING)
-            .content(TEST_STRING + UPDATE_STRING)
-            .placeName(TEST_STRING + UPDATE_STRING)
-            .lat("111")
-            .lnt("111")
-            .cost(1000)
-            .recruitCount(5)
-            .meetingDate(LocalDateTime.now())
-            .gender(Gender.FEMALE)
-            .gradeFrom(1)
-            .gradeTo(10)
-            .build();
-
-    RecruitEntity updatedRecruit = RecruitEntity.builder()
-        .recruitId(1L)
-        .sports(sports)
-        .member(member)
-        .title(TEST_STRING + UPDATE_STRING)
-        .content(TEST_STRING + UPDATE_STRING)
-        .placeName(TEST_STRING + UPDATE_STRING)
-        .lat("111")
-        .lnt("111")
-        .cost(1000)
-        .gender(Gender.FEMALE)
-        .recruitCount(5)
-        .meetingDate(LocalDateTime.now())
-        .recruitStatus(RecruitStatus.RECRUITING)
-        .gradeFrom(1)
-        .gradeTo(10)
-        .build();
-
-    //given
-    when(recruitRepository.findById(anyLong()))
-        .thenReturn(Optional.of(recruit));
-    when(sportsRepository.findById(anyLong()))
-        .thenReturn(Optional.of(sports));
-    when(recruitRepository.save(any(RecruitEntity.class)))
-        .thenReturn(updatedRecruit);
-
-    //when
-    RecruitDto result =
-        recruitService.updateRecruit(request, recruit.getRecruitId(), member.getMemberId());
-
-    //then
-    assertThat(result.getTitle()).isEqualTo(request.getTitle());
-    assertThat(result.getContent()).isEqualTo(request.getContent());
-    assertThat(result.getCost()).isEqualTo(request.getCost());
-  }
-
-  @Test
-  @DisplayName("Recruit 삭제")
-  void deleteRecruit() {
-    //given
-    Long recruitId = recruit.getRecruitId();
-    when(recruitRepository.findById(anyLong()))
-        .thenReturn(Optional.of(recruit));
-
-    //when
-    RecruitDto recruitDto = recruitService.deleteRecruit(recruitId, member.getMemberId());
-
-    //then
-    verify(recruitRepository, times(1)).delete(recruit);
-
-    assertThat(recruitDto.getRecruitId()).isEqualTo(recruitId);
+  private SportsEntity createSports(Long id) {
+    return new SportsEntity(id, "sportsName");
   }
 
   @Nested
+  @DisplayName("Recruit 등록")
+  class RegisterRecruit {
+
+    private RecruitRegister.Request createRegisterRequest(RecruitEntity recruit) {
+      return RecruitRegister.Request.builder()
+          .sportsId(recruit.getSports().getSportsId())
+          .title(recruit.getTitle())
+          .content(recruit.getContent())
+          .placeName(recruit.getPlaceName())
+          .lat(recruit.getLat())
+          .lnt(recruit.getLnt())
+          .cost(recruit.getCost())
+          .recruitCount(recruit.getRecruitCount())
+          .meetingDate(recruit.getMeetingDate())
+          .gender(recruit.getGender())
+          .gradeFrom(recruit.getGradeFrom())
+          .gradeTo(recruit.getGradeTo())
+          .build();
+    }
+
+    @Test
+    @DisplayName("성공")
+    void registerRecruit() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      //given
+      RecruitRegister.Request request = createRegisterRequest(recruit);
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
+      when(sportsRepository.findById(1000L))
+          .thenReturn(Optional.of(sports));
+
+      when(recruitRepository.save(Request.toEntity(request, member, sports)))
+          .thenReturn(recruit);
+
+      //when
+      RecruitDto result = recruitService.registerRecruit(request, member.getMemberId());
+
+      //then
+      assertThat(result.getSportsId()).isEqualTo(sports.getSportsId());
+      assertThat(result.getMemberId()).isEqualTo(member.getMemberId());
+      assertThat(result.getRecruitStatus()).isEqualTo(RecruitStatus.RECRUITING);
+    }
+
+    @Test
+    @DisplayName("실패 - MEMBER_NOT_FOUND")
+    void registerRecruit_MEMBER_NOT_FOUND() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      //given
+      RecruitRegister.Request request = createRegisterRequest(recruit);
+
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      MemberException exception =
+          catchThrowableOfType(() ->
+              recruitService.registerRecruit(request, 2L), MemberException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("실패 - SPORTS_NOT_FOUND")
+    void registerRecruit_SPORTS_NOT_FOUND() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      //given
+      RecruitRegister.Request request = createRegisterRequest(recruit);
+      request.setSportsId(1001L);
+
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
+      when(sportsRepository.findById(1001L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      SportsException exception =
+          catchThrowableOfType(() ->
+              recruitService.registerRecruit(request, member.getMemberId()), SportsException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SPORTS_NOT_FOUND);
+    }
+
+  }
+
+  @Nested
+  @DisplayName("Recruit 한 건 조회")
+  class GetRecruit {
+
+    @Test
+    @DisplayName("성공")
+    void getRecruit() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+      //given
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+
+      //when
+      RecruitDto result = recruitService.getRecruit(10L);
+
+      //then
+      assertThat(result.getRecruitId()).isEqualTo(recruit.getRecruitId());
+    }
+
+    @Test
+    @DisplayName("실패 - RECRUIT_NOT_FOUND")
+    void getRecruit_RECRUIT_NOT_FOUND() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+      //given
+      when(recruitRepository.findById(11L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      RecruitException exception =
+          catchThrowableOfType(() ->
+              recruitService.getRecruit(11L), RecruitException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
+    }
+  }
+
+  @Nested
+  @DisplayName("Recruit 수정")
+  class UpdateRecruit {
+
+    private RecruitUpdate.Request createUpdateRequest(RecruitEntity recruit) {
+      String UPDATE = "update";
+      return RecruitUpdate.Request.builder()
+          .sportsId(recruit.getSports().getSportsId())
+          .title(recruit.getTitle() + UPDATE)
+          .content(recruit.getContent() + UPDATE)
+          .placeName(recruit.getPlaceName() + UPDATE)
+          .lat("11")
+          .lnt("22")
+          .cost(recruit.getCost() + 10)
+          .recruitCount(recruit.getRecruitCount() + 1)
+          .meetingDate(recruit.getMeetingDate())
+          .gender(Gender.BOTH)
+          .gradeFrom(recruit.getGradeFrom() + 1)
+          .gradeTo(recruit.getGradeTo() - 1)
+          .build();
+    }
+
+    @Test
+    @DisplayName("성공")
+    void updateRecruit() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+      RecruitUpdate.Request request = createUpdateRequest(recruit);
+
+      //given
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(sportsRepository.findById(1000L))
+          .thenReturn(Optional.of(sports));
+      when(recruitRepository.save(recruit))
+          .thenReturn(recruit);
+
+      //when
+      RecruitDto result = recruitService.updateRecruit(request, recruit.getRecruitId(),
+          member.getMemberId());
+
+      //then
+      assertThat(result.getRecruitId()).isEqualTo(recruit.getRecruitId());
+      assertThat(result.getTitle()).isEqualTo(request.getTitle());
+      assertThat(result.getContent()).isEqualTo(request.getContent());
+      assertThat(result.getPlaceName()).isEqualTo(request.getPlaceName());
+      assertThat(result.getGender()).isEqualTo(request.getGender());
+    }
+
+    @Test
+    @DisplayName("실패 - RECRUIT_NOT_FOUND")
+    void updateRecruit_RECRUIT_NOT_FOUND() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+      RecruitUpdate.Request request = createUpdateRequest(recruit);
+
+      //given
+      when(recruitRepository.findById(11L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      RecruitException exception =
+          catchThrowableOfType(() ->
+              recruitService.updateRecruit(request, 11L,
+                  member.getMemberId()), RecruitException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("실패 - NO_AUTHORITY_ERROR")
+    void updateRecruit_NO_AUTHORITY_ERROR() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+      RecruitUpdate.Request request = createUpdateRequest(recruit);
+
+      //given
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+
+      //when
+      //then
+      MyException exception =
+          catchThrowableOfType(() ->
+              recruitService.updateRecruit(request, 10L,
+                  2L), MyException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NO_AUTHORITY_ERROR);
+    }
+
+    @Test
+    @DisplayName("실패 - SPORTS_NOT_FOUND")
+    void updateRecruit_SPORTS_NOT_FOUND() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+      RecruitUpdate.Request request = createUpdateRequest(recruit);
+
+      //given
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(sportsRepository.findById(1000L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      SportsException exception =
+          catchThrowableOfType(() ->
+              recruitService.updateRecruit(request, 10L,
+                  member.getMemberId()), SportsException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SPORTS_NOT_FOUND);
+    }
+  }
+
+  @Nested
+  @DisplayName("Recruit 삭제")
+  class DeleteRecruit {
+
+    @Test
+    @DisplayName("성공")
+    void deleteRecruit() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      //given
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+
+      //when
+      RecruitDto result = recruitService.deleteRecruit(recruit.getRecruitId(),
+          member.getMemberId());
+
+      //then
+      verify(recruitRepository, times(1)).delete(recruit);
+      assertThat(result.getRecruitId()).isEqualTo(recruit.getRecruitId());
+    }
+
+    @Test
+    @DisplayName("실패 - RECRUIT_NOT_FOUND")
+    void deleteRecruit_RECRUIT_NOT_FOUND() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      //given
+      when(recruitRepository.findById(11L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      RecruitException exception =
+          catchThrowableOfType(() ->
+              recruitService.deleteRecruit(11L,
+                  member.getMemberId()), RecruitException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("실패 - NO_AUTHORITY_ERROR")
+    void deleteRecruit_NO_AUTHORITY_ERROR() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      //given
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+
+      //when
+      //then
+      MyException exception =
+          catchThrowableOfType(() ->
+              recruitService.deleteRecruit(10L,
+                  2L), MyException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NO_AUTHORITY_ERROR);
+    }
+  }
+
+
+  @Nested
   @DisplayName("모집 글 마감 / 마감 취소")
-  class EndRecruit{
+  class EndRecruit {
+
     @Test
     @DisplayName("RECRUITING -> 마감")
-    void endRecruit_RECRUITING_TO_END(){
-      //given
+    void endRecruit_RECRUITING_TO_END() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
       recruit.setRecruitStatus(RecruitStatus.RECRUITING);
-      when(recruitRepository.findById(anyLong()))
+
+      //given
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
-      when(memberRepository.findById(anyLong()))
+      when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
 
       //when
@@ -245,12 +446,16 @@ class RecruitServiceTest {
 
     @Test
     @DisplayName("ALMOST_FINISHED -> 마감")
-    void endRecruit(){
-      //given
+    void endRecruit() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
       recruit.setRecruitStatus(RecruitStatus.ALMOST_FINISHED);
-      when(recruitRepository.findById(anyLong()))
+
+      //given
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
-      when(memberRepository.findById(anyLong()))
+      when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
 
       //when
@@ -264,13 +469,17 @@ class RecruitServiceTest {
 
     @Test
     @DisplayName("END -> RECRUITING")
-    void endRecruit_END_TO_RECRUITING(){
-      //given
+    void endRecruit_END_TO_RECRUITING() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
       recruit.setRecruitStatus(RecruitStatus.END);
       recruit.setCurrentCount(3);
-      when(recruitRepository.findById(anyLong()))
+
+      //given
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
-      when(memberRepository.findById(anyLong()))
+      when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
 
       //when
@@ -285,13 +494,17 @@ class RecruitServiceTest {
 
     @Test
     @DisplayName("END -> ALMOST_FINISHED")
-    void endRecruit_END_TO_ALMOST_FINISHED(){
-      //given
+    void endRecruit_END_TO_ALMOST_FINISHED() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
       recruit.setRecruitStatus(RecruitStatus.END);
       recruit.setCurrentCount(8);
-      when(recruitRepository.findById(anyLong()))
+
+      //given
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
-      when(memberRepository.findById(anyLong()))
+      when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
 
       //when
@@ -302,6 +515,74 @@ class RecruitServiceTest {
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.END_RECRUIT_CANCELED);
       assertThat(recruit.getRecruitStatus()).isEqualTo(RecruitStatus.ALMOST_FINISHED);
+    }
+
+    @Test
+    @DisplayName("실패 - RECRUIT_NOT_FOUND")
+    void endRecruit_RECRUIT_NOT_FOUND() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      //given
+      when(recruitRepository.findById(11L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      RecruitException exception =
+          catchThrowableOfType(() ->
+              recruitService.endRecruit(11L,
+                  member.getMemberId()), RecruitException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("실패 - MEMBER_NOT_FOUND")
+    void endRecruit_MEMBER_NOT_FOUND() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      //given
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      MemberException exception =
+          catchThrowableOfType(() ->
+              recruitService.endRecruit(recruit.getRecruitId(),
+                  2L), MemberException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("실패 - NO_AUTHORITY_ERROR")
+    void endRecruit_NO_AUTHORITY_ERROR() {
+      SportsEntity sports = createSports(1000L);
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member, sports);
+
+      MemberEntity loginMember = createMember(2L);
+      //given
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.of(member));
+
+      //when
+      //then
+      MyException exception =
+          catchThrowableOfType(() ->
+              recruitService.endRecruit(recruit.getRecruitId(),
+                  2L), MyException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NO_AUTHORITY_ERROR);
     }
 
   }

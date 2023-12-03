@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -29,7 +30,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode
 @EntityListeners(AuditingEntityListener.class)
 @Entity(name = "participant")
 public class ParticipantEntity {
@@ -79,5 +79,22 @@ public class ParticipantEntity {
 
   public void evaluation() {
     this.evaluationAt = LocalDateTime.now();
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    ParticipantEntity that = (ParticipantEntity) object;
+    return Objects.equals(participantId, that.participantId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(participantId);
   }
 }

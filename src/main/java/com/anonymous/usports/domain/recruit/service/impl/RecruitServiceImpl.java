@@ -44,7 +44,6 @@ public class RecruitServiceImpl implements RecruitService {
 
     RecruitEntity saved =
         recruitRepository.save(Request.toEntity(request, memberEntity, sportsEntity));
-    System.out.println(saved);
 
     return RecruitDto.fromEntity(saved);
   }

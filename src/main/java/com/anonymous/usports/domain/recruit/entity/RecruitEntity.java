@@ -7,6 +7,7 @@ import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
@@ -35,8 +36,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString
-@EqualsAndHashCode
 @EntityListeners(AuditingEntityListener.class)
 @Entity(name = "recruit")
 public class RecruitEntity {
@@ -135,4 +134,20 @@ public class RecruitEntity {
   }
 
 
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    RecruitEntity that = (RecruitEntity) object;
+    return Objects.equals(recruitId, that.recruitId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(recruitId);
+  }
 }
