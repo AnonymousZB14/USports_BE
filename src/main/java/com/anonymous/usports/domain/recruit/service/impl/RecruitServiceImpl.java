@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.recruit.service.impl;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
@@ -32,6 +33,7 @@ public class RecruitServiceImpl implements RecruitService {
   private final MemberRepository memberRepository;
   private final SportsRepository sportsRepository;
   private final RecruitRepository recruitRepository;
+  private final ParticipantRepository participantRepository;
 
   @Override
   @Transactional
@@ -84,6 +86,8 @@ public class RecruitServiceImpl implements RecruitService {
     MemberEntity memberEntity = recruitEntity.getMember(); //작성자
 
     this.validateAuthority(memberEntity, memberId);
+
+    participantRepository.deleteAllByRecruit(recruitEntity);
 
     recruitRepository.delete(recruitEntity);
 
