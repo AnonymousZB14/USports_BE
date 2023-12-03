@@ -3,7 +3,6 @@ package com.anonymous.usports.domain.participant.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,6 +37,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -47,8 +47,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 class ParticipantServiceTest {
 
@@ -94,6 +95,7 @@ class ParticipantServiceTest {
         .lnt("100")
         .cost(10000)
         .gender(Gender.MALE)
+        .currentCount(1)
         .recruitCount(10)
         .meetingDate(LocalDateTime.now())
         .recruitStatus(RecruitStatus.RECRUITING)
@@ -150,61 +152,106 @@ class ParticipantServiceTest {
         .build();
   }
 
+  @Nested
+  @DisplayName("신청중(ING)인 Participant 리스트 조회 (페이징)")
+  class GetParticipants {
 
-  @Test
-  @DisplayName("Participant 리스트 조회 (페이징)")
-  void getParticipants() {
-    //given
-    Long recruitId = recruit.getRecruitId();
-    int page = 1;
-    Long loginMemberId = member.getMemberId();
+    @Test
+    @DisplayName("성공")
+    void getParticipants() {
+      //given
+      MemberEntity recruitWriter = createMember(999L);
+      RecruitEntity recruit = createRecruit(10L, recruitWriter);
+      List<ParticipantEntity> participantList = new ArrayList<>();
 
-    List<ParticipantEntity> entityList = new ArrayList<>();
-    for (long i = 1; i <= 10; i++) {
-      entityList.add(ParticipantEntity.builder()
-          .participantId(i)
-          .member(MemberEntity.builder().memberId(i).build())
-          .recruit(recruit)
-          .registeredAt(LocalDateTime.now())
-          .build());
+      for (long i = 1; i <= 7; i++) {
+        MemberEntity memberEntity = createMember(i);
+        ParticipantEntity participant = createParticipant(i + 100, memberEntity, recruit);
+        participantList.add(participant);
+      }
+
+      int page = 2;
+
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(participantRepository
+          .findAllByRecruitAndStatusOrderByParticipantId(
+              recruit,
+              ParticipantStatus.ING,
+              PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT))
+      ).thenReturn(new PageImpl<>(participantList));
+
+      //when
+      ParticipantListDto participants =
+          participantService.getParticipants(recruit.getRecruitId(), page,
+              recruitWriter.getMemberId());
+      log.info("participants : {}", participants);
+
+      //then
+      assertThat(participants.getCurrentPage()).isEqualTo(1);
+      assertThat(participants.getPageSize()).isEqualTo(7);
+      assertThat(participants.getTotalPages()).isEqualTo(1);
+      assertThat(participants.getTotalElements()).isEqualTo(7);
+
+      List<ParticipantDto> list = participants.getList();
+      for (int i = 0; i < list.size(); i++) {
+        ParticipantDto participantDto = list.get(i);
+        assertThat(participantDto.getRecruitId()).isEqualTo(recruit.getRecruitId());
+      }
     }
-    when(recruitRepository.findById(anyLong()))
-        .thenReturn(Optional.of(recruit));
-    when(participantRepository
-        .findAllByRecruitAndStatusOrderByParticipantId(any(RecruitEntity.class),
-            any(ParticipantStatus.class), any(Pageable.class)))
-        .thenReturn(new PageImpl<>(entityList));
 
-    //when
-    ParticipantListDto participants =
-        participantService.getParticipants(recruitId, page, loginMemberId);
+    @Test
+    @DisplayName("실패 - RECRUIT_NOT_FOUND")
+    void getParticipants_RECRUIT_NOT_FOUND() {
+      //given
+      MemberEntity recruitWriter = createMember(999L);
+      RecruitEntity recruit = createRecruit(10L, recruitWriter);
+      List<ParticipantEntity> participantList = new ArrayList<>();
 
-    //then
-    assertThat(participants.getCurrentPage()).isEqualTo(1);
-    assertThat(participants.getPageSize()).isEqualTo(NumberConstant.PAGE_SIZE_DEFAULT);
-    assertThat(participants.getTotalPages()).isEqualTo(1);
-    assertThat(participants.getTotalElements()).isEqualTo(10);
-    List<ParticipantDto> list = participants.getList();
-    for (int i = 0; i < list.size(); i++) {
-      assertThat(list.get(i).getRecruitId()).isEqualTo(recruitId);
+      for (long i = 1; i <= 7; i++) {
+        MemberEntity memberEntity = createMember(i);
+        ParticipantEntity participant = createParticipant(i + 100, memberEntity, recruit);
+        participantList.add(participant);
+      }
+
+      int page = 2;
+
+      when(recruitRepository.findById(9L))
+          .thenReturn(Optional.empty());
+      //when
+      //then
+      RecruitException exception =
+          catchThrowableOfType(() ->
+                  participantService
+                      .getParticipants(9L, page, recruitWriter.getMemberId()),
+              RecruitException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
     }
 
   }
+
 
   @Nested
   @DisplayName("모집 글에 참여 신청 - joinRecruit")
   class JoinRecruit {
 
     @Test
-    @DisplayName("신청 성공")
+    @DisplayName("정상 - 신청 성공")
     void joinRecruit_JOIN_RECRUIT_COMPLETED() {
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member);
+
       //given
-      when(memberRepository.findById(anyLong()))
+      when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
-      when(recruitRepository.findById(anyLong()))
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository.findByMemberAndRecruitAndStatus(
-          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
+      when(participantRepository.findByMemberAndRecruitAndStatus(member, recruit,
+          ParticipantStatus.ING))
+          .thenReturn(Optional.empty());
+      when(participantRepository.findByMemberAndRecruitAndStatus(member, recruit,
+          ParticipantStatus.ACCEPTED))
           .thenReturn(Optional.empty());
 
       //when
@@ -221,23 +268,20 @@ class ParticipantServiceTest {
     }
 
     @Test
-    @DisplayName("신청 진행중인 상태")
+    @DisplayName("정상 - 신청 진행중인 상태")
     void joinRecruit_JOIN_RECRUIT_ING() {
-      ParticipantEntity participant = ParticipantEntity.builder()
-          .participantId(1L)
-          .member(member)
-          .recruit(recruit)
-          .status(ParticipantStatus.ING)
-          .registeredAt(LocalDateTime.now())
-          .build();
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member);
+      ParticipantEntity participant = createParticipant(100L, member, recruit);
+      participant.setStatus(ParticipantStatus.ING);
 
       //given
-      when(memberRepository.findById(anyLong()))
+      when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
-      when(recruitRepository.findById(anyLong()))
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository.findByMemberAndRecruitAndStatus(
-          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
+      when(participantRepository.findByMemberAndRecruitAndStatus(member, recruit,
+          ParticipantStatus.ING))
           .thenReturn(Optional.of(participant));
 
       //when
@@ -247,8 +291,7 @@ class ParticipantServiceTest {
       //then
       verify(participantRepository, never()).save(any(ParticipantEntity.class));
       verify(participantRepository, times(1))
-          .findByMemberAndRecruitAndStatus(
-              any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class));
+          .findByMemberAndRecruitAndStatus(member, recruit, ParticipantStatus.ING);
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMemberId()).isEqualTo(member.getMemberId());
@@ -256,39 +299,81 @@ class ParticipantServiceTest {
     }
 
     @Test
-    @DisplayName("이미 신청이 수락 된 상태")
+    @DisplayName("정상 - 이미 신청이 수락 된 상태")
     void joinRecruit_JOIN_RECRUIT_ALREADY_CONFIRMED() {
-      ParticipantEntity participant = ParticipantEntity.builder()
-          .participantId(1L)
-          .member(member)
-          .recruit(recruit)
-          .status(ParticipantStatus.ACCEPTED)
-          .registeredAt(LocalDateTime.now().minusHours(1L))
-          .confirmedAt(LocalDateTime.now())
-          .build();
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member);
+      ParticipantEntity participant = createParticipant(100L, member, recruit);
+      participant.setStatus(ParticipantStatus.ACCEPTED);
 
       //given
-      when(memberRepository.findById(anyLong()))
+      when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
-      when(recruitRepository.findById(anyLong()))
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository.findByMemberAndRecruitAndStatus(
-          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
-          .thenReturn(Optional.empty())
+      when(participantRepository.findByMemberAndRecruitAndStatus(member, recruit,
+          ParticipantStatus.ING))
+          .thenReturn(Optional.empty());
+      when(participantRepository.findByMemberAndRecruitAndStatus(member, recruit,
+          ParticipantStatus.ACCEPTED))
           .thenReturn(Optional.of(participant));
+
       //when
       ParticipateResponse response =
           participantService.joinRecruit(member.getMemberId(), recruit.getRecruitId());
 
       //then
       verify(participantRepository, never()).save(any(ParticipantEntity.class));
-      verify(participantRepository, times(2))
-          .findByMemberAndRecruitAndStatus(
-              any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class));
+      verify(participantRepository, times(1))
+          .findByMemberAndRecruitAndStatus(member, recruit, ParticipantStatus.ING);
+      verify(participantRepository, times(1))
+          .findByMemberAndRecruitAndStatus(member, recruit, ParticipantStatus.ACCEPTED);
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMemberId()).isEqualTo(member.getMemberId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ALREADY_ACCEPTED);
+    }
+
+    @Test
+    @DisplayName("실패 - MEMBER_NOT_FOUND")
+    void joinRecruit_MEMBER_NOT_FOUND() {
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member);
+
+      //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      MemberException exception =
+          catchThrowableOfType(() ->
+              participantService.joinRecruit(
+                  member.getMemberId(), recruit.getRecruitId()), MemberException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("실패 - RECRUIT_NOT_FOUND")
+    void joinRecruit_RECRUIT_NOT_FOUND() {
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member);
+
+      //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      RecruitException exception =
+          catchThrowableOfType(() ->
+              participantService.joinRecruit(
+                  member.getMemberId(), recruit.getRecruitId()), RecruitException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
     }
   }
 
@@ -297,103 +382,241 @@ class ParticipantServiceTest {
   class ManageJoinRecruit {
 
     @Test
-    @DisplayName("수락")
+    @DisplayName("정상 - 참여 신청 수락, 마감 x")
     void manageJoinRecruit_JOIN_RECRUIT_ACCEPTED() {
-      ParticipantManage.Request request =
-          new Request(true, member.getMemberId());
-      ParticipantEntity participant = ParticipantEntity.builder()
-          .participantId(1L)
-          .member(member)
-          .recruit(recruit)
-          .registeredAt(LocalDateTime.now().minusHours(1L))
-          .confirmedAt(LocalDateTime.now())
-          .build();
-
-      MemberEntity applicant = MemberEntity.builder()
-          .memberId(2L)
-          .accountName(TEST_STRING)
-          .name(TEST_STRING)
-          .email("test@test.com")
-          .password(TEST_STRING)
-          .phoneNumber("010-1111-2222")
-          .birthDate(LocalDate.now())
-          .gender(Gender.MALE)
-          .role(Role.USER)
-          .profileOpen(true)
-          .build();
+      MemberEntity writer = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, writer);
+      recruit.setCurrentCount(2);
 
       //given
-      when(memberRepository.findById(anyLong()))
+      MemberEntity applicant = createMember(2L);
+      ParticipantEntity participant = createParticipant(100L, applicant, recruit);
+      participant.setStatus(ParticipantStatus.ING);
+
+      ParticipantManage.Request request =
+          new Request(true, applicant.getMemberId());
+
+      when(memberRepository.findById(2L))
           .thenReturn(Optional.of(applicant));
-      when(recruitRepository.findById(anyLong()))
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
       when(participantRepository.findByMemberAndRecruitAndStatus(
-          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
+          applicant, recruit, ParticipantStatus.ING))
           .thenReturn(Optional.of(participant));
 
       //when
       ParticipantManage.Response response =
           participantService.manageJoinRecruit(
-              request, recruit.getRecruitId(), member.getMemberId());
+              request, recruit.getRecruitId(), writer.getMemberId());
 
       //then
-      verify(participantRepository, never()).delete(any(ParticipantEntity.class));
-      verify(participantRepository, times(1)).save(any(ParticipantEntity.class));
+      verify(participantRepository, times(1)).save(participant);
+      verify(recruitRepository, times(1)).save(recruit);
+
+      log.info("recruit : {}", recruit);
+      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.ACCEPTED); //confirm()
+      assertThat(recruit.getCurrentCount()).isEqualTo(3);//participantAdded()
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ACCEPTED);
-      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.ACCEPTED);
     }
 
     @Test
-    @DisplayName("거절")
-    void manageJoinRecruit_JOIN_RECRUIT_REJECTED() {
-      ParticipantManage.Request request =
-          new Request(false, member.getMemberId());
-      ParticipantEntity participant = ParticipantEntity.builder()
-          .participantId(1L)
-          .member(member)
-          .recruit(recruit)
-          .registeredAt(LocalDateTime.now().minusHours(1L))
-          .confirmedAt(LocalDateTime.now())
-          .build();
-
-      MemberEntity applicant = MemberEntity.builder()
-          .memberId(2L)
-          .accountName(TEST_STRING)
-          .name(TEST_STRING)
-          .email("test@test.com")
-          .password(TEST_STRING)
-          .phoneNumber("010-1111-2222")
-          .birthDate(LocalDate.now())
-          .gender(Gender.MALE)
-          .role(Role.USER)
-          .profileOpen(true)
-          .build();
+    @DisplayName("정상 - 참여 신청 수락, 마감 o")
+    void manageJoinRecruit_JOIN_RECRUIT_ACCEPTED_Recruit_END() {
+      MemberEntity writer = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, writer);
+      recruit.setCurrentCount(9);
 
       //given
-      when(memberRepository.findById(anyLong()))
+      MemberEntity applicant = createMember(2L);
+      ParticipantEntity participant = createParticipant(100L, applicant, recruit);
+      participant.setStatus(ParticipantStatus.ING);
+
+      ParticipantManage.Request request =
+          new Request(true, applicant.getMemberId());
+
+      when(memberRepository.findById(2L))
           .thenReturn(Optional.of(applicant));
-      when(recruitRepository.findById(anyLong()))
+      when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
       when(participantRepository.findByMemberAndRecruitAndStatus(
-          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
+          applicant, recruit, ParticipantStatus.ING))
           .thenReturn(Optional.of(participant));
 
       //when
       ParticipantManage.Response response =
           participantService.manageJoinRecruit(
-              request, recruit.getRecruitId(), member.getMemberId());
+              request, recruit.getRecruitId(), writer.getMemberId());
 
       //then
-      verify(participantRepository, times(1)).save(any(ParticipantEntity.class));
+      verify(participantRepository, times(1)).save(participant);
+      verify(recruitRepository, times(1)).save(recruit);
+
+      log.info("recruit : {}", recruit);
+      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.ACCEPTED); //confirm()
+      assertThat(recruit.getCurrentCount()).isEqualTo(10);//participantAdded()
+      assertThat(recruit.getRecruitStatus()).isEqualTo(RecruitStatus.END); //statusToEnd()
+
+      assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
+      assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
+      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ACCEPTED);
+    }
+
+    @Test
+    @DisplayName("정상 : 참여 신청 거절")
+    void manageJoinRecruit_JOIN_RECRUIT_REJECTED() {
+      MemberEntity writer = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, writer);
+
+      //given
+      MemberEntity applicant = createMember(2L);
+      ParticipantEntity participant = createParticipant(100L, applicant, recruit);
+      participant.setStatus(ParticipantStatus.ING);
+
+      ParticipantManage.Request request =
+          new Request(false, applicant.getMemberId());
+
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.of(applicant));
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(participantRepository.findByMemberAndRecruitAndStatus(
+          applicant, recruit, ParticipantStatus.ING))
+          .thenReturn(Optional.of(participant));
+
+      //when
+      ParticipantManage.Response response =
+          participantService.manageJoinRecruit(
+              request, recruit.getRecruitId(), writer.getMemberId());
+
+      //then
+      verify(participantRepository, times(1)).save(participant);
+      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.REFUSED);//refuse()
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_REJECTED);
-      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.REFUSED);
     }
+
+    @Test
+    @DisplayName("실패 - RECRUIT_ALREADY_END")
+    void manageJoinRecruit_RECRUIT_ALREADY_END() {
+      MemberEntity writer = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, writer);
+      recruit.setRecruitStatus(RecruitStatus.END);
+
+      //given
+      MemberEntity applicant = createMember(2L);
+      ParticipantEntity participant = createParticipant(100L, applicant, recruit);
+      participant.setStatus(ParticipantStatus.ING);
+
+      ParticipantManage.Request request =
+          new Request(false, applicant.getMemberId());
+
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.of(applicant));
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+
+      //when
+      //then
+      RecruitException exception =
+          catchThrowableOfType(() ->
+              participantService.manageJoinRecruit(
+                  request, recruit.getRecruitId(), writer.getMemberId()), RecruitException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_ALREADY_END);
+    }
+
+    @Test
+    @DisplayName("실패 - APPLICANT_MEMBER_NOT_FOUND")
+    void manageJoinRecruit_APPLICANT_MEMBER_NOT_FOUND() {
+      MemberEntity writer = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, writer);
+
+      //given
+      MemberEntity applicant = createMember(2L);
+      ParticipantEntity participant = createParticipant(100L, applicant, recruit);
+      participant.setStatus(ParticipantStatus.ING);
+
+      ParticipantManage.Request request =
+          new Request(false, 3L);
+
+      when(memberRepository.findById(3L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      MemberException exception =
+          catchThrowableOfType(() ->
+              participantService.manageJoinRecruit(
+                  request, recruit.getRecruitId(), writer.getMemberId()), MemberException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.APPLICANT_MEMBER_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("실패 - RECRUIT_NOT_FOUND")
+    void manageJoinRecruit_RECRUIT_NOT_FOUND() {
+      MemberEntity writer = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, writer);
+
+      //given
+      MemberEntity applicant = createMember(2L);
+      ParticipantEntity participant = createParticipant(100L, applicant, recruit);
+      participant.setStatus(ParticipantStatus.ING);
+
+      ParticipantManage.Request request =
+          new Request(false, applicant.getMemberId());
+
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.of(applicant));
+      when(recruitRepository.findById(11L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      RecruitException exception =
+          catchThrowableOfType(() ->
+              participantService.manageJoinRecruit(
+                  request, 11L, writer.getMemberId()), RecruitException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("실패 - PARTICIPANT_NOT_FOUND")
+    void manageJoinRecruit_PARTICIPANT_NOT_FOUND() {
+      MemberEntity writer = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, writer);
+
+      //given
+      MemberEntity applicant = createMember(2L);
+
+      ParticipantManage.Request request =
+          new Request(false, applicant.getMemberId());
+
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.of(applicant));
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(participantRepository.findByMemberAndRecruitAndStatus(
+          applicant, recruit, ParticipantStatus.ING))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      ParticipantException exception =
+          catchThrowableOfType(() ->
+                  participantService.manageJoinRecruit(
+                      request, recruit.getRecruitId(), writer.getMemberId()),
+              ParticipantException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PARTICIPANT_NOT_FOUND);
+    }
+
   }
 
   @Nested

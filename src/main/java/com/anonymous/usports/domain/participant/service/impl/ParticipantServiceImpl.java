@@ -43,7 +43,7 @@ public class ParticipantServiceImpl implements ParticipantService {
   @Transactional
   public ParticipantListDto getParticipants(Long recruitId, int page, Long loginMemberId) {
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
-        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
 
     this.validateAuthority(recruitEntity, loginMemberId);
 
@@ -59,9 +59,9 @@ public class ParticipantServiceImpl implements ParticipantService {
   @Transactional
   public ParticipateResponse joinRecruit(Long memberId, Long recruitId) {
     MemberEntity memberEntity = memberRepository.findById(memberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
-        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
 
     //신청 진행중
     Optional<ParticipantEntity> ingParticipant =
@@ -90,19 +90,19 @@ public class ParticipantServiceImpl implements ParticipantService {
   public Response manageJoinRecruit(ParticipantManage.Request request, Long recruitId,
       Long loginMemberId) {
     MemberEntity applicant = memberRepository.findById(request.getApplicantId())
-        .orElseThrow(() -> new MyException(ErrorCode.APPLICANT_MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(ErrorCode.APPLICANT_MEMBER_NOT_FOUND));
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
-        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
 
     this.validateAuthority(recruitEntity, loginMemberId);
     if (recruitEntity.getRecruitStatus() == RecruitStatus.END) {
-      throw new MyException(ErrorCode.RECRUIT_ALREADY_END);
+      throw new RecruitException(ErrorCode.RECRUIT_ALREADY_END);
     }
 
     ParticipantEntity participantEntity =
         participantRepository.findByMemberAndRecruitAndStatus(applicant, recruitEntity,
                 ParticipantStatus.ING)
-            .orElseThrow(() -> new MyException(ErrorCode.PARTICIPANT_NOT_FOUND));
+            .orElseThrow(() -> new ParticipantException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
     //거절
     if (!request.isAccept()) {
