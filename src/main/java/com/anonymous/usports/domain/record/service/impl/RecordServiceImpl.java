@@ -185,7 +185,7 @@ public class RecordServiceImpl implements RecordService {
       List<SportsEntity> sportsList = interestedSportsEntityList.stream()
           .map(InterestedSportsEntity::getSports)
           .collect(Collectors.toList());
-      recordEntityPage = recordRepository.findAllBySportsIn(sportsList, pageRequest);
+      recordEntityPage = recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList, pageRequest);
     } else {
       List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
           FollowStatus.ACTIVE);
