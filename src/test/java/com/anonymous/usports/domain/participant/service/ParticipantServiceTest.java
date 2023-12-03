@@ -421,6 +421,48 @@ class ParticipantServiceTest {
     }
 
     @Test
+    @DisplayName("정상 - 참여 신청 수락, ALMOST_FINISHED로 변경")
+    void manageJoinRecruit_JOIN_RECRUIT_ACCEPTED_status_to_ALMOST_FINISHED() {
+      MemberEntity writer = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, writer);
+      recruit.setCurrentCount(8);
+
+      //given
+      MemberEntity applicant = createMember(2L);
+      ParticipantEntity participant = createParticipant(100L, applicant, recruit);
+      participant.setStatus(ParticipantStatus.ING);
+
+      ParticipantManage.Request request =
+          new Request(true, applicant.getMemberId());
+
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.of(applicant));
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(participantRepository.findByMemberAndRecruitAndStatus(
+          applicant, recruit, ParticipantStatus.ING))
+          .thenReturn(Optional.of(participant));
+
+      //when
+      ParticipantManage.Response response =
+          participantService.manageJoinRecruit(
+              request, recruit.getRecruitId(), writer.getMemberId());
+
+      //then
+      verify(participantRepository, times(1)).save(participant);
+      verify(recruitRepository, times(1)).save(recruit);
+
+      log.info("recruit : {}", recruit);
+      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.ACCEPTED); //confirm()
+      assertThat(recruit.getCurrentCount()).isEqualTo(9);//participantAdded()
+      assertThat(recruit.getRecruitStatus()).isEqualTo(RecruitStatus.ALMOST_FINISHED); //statusToAlmostFinished()
+
+      assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
+      assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
+      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ACCEPTED);
+    }
+
+    @Test
     @DisplayName("정상 : 참여 신청 거절")
     void manageJoinRecruit_JOIN_RECRUIT_REJECTED() {
       MemberEntity writer = createMember(1L);
