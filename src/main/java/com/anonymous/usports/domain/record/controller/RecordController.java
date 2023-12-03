@@ -28,7 +28,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class RecordController {
 
   private final RecordService recordService;
-  private final AmazonS3 amazonS3;
 
   @ApiOperation("기록 작성 페이지")
   @GetMapping("/record")
@@ -43,7 +42,8 @@ public class RecordController {
       @PathVariable RecordType recordType,
       @RequestParam("page") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
-    RecordListDto records = recordService.getRecordsPage(recordType, page, loginMember.getMemberId());
+    RecordListDto records = recordService.getRecordsPage(recordType, page,
+        loginMember.getMemberId());
     return ResponseEntity.ok(records);
   }
 
