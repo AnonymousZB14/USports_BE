@@ -15,7 +15,10 @@ import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.exception.ParticipantException;
+import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.util.Objects;
@@ -131,28 +134,28 @@ public class ParticipantServiceImpl implements ParticipantService {
   }
 
   @Override
-  public ParticipateCancel cancelJoinRecruit(Long recruitId, Long memberId) {
-    MemberEntity applicant = memberRepository.findById(recruitId)
-        .orElseThrow(() -> new MyException(ErrorCode.APPLICANT_MEMBER_NOT_FOUND));
+  public ParticipateCancel cancelJoinRecruit(Long recruitId, Long loginMemberId) {
+    MemberEntity applicant = memberRepository.findById(loginMemberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.APPLICANT_MEMBER_NOT_FOUND));
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
-        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
 
     //ING 상태의 참여 신청 찾기
     Optional<ParticipantEntity> ing = participantRepository.findByMemberAndRecruitAndStatus(
         applicant, recruitEntity, ParticipantStatus.ING);
     if (ing.isPresent()) {
       participantRepository.delete(ing.get());
-      return new ParticipateCancel(recruitId, memberId, ResponseConstant.CANCEL_JOIN_RECRUIT);
+      return new ParticipateCancel(recruitId, loginMemberId, ResponseConstant.CANCEL_JOIN_RECRUIT);
     }
     //ACCEPTED 상태의 참여 신청 찾기
     Optional<ParticipantEntity> accepted = participantRepository.findByMemberAndRecruitAndStatus(
         applicant, recruitEntity, ParticipantStatus.ACCEPTED);
     if (accepted.isPresent()) {
       participantRepository.delete(accepted.get());
-      return new ParticipateCancel(recruitId, memberId, ResponseConstant.CANCEL_JOIN_RECRUIT);
+      return new ParticipateCancel(recruitId, loginMemberId, ResponseConstant.CANCEL_JOIN_RECRUIT);
     }
 
     //아무것도 찾지 못한 경우
-    throw new MyException(ErrorCode.PARTICIPANT_NOT_FOUND);
+    throw new ParticipantException(ErrorCode.PARTICIPANT_NOT_FOUND);
   }
 }
