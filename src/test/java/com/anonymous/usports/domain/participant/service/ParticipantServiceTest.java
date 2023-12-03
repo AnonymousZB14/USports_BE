@@ -63,11 +63,6 @@ class ParticipantServiceTest {
   @InjectMocks
   private ParticipantServiceImpl participantService;
 
-  static final String TEST_STRING = "test";
-  static MemberEntity member;
-  static SportsEntity sports;
-  static RecruitEntity recruit;
-
   private MemberEntity createMember(Long id) {
     return MemberEntity.builder()
         .memberId(id)
@@ -110,45 +105,6 @@ class ParticipantServiceTest {
         .member(member)
         .recruit(recruit)
         .registeredAt(LocalDateTime.now())
-        .build();
-  }
-
-  @BeforeEach
-  void init() {
-    member = MemberEntity.builder()
-        .memberId(1L)
-        .accountName(TEST_STRING)
-        .name(TEST_STRING)
-        .email("test@test.com")
-        .password(TEST_STRING)
-        .phoneNumber("010-1111-2222")
-        .birthDate(LocalDate.now())
-        .gender(Gender.MALE)
-        .role(Role.USER)
-        .profileOpen(true)
-        .build();
-
-    sports = SportsEntity.builder()
-        .sportsId(1L)
-        .sportsName(TEST_STRING)
-        .build();
-
-    recruit = RecruitEntity.builder()
-        .recruitId(1L)
-        .sports(sports)
-        .member(member)
-        .title(TEST_STRING)
-        .content(TEST_STRING)
-        .placeName(TEST_STRING)
-        .lat("111")
-        .lnt("11")
-        .cost(10000)
-        .gender(Gender.MALE)
-        .recruitCount(10)
-        .meetingDate(LocalDateTime.now())
-        .recruitStatus(RecruitStatus.RECRUITING)
-        .gradeFrom(1)
-        .gradeTo(10)
         .build();
   }
 
