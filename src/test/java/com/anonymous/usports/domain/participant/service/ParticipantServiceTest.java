@@ -413,7 +413,7 @@ class ParticipantServiceTest {
       log.info("recruit : {}", recruit);
       assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.ACCEPTED); //confirm()
       assertThat(recruit.getCurrentCount()).isEqualTo(10);//participantAdded()
-      assertThat(recruit.getRecruitStatus()).isEqualTo(RecruitStatus.END); //statusToEnd()
+      assertThat(recruit.getRecruitStatus()).isEqualTo(RecruitStatus.END);
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());

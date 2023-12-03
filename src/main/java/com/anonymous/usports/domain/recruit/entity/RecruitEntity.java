@@ -119,10 +119,20 @@ public class RecruitEntity {
 
   public void participantAdded(){
     this.currentCount = this.currentCount + 1;
+    if(this.currentCount == this.recruitCount){
+      this.recruitStatus = RecruitStatus.END;
+    }else if((double)this.currentCount / this.recruitCount >= 0.7){
+      this.recruitStatus = RecruitStatus.ALMOST_FINISHED;
+    }
   }
+
   public void participantCanceled(){
-    if(this.currentCount > 0){
-      this.currentCount = this.currentCount - 1;
+    if(this.currentCount == 0){
+      return;
+    }
+    this.currentCount = this.currentCount - 1;
+    if(this.recruitStatus == RecruitStatus.ALMOST_FINISHED && (double)this.currentCount / this.recruitCount <= 0.7){
+      this.recruitStatus = RecruitStatus.RECRUITING;
     }
   }
 

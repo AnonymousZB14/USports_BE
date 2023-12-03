@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
@@ -49,6 +50,8 @@ class RecruitServiceTest {
   private SportsRepository sportsRepository;
   @Mock
   private RecruitRepository recruitRepository;
+  @Mock
+  private ParticipantRepository participantRepository;
 
   @InjectMocks
   private RecruitServiceImpl recruitService;

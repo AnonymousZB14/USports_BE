@@ -117,16 +117,6 @@ public class ParticipantServiceImpl implements ParticipantService {
     participantRepository.save(participantEntity);
 
     recruitEntity.participantAdded();//Recruit의 currentCount + 1
-    int current = recruitEntity.getCurrentCount();
-    int total = recruitEntity.getRecruitCount();
-
-    //수락 후 마감됨
-    if (current == total) {
-      recruitEntity.statusToEnd();
-    }else if(0.7 <= (double)current / total){
-      //수락 후 ALMOST_FINISHED로 수정
-      recruitEntity.statusToAlmostFinished();
-    }
 
     recruitRepository.save(recruitEntity);
 
