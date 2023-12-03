@@ -63,6 +63,11 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 기록 게시글 등록
+   *
+   * @param request 게시글 등록 Dto
+   * @param loginMemberId 로그인한 회원 Id
+   * @param images 등록할 images
+   * @return
    */
   @Override
   @Transactional
@@ -82,7 +87,11 @@ public class RecordServiceImpl implements RecordService {
   }
 
   /**
-   * 기록 게시글 이미지 저장 메서드
+   * RecordImageEntity에 이미지 정보 저장
+   *
+   * @param recordEntity 연관 Record
+   * @param images 저장할 Images
+   * @return 저장한 List<RecordImageEntity>
    */
   private List<RecordImageEntity> saveImages(RecordEntity recordEntity,
       List<MultipartFile> images) {
@@ -107,7 +116,10 @@ public class RecordServiceImpl implements RecordService {
   }
 
   /**
-   * S3에 이미지 저장하는 메서드
+   * S3에 이미지 저장
+   *
+   * @param image 저장할 image
+   * @return 객체 URL을 반환
    */
   private String uploadImageToS3(MultipartFile image) {
     // 이미지를 S3에 업로드하고 이미지의 URL을 반환
@@ -129,7 +141,10 @@ public class RecordServiceImpl implements RecordService {
   }
 
   /**
-   * 이름 중복 방지를 위해 random 생성
+   * 이름 중복 방지를 위한 UUID 생성
+   *
+   * @param originName 기존 파일명
+   * @return UUID+originName
    */
   private String changedImageName(String originName) {
     String random = UUID.randomUUID().toString();
@@ -138,6 +153,8 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 저장할 이미지 수 체크
+   *
+   * @param images 저장할 이미지 리스트
    */
   private void validateImageCount(List<MultipartFile> images) {
     if (images.size() > NumberConstant.MAX_IMAGE_COUNT) {
@@ -145,7 +162,14 @@ public class RecordServiceImpl implements RecordService {
     }
   }
 
-
+  /**
+   * 기록 리스트 불러오기
+   *
+   * @param recordType 불러올 리스트 타입 (RECOMMENDATION or FOLLOW)
+   * @param page 불러올 페이지 정보
+   * @param loginMemberId 로그인한 회원 Id
+   * @return RecordListDto 형태로 반환
+   */
   @Override
   public RecordListDto getRecordsPage(RecordType recordType, int page, Long loginMemberId) {
     MemberEntity member = memberRepository.findById(loginMemberId)
