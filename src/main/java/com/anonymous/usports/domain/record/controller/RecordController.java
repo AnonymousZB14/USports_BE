@@ -42,8 +42,8 @@ public class RecordController {
   public ResponseEntity<RecordListDto> getRecordList(
       @PathVariable RecordType recordType,
       @RequestParam("page") int page,
-      @AuthenticationPrincipal MemberDto member) {
-    RecordListDto records = recordService.getRecordsPage(recordType, page, member.getMemberId());
+      @AuthenticationPrincipal MemberDto loginMember) {
+    RecordListDto records = recordService.getRecordsPage(recordType, page, loginMember.getMemberId());
     return ResponseEntity.ok(records);
   }
 
@@ -53,10 +53,10 @@ public class RecordController {
   public ResponseEntity<RecordRegister.Response> registerRecord(
       @RequestPart("request") RecordRegister.Request request,
       @RequestPart("images") List<MultipartFile> images,
-      @AuthenticationPrincipal MemberDto member
+      @AuthenticationPrincipal MemberDto loginMember
   ) {
 
-    RecordDto savedRecord = recordService.saveRecord(request, member.getMemberId(), images);
+    RecordDto savedRecord = recordService.saveRecord(request, loginMember.getMemberId(), images);
 
     return ResponseEntity.ok(new Response(savedRecord));
   }
@@ -64,8 +64,8 @@ public class RecordController {
   @ApiOperation("기록 삭제하기")
   @DeleteMapping("/record/{recordId}")
   public ResponseEntity<RecordDelete.Response> deleteRecord(@PathVariable Long recordId,
-      @AuthenticationPrincipal MemberDto loginMemberId) {
-    RecordDto recordDto = recordService.deleteRecord(recordId, loginMemberId.getMemberId());
+      @AuthenticationPrincipal MemberDto loginMember) {
+    RecordDto recordDto = recordService.deleteRecord(recordId, loginMember.getMemberId());
     return ResponseEntity.ok(new RecordDelete.Response(recordDto));
   }
 

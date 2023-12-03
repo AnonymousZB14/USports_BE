@@ -66,9 +66,9 @@ public class RecordServiceImpl implements RecordService {
    */
   @Override
   @Transactional
-  public RecordDto saveRecord(Request request, Long memberId,
+  public RecordDto saveRecord(Request request, Long loginMemberId,
       List<MultipartFile> images) {
-    MemberEntity member = memberRepository.findById(memberId)
+    MemberEntity member = memberRepository.findById(loginMemberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
     SportsEntity sports = sportsRepository.findById(request.getSportsId())
         .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND));
@@ -147,8 +147,8 @@ public class RecordServiceImpl implements RecordService {
 
 
   @Override
-  public RecordListDto getRecordsPage(RecordType recordType, int page, Long memberId) {
-    MemberEntity member = memberRepository.findById(memberId)
+  public RecordListDto getRecordsPage(RecordType recordType, int page, Long loginMemberId) {
+    MemberEntity member = memberRepository.findById(loginMemberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
 
     Page<RecordEntity> recordEntityPage;
