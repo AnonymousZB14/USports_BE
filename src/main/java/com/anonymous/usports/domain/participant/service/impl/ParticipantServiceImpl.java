@@ -158,6 +158,7 @@ public class ParticipantServiceImpl implements ParticipantService {
         applicant, recruitEntity, ParticipantStatus.ACCEPTED);
     if (accepted.isPresent()) {
       participantRepository.delete(accepted.get());
+      recruitEntity.participantCanceled();
       return new ParticipateCancel(recruitId, loginMemberId, ResponseConstant.CANCEL_JOIN_RECRUIT);
     }
 

@@ -120,6 +120,11 @@ public class RecruitEntity {
   public void participantAdded(){
     this.currentCount = this.currentCount + 1;
   }
+  public void participantCanceled(){
+    if(this.currentCount > 0){
+      this.currentCount = this.currentCount - 1;
+    }
+  }
 
   public void statusToEnd(){
     this.recruitStatus = RecruitStatus.END;
