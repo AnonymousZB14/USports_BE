@@ -191,7 +191,7 @@ public class RecordServiceImpl implements RecordService {
    * 기록 게시글 삭제
    *
    * @param recordId 기록 게시글 번호
-   * @param memberId 로그인한 회원 ID
+   * @param loginMemberId 로그인한 회원 ID
    * @return RecordDto 형태로 반환
    */
   @Override
