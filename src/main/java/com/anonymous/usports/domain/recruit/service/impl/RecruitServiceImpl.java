@@ -13,7 +13,10 @@ import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.exception.RecruitException;
+import com.anonymous.usports.global.exception.SportsException;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -34,13 +37,14 @@ public class RecruitServiceImpl implements RecruitService {
   @Transactional
   public RecruitDto registerRecruit(Request request, Long memberId) {
     MemberEntity memberEntity = memberRepository.findById(memberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     SportsEntity sportsEntity = sportsRepository.findById(request.getSportsId())
-        .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND));
+        .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
 
     RecruitEntity saved =
         recruitRepository.save(Request.toEntity(request, memberEntity, sportsEntity));
+    System.out.println(saved);
 
     return RecruitDto.fromEntity(saved);
   }
@@ -50,7 +54,7 @@ public class RecruitServiceImpl implements RecruitService {
   public RecruitDto getRecruit(Long recruitId) {
     return RecruitDto.fromEntity(
         recruitRepository.findById(recruitId)
-            .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND))
+            .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND))
     );
   }
 
@@ -58,13 +62,13 @@ public class RecruitServiceImpl implements RecruitService {
   @Transactional
   public RecruitDto updateRecruit(RecruitUpdate.Request request, Long recruitId, Long memberId) {
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
-        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
     MemberEntity memberEntity = recruitEntity.getMember(); //작성자
 
     this.validateAuthority(memberEntity, memberId);
 
     SportsEntity sportsEntity = sportsRepository.findById(request.getSportsId())
-        .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND));
+        .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
 
     recruitEntity.updateRecruit(request, sportsEntity);
 
@@ -77,7 +81,7 @@ public class RecruitServiceImpl implements RecruitService {
   @Transactional
   public RecruitDto deleteRecruit(Long recruitId, Long memberId) {
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
-        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
     MemberEntity memberEntity = recruitEntity.getMember(); //작성자
 
     this.validateAuthority(memberEntity, memberId);
@@ -91,25 +95,25 @@ public class RecruitServiceImpl implements RecruitService {
   @Transactional
   public RecruitEndResponse endRecruit(Long recruitId, Long loginMemberId) {
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
-        .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
+        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
     MemberEntity memberEntity = memberRepository.findById(loginMemberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     this.validateAuthority(memberEntity, loginMemberId);
 
     //인원이 가득 찬 상태 -> 모집 마감 취소 불가
-    if(recruitEntity.getCurrentCount() == recruitEntity.getRecruitCount()){
+    if (recruitEntity.getCurrentCount() == recruitEntity.getRecruitCount()) {
       return new RecruitEndResponse(recruitId, ResponseConstant.END_RECRUIT_CANCEL_REFUSED);
     }
 
     //END -> 모집 중 상태로 변경 모집 인원수에 따라 RECRUITING 또는 ALMOST_FINISHED로 수정
-    if(recruitEntity.getRecruitStatus() == RecruitStatus.END){
+    if (recruitEntity.getRecruitStatus() == RecruitStatus.END) {
       double ratio = (double) recruitEntity.getCurrentCount() / recruitEntity.getRecruitCount();
 
       //인원이 70% 이상 차서, ALMOST_FINISHED 상태로 변경
-      if(ratio >= 0.7){
+      if (ratio >= 0.7) {
         recruitEntity.statusToAlmostFinished();
-      }else{ //RECRUITING으로 변경
+      } else { //RECRUITING으로 변경
         recruitEntity.statusToRecruiting();
       }
       return new RecruitEndResponse(recruitId, ResponseConstant.END_RECRUIT_CANCELED);
@@ -128,8 +132,8 @@ public class RecruitServiceImpl implements RecruitService {
 
   }
 
-  private void validateAuthority(MemberEntity member, Long memberId){
-    if(!Objects.equals(member.getMemberId(), memberId)){
+  private void validateAuthority(MemberEntity member, Long memberId) {
+    if (!Objects.equals(member.getMemberId(), memberId)) {
       throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);
     }
   }
