@@ -32,6 +32,19 @@ public interface MemberService {
      */
     MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId);
 
+    /**
+     * 회원 비밀번호 수정
+     */
+    PasswordUpdate.Response updatePassword(PasswordUpdate.Request request, Long id, MemberDto memberDto);
 
+    /**
+     * 비밀번호 잃어버림
+     */
+    PasswordLostResponse.Response lostPassword(PasswordLostResponse.Request request);
+
+    /**
+     * 회원 이메일 인증 번호 재전송
+     */
+    MailResponse resendEmailAuth(MemberDto memberDto, Long memberId);
 
 }

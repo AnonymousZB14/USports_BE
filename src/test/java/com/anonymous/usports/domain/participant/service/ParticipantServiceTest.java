@@ -14,7 +14,6 @@ import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage.Request;
-import com.anonymous.usports.domain.participant.dto.ParticipantManage.Response;
 import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
@@ -26,6 +25,7 @@ import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.MemberStatus;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
 import java.time.LocalDate;
@@ -123,7 +123,7 @@ class ParticipantServiceTest {
     when(recruitRepository.findById(anyLong()))
         .thenReturn(Optional.of(recruit));
     when(participantRepository
-        .findAllByRecruitOrderByParticipantId(any(RecruitEntity.class), any(Pageable.class)))
+        .findAllByRecruitAndStatusOrderByParticipantId(any(RecruitEntity.class), any(ParticipantStatus.class), any(Pageable.class)))
         .thenReturn(new PageImpl<>(entityList));
 
     //when
@@ -154,8 +154,8 @@ class ParticipantServiceTest {
           .thenReturn(Optional.of(member));
       when(recruitRepository.findById(anyLong()))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository.findByMemberAndRecruit(any(MemberEntity.class),
-          any(RecruitEntity.class)))
+      when(participantRepository.findByMemberAndRecruitAndStatus(
+          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
           .thenReturn(Optional.empty());
 
       //when
@@ -167,7 +167,7 @@ class ParticipantServiceTest {
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMemberId()).isEqualTo(member.getMemberId());
-      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_COMPLETED);
+      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_COMPLETE);
 
     }
 
@@ -178,6 +178,7 @@ class ParticipantServiceTest {
           .participantId(1L)
           .member(member)
           .recruit(recruit)
+          .status(ParticipantStatus.ING)
           .registeredAt(LocalDateTime.now())
           .build();
 
@@ -186,8 +187,8 @@ class ParticipantServiceTest {
           .thenReturn(Optional.of(member));
       when(recruitRepository.findById(anyLong()))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository.findByMemberAndRecruit(any(MemberEntity.class),
-          any(RecruitEntity.class)))
+      when(participantRepository.findByMemberAndRecruitAndStatus(
+          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
           .thenReturn(Optional.of(participant));
 
       //when
@@ -196,6 +197,9 @@ class ParticipantServiceTest {
 
       //then
       verify(participantRepository, never()).save(any(ParticipantEntity.class));
+      verify(participantRepository, times(1))
+          .findByMemberAndRecruitAndStatus(
+              any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class));
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMemberId()).isEqualTo(member.getMemberId());
@@ -209,6 +213,7 @@ class ParticipantServiceTest {
           .participantId(1L)
           .member(member)
           .recruit(recruit)
+          .status(ParticipantStatus.ACCEPTED)
           .registeredAt(LocalDateTime.now().minusHours(1L))
           .confirmedAt(LocalDateTime.now())
           .build();
@@ -218,20 +223,23 @@ class ParticipantServiceTest {
           .thenReturn(Optional.of(member));
       when(recruitRepository.findById(anyLong()))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository.findByMemberAndRecruit(any(MemberEntity.class),
-          any(RecruitEntity.class)))
+      when(participantRepository.findByMemberAndRecruitAndStatus(
+          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
+          .thenReturn(Optional.empty())
           .thenReturn(Optional.of(participant));
-
       //when
       ParticipateResponse response =
           participantService.joinRecruit(member.getMemberId(), recruit.getRecruitId());
 
       //then
       verify(participantRepository, never()).save(any(ParticipantEntity.class));
+      verify(participantRepository, times(2))
+          .findByMemberAndRecruitAndStatus(
+              any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class));
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMemberId()).isEqualTo(member.getMemberId());
-      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ALREADY_CONFIRMED);
+      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ALREADY_ACCEPTED);
     }
   }
 
@@ -270,8 +278,8 @@ class ParticipantServiceTest {
           .thenReturn(Optional.of(applicant));
       when(recruitRepository.findById(anyLong()))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository
-          .findByMemberAndRecruit(any(MemberEntity.class), any(RecruitEntity.class)))
+      when(participantRepository.findByMemberAndRecruitAndStatus(
+          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
           .thenReturn(Optional.of(participant));
 
       //when
@@ -286,6 +294,7 @@ class ParticipantServiceTest {
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_ACCEPTED);
+      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.ACCEPTED);
     }
 
     @Test
@@ -320,8 +329,8 @@ class ParticipantServiceTest {
           .thenReturn(Optional.of(applicant));
       when(recruitRepository.findById(anyLong()))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository
-          .findByMemberAndRecruit(any(MemberEntity.class), any(RecruitEntity.class)))
+      when(participantRepository.findByMemberAndRecruitAndStatus(
+          any(MemberEntity.class), any(RecruitEntity.class), any(ParticipantStatus.class)))
           .thenReturn(Optional.of(participant));
 
       //when
@@ -330,12 +339,13 @@ class ParticipantServiceTest {
               request, recruit.getRecruitId(), member.getMemberId());
 
       //then
-      verify(participantRepository, times(1)).delete(any(ParticipantEntity.class));
-      verify(participantRepository, never()).save(any(ParticipantEntity.class));
+      verify(participantRepository, times(1)).save(any(ParticipantEntity.class));
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_REJECTED);
+      assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.REFUSED);
+
     }
   }
 
