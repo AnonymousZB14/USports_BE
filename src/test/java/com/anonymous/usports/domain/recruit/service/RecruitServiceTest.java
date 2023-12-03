@@ -66,7 +66,6 @@ class RecruitServiceTest {
         .phoneNumber("010-1111-2222")
         .birthDate(LocalDate.now())
         .gender(Gender.MALE)
-        .status(MemberStatus.NEED_UPDATE)
         .role(Role.USER)
         .profileOpen(true)
         .build();
