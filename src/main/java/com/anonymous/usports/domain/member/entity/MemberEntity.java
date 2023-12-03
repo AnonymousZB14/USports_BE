@@ -2,7 +2,6 @@ package com.anonymous.usports.domain.member.entity;
 
 import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -55,9 +54,6 @@ public class MemberEntity {
     @Column(name = "profile_image")
     private String profileImage;
 
-    @Column(name = "status", nullable = false)
-    private MemberStatus status;
-
     @Column(name = "registered_at", nullable = false)
     @CreatedDate
     private LocalDateTime registeredAt;
@@ -97,6 +93,7 @@ public class MemberEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+
     public void updateMember(MemberUpdate.Request request) {
 
         String profileOpen = request.getProfileOpen().toLowerCase();
@@ -117,5 +114,6 @@ public class MemberEntity {
         this.profileImage = request.getProfileImage();
         this.addrCity = request.getAddrCity();
         this.addrDistrict = request.getAddrDistrict();
+        this.role = Role.USER;
     }
 }

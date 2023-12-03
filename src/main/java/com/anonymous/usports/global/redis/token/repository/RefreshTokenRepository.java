@@ -17,21 +17,23 @@ public class RefreshTokenRepository implements TokenRepository {
     @Override
     public void saveToken(String refreshToken, String email) {
         ValueOperations<String, String> values = redisTemplate.opsForValue();
-        values.set(email, refreshToken, Duration.ofMillis(TokenConstant.REFRESH_TOKEN_VALID_TIME));
+        values.set(TokenConstant.REFRESH_TOKEN_PREFIX + email,
+                refreshToken,
+                Duration.ofMillis(TokenConstant.REFRESH_TOKEN_VALID_TIME));
     }
 
     @Override
     public String getToken(String email) {
         ValueOperations<String, String> values = redisTemplate.opsForValue();
-        return values.get(email);
+        return values.get(TokenConstant.REFRESH_TOKEN_PREFIX + email);
     }
 
     // 로그아웃 할 때
     @Override
     public boolean deleteToken(String email) {
-        boolean result = redisTemplate.hasKey(email);
+        boolean result = redisTemplate.hasKey(TokenConstant.REFRESH_TOKEN_PREFIX + email);
 
-        if (result) redisTemplate.delete(email);
+        if (result) redisTemplate.delete(TokenConstant.REFRESH_TOKEN_PREFIX + email);
 
         return result;
     }
@@ -43,7 +45,9 @@ public class RefreshTokenRepository implements TokenRepository {
     @Override
     public void addBlackListAccessToken(String accessToken) {
         ValueOperations<String, String> values = redisTemplate.opsForValue();
-        values.set(accessToken, TokenConstant.BLACK_LIST, TokenConstant.ACCESS_TOKEN_VALID_TIME);
+        values.set(TokenConstant.ACCESS_TOKEN_PREFIX + accessToken,
+                TokenConstant.BLACK_LIST,
+                TokenConstant.ACCESS_TOKEN_VALID_TIME);
     }
 
     /**
@@ -53,6 +57,6 @@ public class RefreshTokenRepository implements TokenRepository {
      */
     @Override
     public boolean existsBlackListAccessToken(String accessToken) {
-        return redisTemplate.hasKey(accessToken);
+        return redisTemplate.hasKey(TokenConstant.ACCESS_TOKEN_PREFIX + accessToken);
     }
 }

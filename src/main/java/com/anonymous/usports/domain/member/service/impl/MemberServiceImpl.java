@@ -5,14 +5,17 @@ import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.member.service.MailService;
 import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
+import com.anonymous.usports.global.constant.MailConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
-import com.anonymous.usports.global.redis.token.repository.RefreshTokenRepository;
+import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
+import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +40,9 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     private final InterestedSportsRepository interestedSportsRepository;
     private final SportsRepository sportsRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final TokenRepository tokenRepository;
+    private final AuthRedisRepository authRedisRepository;
+    private final MailService mailService;
 
     private void checkDuplication(String accountName, String email, String phoneNumber){
         if (memberRepository.existsByAccountName(accountName)) {
@@ -58,8 +64,10 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         memberRepository.save(MemberRegister.Request.toEntity(request));
 
+        mailService.sendEmailAuthMail(request.getEmail());
+
         return MemberRegister.Response.fromEntity(
-                MemberRegister.Request.toEntity(request)
+                MemberRegister.Request.toEntity(request), MailConstant.AUTH_EMAIL_SEND
         );
     }
 
@@ -86,16 +94,16 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     @Override
     public String logoutMember(String accessToken, String email) {
 
-        boolean result = refreshTokenRepository.deleteToken(email);
+        boolean result = tokenRepository.deleteToken(email);
 
         if(!result) return TokenConstant.LOGOUT_NOT_SUCCESSFUL;
 
-        refreshTokenRepository.addBlackListAccessToken(accessToken);
+        tokenRepository.addBlackListAccessToken(accessToken);
 
         return TokenConstant.LOGOUT_SUCCESSFUL;
     }
 
-    public MemberEntity passwordCheck(MemberDto memberDto, Long memberId, String password) {
+    private MemberEntity passwordCheckAndGetMember(MemberDto memberDto, Long memberId, String password) {
 
         if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
@@ -104,7 +112,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         MemberEntity memberEntity = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (!memberEntity.getPassword().equals(password))
+        if (!passwordEncoder.matches(password, memberEntity.getPassword()))
             throw new MemberException(ErrorCode.PASSWORD_UNMATCH);
 
         return memberEntity;
@@ -113,11 +121,9 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     @Override
     public MemberWithdraw.Response deleteMember(MemberDto memberDto, MemberWithdraw.Request request, Long memberId) {
 
-        memberRepository.delete(passwordCheck(memberDto, memberId, request.getPassword()));
+        memberRepository.delete(passwordCheckAndGetMember(memberDto, memberId, request.getPassword()));
 
-        return MemberWithdraw.Response.builder()
-                .message(ResponseConstant.MEMBER_DELETE_SUCCESS)
-                .build();
+        return new MemberWithdraw.Response(ResponseConstant.MEMBER_DELETE_SUCCESS);
     }
 
 
@@ -178,6 +184,16 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         // 하는 김에 MemberEntity 가지고 오기
         MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
 
+        if (memberDto.getRole() == Role.UNAUTH && memberDto.getEmailAuthAt() == null) {
+            int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(request.getEmail());
+
+            if (redisEmailAuthNumber != request.getEmailAuthNumber()) {
+                throw new MemberException(ErrorCode.EMAIL_AUTH_NUMBER_UNMATCH);
+            }
+
+            memberEntity.setEmailAuthAt(LocalDateTime.now());
+        }
+
         // 관심 운동이 아예 없으면 안 된다
         if (request.getInterestedSports().size() == 0) {
             throw new MemberException(ErrorCode.NEED_AT_LEAST_ONE_SPORTS);
@@ -201,6 +217,61 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         response.setInterestedSports(sportsList);
 
         return response;
+    }
+
+
+
+    @Override
+    public PasswordUpdate.Response updatePassword(PasswordUpdate.Request request, Long id, MemberDto memberDto) {
+
+        // 기존 비밀번호와 일치하는지 확인
+        MemberEntity memberEntity = passwordCheckAndGetMember(memberDto, id, request.getCurrentPassword());
+
+        if (!request.getNewPassword().equals(request.getNewPasswordCheck())) {
+            throw new MemberException(ErrorCode.NEW_PASSWORD_UNMATCH);
+        }
+
+        memberEntity.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        memberRepository.save(memberEntity);
+
+        return new PasswordUpdate.Response(ResponseConstant.PASSWORD_CHANGE_SUCCESS);
+    }
+
+    @Override
+    public PasswordLostResponse.Response lostPassword(PasswordLostResponse.Request request) {
+        MemberEntity memberEntity = memberRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!memberEntity.getPhoneNumber().equals(request.getPhoneNumber())) {
+            throw new MemberException(ErrorCode.PHONE_NUMBER_UNMATCH);
+        }
+
+        if (!memberEntity.getName().equals(request.getName())) {
+            throw new MemberException(ErrorCode.NAME_UNMATCH);
+        }
+
+        String tempPassword = mailService.sendTempPassword(request.getEmail());
+
+        memberEntity.setPassword(passwordEncoder.encode(tempPassword));
+
+        memberRepository.save(memberEntity);
+
+        return new PasswordLostResponse.Response(request.getEmail() + MailConstant.TEMP_PASSWORD_SUCCESSFULLY_SENT);
+    }
+
+    @Override
+    public MailResponse resendEmailAuth(MemberDto memberDto, Long memberId) {
+
+        if (memberDto.getMemberId() != memberId)
+            throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
+
+        if (!memberRepository.existsById(memberId))
+            throw new MemberException(ErrorCode.MEMBER_NOT_FOUND);
+
+        mailService.sendEmailAuthMail(memberDto.getEmail());
+
+        return new MailResponse(MailConstant.AUTH_EMAIL_SEND);
     }
 
     @Override

@@ -2,8 +2,6 @@ package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
-import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -16,14 +14,14 @@ import java.util.List;
 
 public class MemberUpdate {
 
-    //todo : 관심 운동 추가하기
-
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
     public static class Request {
+
+        private int emailAuthNumber;
 
         @NotBlank(message="계정 닉네임은 필수 입력 사항입니다")
         private String accountName;
@@ -61,34 +59,6 @@ public class MemberUpdate {
         private String addrDistrict;
 
         private List<Long> interestedSports;
-
-        public static MemberEntity toEntity(MemberUpdate.Request request){
-
-            String profileOpen = request.getProfileOpen().toLowerCase();
-            boolean po = false;
-
-            if (profileOpen.equals("open")) {
-                po = true;
-            } else if (!profileOpen.equals("close")) {
-                throw new RuntimeException("Open 또는 Close를 입력해주세요");
-            }
-
-            return MemberEntity.builder()
-                    .accountName(request.getAccountName())
-                    .name(request.getName())
-                    .email(request.getEmail())
-                    .phoneNumber(request.getPhoneNumber())
-                    .birthDate(request.getBirthDate())
-                    .gender(request.getGender())
-                    .status(MemberStatus.ACTIVE)
-                    .role(Role.USER)
-                    .profileOpen(po)
-                    .profileContent(request.getProfileContent())
-                    .profileImage(request.getProfileImage())
-                    .addrCity(request.getAddrCity())
-                    .addrDistrict(request.getAddrDistrict())
-                    .build();
-        }
     }
 
     @Getter

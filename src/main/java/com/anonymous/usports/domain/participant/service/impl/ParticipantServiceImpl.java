@@ -15,6 +15,8 @@ import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.type.ParticipantStatus;
+import com.anonymous.usports.global.type.RecruitStatus;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +45,8 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
     Page<ParticipantEntity> findPage =
-        participantRepository.findAllByRecruitOrderByParticipantId(recruitEntity, pageRequest);
+        participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
+            recruitEntity, ParticipantStatus.ING, pageRequest);
 
     return ParticipantListDto.fromEntityPage(findPage);
   }
@@ -56,24 +59,23 @@ public class ParticipantServiceImpl implements ParticipantService {
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
         .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
 
-    Optional<ParticipantEntity> optionalParticipant =
-        participantRepository.findByMemberAndRecruit(memberEntity, recruitEntity);
-
-    if (optionalParticipant.isPresent()) {
-      ParticipantEntity participantEntity = optionalParticipant.get();
-      //신청 진행 중
-      if (Objects.isNull(participantEntity.getConfirmedAt())) {
-        return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ING);
-      }
-      //이미 수락 된 상태
-      return new ParticipateResponse(
-          recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ALREADY_CONFIRMED);
+    //신청 진행중
+    Optional<ParticipantEntity> ingParticipant =
+        participantRepository.findByMemberAndRecruitAndStatus(memberEntity, recruitEntity, ParticipantStatus.ING);
+    if(ingParticipant.isPresent()){
+      return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ING);
+    }
+    //이미 수락된 상태
+    Optional<ParticipantEntity> acceptedParticipant =
+        participantRepository.findByMemberAndRecruitAndStatus(memberEntity, recruitEntity, ParticipantStatus.ACCEPTED);
+    if(acceptedParticipant.isPresent()){
+      return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_ALREADY_ACCEPTED);
     }
 
     //신청 가능 -> 신청
     participantRepository.save(new ParticipantEntity(memberEntity, recruitEntity));
 
-    return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETED);
+    return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETE);
   }
 
   @Override
@@ -86,21 +88,35 @@ public class ParticipantServiceImpl implements ParticipantService {
         .orElseThrow(() -> new MyException(ErrorCode.RECRUIT_NOT_FOUND));
 
     this.validateAuthority(recruitEntity, loginMemberId);
-
-    ParticipantEntity participantEntity =
-        participantRepository.findByMemberAndRecruit(applicant, recruitEntity)
-            .orElseThrow(() -> new MyException(ErrorCode.PARTICIPANT_NOT_FOUND));
-
-    if (!request.isAccept()) {
-      //거절 시
-      participantRepository.delete(participantEntity);
-    } else {
-      //수락 시
-      participantEntity.confirm();
-      participantRepository.save(participantEntity);
+    if(recruitEntity.getRecruitStatus() == RecruitStatus.END){
+      throw new MyException(ErrorCode.RECRUIT_ALREADY_END);
     }
 
-    return new ParticipantManage.Response(recruitId, applicant.getMemberId(), request.isAccept());
+    ParticipantEntity participantEntity =
+        participantRepository.findByMemberAndRecruitAndStatus(applicant, recruitEntity, ParticipantStatus.ING)
+            .orElseThrow(() -> new MyException(ErrorCode.PARTICIPANT_NOT_FOUND));
+
+    //거절
+    if (!request.isAccept()) {
+      participantEntity.refuse();
+      participantRepository.save(participantEntity);
+      return new ParticipantManage.Response(recruitId, applicant.getMemberId(),false);
+    }
+
+    //수락 시
+    //참여 수락 상태로 변경
+    participantEntity.confirm();
+    participantRepository.save(participantEntity);
+
+    recruitEntity.participantAdded();//Recruit의 currentCount + 1
+
+    //수락 후 마감됨
+    if(recruitEntity.getCurrentCount() == recruitEntity.getRecruitCount()){
+      recruitEntity.statusToEnd();
+    }
+    recruitRepository.save(recruitEntity);
+
+    return new ParticipantManage.Response(recruitId, applicant.getMemberId(),true);
   }
 
   private void validateAuthority(RecruitEntity recruit, Long loginMemberId) {

@@ -6,7 +6,7 @@ build/
 !**/src/test/**/build/
 
 ### private ###
-application-private.properties
+src/main/resources/application-private.properties
 
 ### STS ###
 .apt_generated
