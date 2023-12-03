@@ -64,9 +64,9 @@ public class RecordServiceImpl implements RecordService {
   /**
    * 기록 게시글 등록
    *
-   * @param request 게시글 등록 Dto
+   * @param request       게시글 등록 Dto
    * @param loginMemberId 로그인한 회원 Id
-   * @param images 등록할 images
+   * @param images        등록할 images
    * @return
    */
   @Override
@@ -90,7 +90,7 @@ public class RecordServiceImpl implements RecordService {
    * RecordImageEntity에 이미지 정보 저장
    *
    * @param recordEntity 연관 Record
-   * @param images 저장할 Images
+   * @param images       저장할 Images
    * @return 저장한 List<RecordImageEntity>
    */
   private List<RecordImageEntity> saveImages(RecordEntity recordEntity,
@@ -165,8 +165,8 @@ public class RecordServiceImpl implements RecordService {
   /**
    * 기록 리스트 불러오기
    *
-   * @param recordType 불러올 리스트 타입 (RECOMMENDATION or FOLLOW)
-   * @param page 불러올 페이지 정보
+   * @param recordType    불러올 리스트 타입 (RECOMMENDATION or FOLLOW)
+   * @param page          불러올 페이지 정보
    * @param loginMemberId 로그인한 회원 Id
    * @return RecordListDto 형태로 반환
    */
@@ -185,7 +185,8 @@ public class RecordServiceImpl implements RecordService {
       List<SportsEntity> sportsList = interestedSportsEntityList.stream()
           .map(InterestedSportsEntity::getSports)
           .collect(Collectors.toList());
-      recordEntityPage = recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList, pageRequest);
+      recordEntityPage = recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList,
+          pageRequest);
     } else {
       List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
           FollowStatus.ACTIVE);
@@ -214,7 +215,7 @@ public class RecordServiceImpl implements RecordService {
   /**
    * 기록 게시글 삭제
    *
-   * @param recordId 기록 게시글 번호
+   * @param recordId      기록 게시글 번호
    * @param loginMemberId 로그인한 회원 ID
    * @return RecordDto 형태로 반환
    */
