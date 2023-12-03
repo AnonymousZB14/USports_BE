@@ -15,6 +15,12 @@ public enum ErrorCode {
   PHONE_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "핸드폰 번호가 이미 존재합니다"),
   PASSWORD_UNMATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다"),
   NEED_AT_LEAST_ONE_SPORTS(HttpStatus.BAD_REQUEST, "최소 하나의 관심 운동이 필요합니다"),
+  EMAIL_AUTH_NUMBER_EXPIRED(HttpStatus.FORBIDDEN, "회원 이메일 인증번호가 만료가 되었습니다. 재발급해주세요."),
+  EMAIL_AUTH_NUMBER_UNMATCH(HttpStatus.BAD_REQUEST, "이메일 인증 번호가 다릅니다. 다시 입력해주세요"),
+  NEW_PASSWORD_UNMATCH(HttpStatus.BAD_REQUEST, "새로 입력한 비밀번호가 일치하지 않습니다"),
+  PHONE_NUMBER_UNMATCH(HttpStatus.BAD_REQUEST, "입력한 핸드폰 번호가 일치하지 않습니다"),
+  NAME_UNMATCH(HttpStatus.BAD_REQUEST, "입력한 이름이 일치하지 않습니다"),
+
 
   // jwt 관련
   JWT_EXPIRED(HttpStatus.FORBIDDEN, "JWT가 만료되었습니다"),
