@@ -79,7 +79,7 @@ public class MailServiceImpl implements MailService {
         MimeMessage message = createMail(email, number, title, content);
         javaMailSender.send(message);
 
-        authRedisRepository.saveEmailAuthNumber(email, String.valueOf(number));
+        authRedisRepository.saveEmailAuthNumber(email, number);
 
         return Integer.parseInt(number);
     }

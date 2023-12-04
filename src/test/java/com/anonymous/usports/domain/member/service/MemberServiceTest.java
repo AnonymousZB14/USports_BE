@@ -1,5 +1,7 @@
 package com.anonymous.usports.domain.member.service;
 
+import com.anonymous.usports.domain.member.dto.MemberDto;
+import com.anonymous.usports.domain.member.dto.MemberLogin;
 import com.anonymous.usports.domain.member.dto.MemberRegister;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
@@ -30,6 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -118,8 +121,9 @@ public class MemberServiceTest {
         void successFirstRegisterMember() {
             //given
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String password = passwordEncoder.encode("abcd1234!");
 
-            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", password,
                     "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
                     true, Role.UNAUTH);
 
@@ -127,7 +131,7 @@ public class MemberServiceTest {
                     .accountName("joons")
                     .name("Je Joon")
                     .email("joons@gmail.com")
-                    .password("Aabcd1234!")
+                    .password(password)
                     .phoneNumber("010-1234-1234")
                     .birthDate(birthDate)
                     .gender(Gender.MALE)
@@ -216,7 +220,77 @@ public class MemberServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
+        @Test
+        @DisplayName("회원가입 실패 - 이메일이 이미 있음")
+        void failPhoneNumberAlreadyExist() {
+            //given
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
+            MemberRegister.Request request = MemberRegister.Request.builder()
+                    .accountName("joons")
+                    .name("Je Joon")
+                    .email("joons@gmail.com")
+                    .password("Aabcd1234!")
+                    .phoneNumber("010-1234-1234")
+                    .birthDate(birthDate)
+                    .gender(Gender.MALE)
+                    .profileOpen("open")
+                    .build();
+
+            //when
+            when(memberRepository.existsByAccountName(request.getAccountName()))
+                    .thenReturn(false); // 이건 굳이 없어도 됨
+            when(memberRepository.existsByEmail(request.getEmail()))
+                    .thenReturn(false);
+            when(memberRepository.existsByPhoneNumber(request.getPhoneNumber()))
+                    .thenReturn(true);
+
+            MemberException exception =
+                    catchThrowableOfType(() ->
+                            memberService.registerMember(request), MemberException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXISTS);
+        }
+    }
+
+    @Nested
+    @DisplayName("로그인")
+    class Login{
+
+        @Test
+        @DisplayName("로그인 성공")
+        void successLogin() {
+            //given
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    true, Role.UNAUTH);
+
+            member.setPassword(member.getPassword());
+
+            MemberLogin.Request request = MemberLogin.Request.builder()
+                    .email("joons@gmail.com")
+                    .password("abcd1234!")
+                    .build();
+
+            //when
+            when(passwordEncoder.matches(request.getPassword(), member.getPassword()))
+                    .thenReturn(true);
+            log.info("{} -- {}", request.getPassword(), member.getPassword());
+            when(memberRepository.findByEmail(request.getEmail()))
+                    .thenReturn(Optional.ofNullable(member));
+            log.info("{}", member.getAccountName());
+
+            MemberDto memberDto = memberService.loginMember(request);
+
+            //then
+            assertThat(memberDto.getMemberId()).isEqualTo(member.getMemberId());
+            assertThat(memberDto.getAccountName()).isEqualTo(member.getAccountName());
+            assertThat(memberDto.getEmail()).isEqualTo(member.getEmail());
+            assertThat(memberDto.getPhoneNumber()).isEqualTo(member.getPhoneNumber());
+        }
     }
 
 }
