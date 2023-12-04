@@ -12,6 +12,7 @@ import com.anonymous.usports.domain.member.service.impl.MemberServiceImpl;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.MailConstant;
+import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
@@ -258,17 +259,21 @@ public class MemberServiceTest {
     @DisplayName("로그인")
     class Login{
 
-        @Test
-        @DisplayName("로그인 성공")
-        void successLogin() {
-            //given
+        private MemberEntity createMember() {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
                     "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
                     true, Role.UNAUTH);
 
-            member.setPassword(member.getPassword());
+            return member;
+        }
+
+        @Test
+        @DisplayName("로그인 성공")
+        void successLogin() {
+            //given
+            MemberEntity member = createMember();
 
             MemberLogin.Request request = MemberLogin.Request.builder()
                     .email("joons@gmail.com")
@@ -296,11 +301,7 @@ public class MemberServiceTest {
         @DisplayName("로그인 실패 - 유저가 없음")
         void failLoginUserNotFound() {
             //given
-            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
-                    true, Role.UNAUTH);
+            MemberEntity member = createMember();
 
             member.setPassword(member.getPassword());
 
@@ -326,11 +327,7 @@ public class MemberServiceTest {
         @DisplayName("로그인 실패 - 비밀번호가 일치하지 않음")
         void failLoginPasswordNotMatch() {
             //given
-            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
-                    true, Role.UNAUTH);
+            MemberEntity member = createMember();
 
             member.setPassword(member.getPassword());
 
@@ -357,4 +354,54 @@ public class MemberServiceTest {
         }
     }
 
+
+    @Nested
+    @DisplayName("로그아웃")
+    class Logout {
+        private MemberEntity createMember() {
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    true, Role.UNAUTH);
+
+            return member;
+        }
+
+        @Test
+        @DisplayName("로그아웃 성공")
+        void successLogout() {
+            //given
+            MemberEntity member = createMember();
+            String accessToken = "iAmAccessToken1994";
+
+            //when
+            when(tokenRepository.deleteToken(member.getEmail()))
+                    .thenReturn(true);
+
+            String logoutMessage = memberService.logoutMember(accessToken, member.getEmail());
+
+            //then
+            assertThat(logoutMessage).isEqualTo(TokenConstant.LOGOUT_SUCCESSFUL);
+        }
+
+        @Test
+        @DisplayName("로그아웃 실패 - Refresh Token이 없음. 즉 로그인 한 적이 없음")
+        void failLogoutNoRefreshToken() {
+            //given
+            MemberEntity member = createMember();
+            String accessToken = "iAmAccessToken1994";
+
+            //when
+            when(tokenRepository.deleteToken(member.getEmail()))
+                    .thenReturn(false);
+
+
+            String logoutMessage = memberService.logoutMember(accessToken, member.getEmail());
+
+            //then
+            assertThat(logoutMessage).isEqualTo(TokenConstant.LOGOUT_NOT_SUCCESSFUL);
+        }
+
+    }
 }
