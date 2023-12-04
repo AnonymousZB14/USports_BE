@@ -5,6 +5,7 @@ import com.anonymous.usports.domain.recruit.dto.RecruitDeleteResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
+import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
@@ -93,7 +94,7 @@ public class RecruitController {
 
   @ApiOperation("운동 모집글 검색")
   @GetMapping("/recruits")
-  public ResponseEntity<?> getRecruitList(
+  public ResponseEntity<RecruitSearchListDto> getRecruitList(
       @RequestParam(required = false, defaultValue = "1") int page,
       @RequestParam(required = false) String search,
       @RequestParam(required = false) String region,
@@ -102,10 +103,10 @@ public class RecruitController {
       @RequestParam(required = false) boolean closeInclude
       ){
 
-    Page<RecruitEntity> recruits = recruitService.getRecruitsByConditions(page, search,
-        region, sports, gender, closeInclude);
+    RecruitSearchListDto result =
+        recruitService.getRecruitsByConditions(page, search, region, sports, gender, closeInclude);
 
-    return ResponseEntity.ok(recruits);
+    return ResponseEntity.ok(result);
   }
 
 
