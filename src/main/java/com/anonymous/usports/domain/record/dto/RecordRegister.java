@@ -10,7 +10,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 public class RecordRegister {
 
@@ -25,11 +24,12 @@ public class RecordRegister {
     private String content;
 
     public static RecordEntity toEntity(RecordRegister.Request request, MemberEntity member,
-        SportsEntity sports) {
+        SportsEntity sports, List<String> recordImageList) {
       return RecordEntity.builder()
           .member(member)
           .sports(sports)
           .recordContent(request.getContent())
+          .imageAddress(recordImageList)
           .build();
     }
   }

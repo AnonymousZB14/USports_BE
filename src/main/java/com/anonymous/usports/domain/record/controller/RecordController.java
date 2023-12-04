@@ -1,6 +1,5 @@
 package com.anonymous.usports.domain.record.controller;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.record.dto.RecordDelete;
 import com.anonymous.usports.domain.record.dto.RecordDto;
