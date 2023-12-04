@@ -1101,5 +1101,81 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NEW_PASSWORD_UNMATCH);
         }
+
+        @Test
+        @DisplayName("비밀번호 수정 실패 - 입력한 비밀번호가 다르다")
+        void failUpdatePasswordPasswordUnmatch() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            PasswordUpdate.Request request = new PasswordUpdate.Request(
+                    "aleex!1234", "qwer1234!", "qwer77777!");
+
+            //when
+            when(memberRepository.findById(memberId))
+                    .thenReturn(Optional.of(member));
+
+            when(passwordEncoder.matches(request.getCurrentPassword(), member.getPassword()))
+                    .thenReturn(false);
+
+            MemberException exception = catchThrowableOfType(
+                    () -> memberService.updatePassword(request, memberId, memberDto), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PASSWORD_UNMATCH);
+        }
+
+        @Test
+        @DisplayName("비밀번호 수정 실패 - 유저를 찾을 수 없음")
+        void failUpdatePasswordMemberNotFound() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            PasswordUpdate.Request request = new PasswordUpdate.Request(
+                    "aleex!1234", "qwer1234!", "qwer77777!");
+
+            //when
+            when(memberRepository.findById(memberId))
+                    .thenReturn(Optional.empty());
+
+            MemberException exception = catchThrowableOfType(
+                    () -> memberService.updatePassword(request, memberId, memberDto), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("비밀번호 수정 실패 - ID 값을 잘 못 입력했음")
+        void failUpdatePasswordIdUnmatch() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 111L;
+
+            PasswordUpdate.Request request = new PasswordUpdate.Request(
+                    "aleex!1234", "qwer1234!", "qwer77777!");
+
+            //when
+
+            MemberException exception = catchThrowableOfType(
+                    () -> memberService.updatePassword(request, memberId, memberDto), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
     }
 }
