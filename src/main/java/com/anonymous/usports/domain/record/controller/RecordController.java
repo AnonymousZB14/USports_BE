@@ -36,9 +36,9 @@ public class RecordController {
   }
 
   @ApiOperation("팔로우, 추천 기록 내용 보기")
-  @GetMapping("/home/{recordType}")
+  @GetMapping("/home")
   public ResponseEntity<RecordListDto> getRecordList(
-      @PathVariable RecordType recordType,
+      @RequestParam(value = "type", defaultValue = "RECOMMENDATION") RecordType recordType,
       @RequestParam("page") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
     RecordListDto records = recordService.getRecordsPage(recordType, page,
