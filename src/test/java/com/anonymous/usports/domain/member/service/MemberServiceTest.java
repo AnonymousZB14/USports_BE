@@ -1073,5 +1073,33 @@ public class MemberServiceTest {
             //then
             assertThat(response.getMessage()).isEqualTo(ResponseConstant.PASSWORD_CHANGE_SUCCESS);
         }
+
+        @Test
+        @DisplayName("비밀번호 수정 실패 - 새로운 비밀번호와 확인 비밀번호가 다름")
+        void failUpdatePasswordNewPasswordUnmatch() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            PasswordUpdate.Request request = new PasswordUpdate.Request(
+                    "abcd1234!", "qwer1234!", "qwer77777!");
+
+            //when
+            when(memberRepository.findById(memberId))
+                    .thenReturn(Optional.of(member));
+
+            when(passwordEncoder.matches(request.getCurrentPassword(), member.getPassword()))
+                    .thenReturn(true);
+
+            MemberException exception = catchThrowableOfType(
+                    () -> memberService.updatePassword(request, memberId, memberDto), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NEW_PASSWORD_UNMATCH);
+        }
     }
 }
