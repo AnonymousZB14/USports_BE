@@ -291,6 +291,70 @@ public class MemberServiceTest {
             assertThat(memberDto.getEmail()).isEqualTo(member.getEmail());
             assertThat(memberDto.getPhoneNumber()).isEqualTo(member.getPhoneNumber());
         }
+
+        @Test
+        @DisplayName("로그인 실패 - 유저가 없음")
+        void failLoginUserNotFound() {
+            //given
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    true, Role.UNAUTH);
+
+            member.setPassword(member.getPassword());
+
+            MemberLogin.Request request = MemberLogin.Request.builder()
+                    .email("joons2@gmail.com")
+                    .password("abcd1234!")
+                    .build();
+
+            //when
+            when(memberRepository.findByEmail(request.getEmail()))
+                    .thenReturn(Optional.empty());
+            log.info("{}", member.getAccountName());
+
+            MemberException memberException =
+                    catchThrowableOfType(() ->
+                            memberService.loginMember(request), MemberException.class);
+
+            //then
+            assertThat(memberException.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("로그인 실패 - 비밀번호가 일치하지 않음")
+        void failLoginPasswordNotMatch() {
+            //given
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    true, Role.UNAUTH);
+
+            member.setPassword(member.getPassword());
+
+            MemberLogin.Request request = MemberLogin.Request.builder()
+                    .email("joons@gmail.com")
+                    .password("aaaaa23422")
+                    .build();
+
+            //when
+            when(passwordEncoder.matches(request.getPassword(), member.getPassword()))
+                    .thenReturn(false);
+            log.info("{} -- {}", request.getPassword(), member.getPassword());
+
+            when(memberRepository.findByEmail(request.getEmail()))
+                    .thenReturn(Optional.ofNullable(member));
+            log.info("{}", member.getAccountName());
+
+            MemberException memberException =
+                    catchThrowableOfType(() ->
+                            memberService.loginMember(request), MemberException.class);
+
+            //then
+            assertThat(memberException.getErrorCode()).isEqualTo(ErrorCode.PASSWORD_UNMATCH);
+        }
     }
 
 }
