@@ -14,6 +14,7 @@ import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
+import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.Gender;
@@ -686,6 +687,21 @@ public class MemberServiceTest {
             return member;
         }
 
+        public List<InterestedSportsEntity> createInterestedSport(MemberEntity member, List<SportsEntity> sports) {
+            List<InterestedSportsEntity> interestedSportsEntities = new ArrayList<>();
+            Long id = 1L;
+
+            for (SportsEntity sport : sports) {
+                interestedSportsEntities.add(InterestedSportsEntity.builder()
+                                .interestedSportsId(id ++)
+                                .memberEntity(member)
+                                .sports(sport)
+                        .build());
+            }
+
+            return interestedSportsEntities;
+        }
+
         private MemberUpdate.Request createMemberRequest(int emailAuthNumber, String accountName, String email,
                                                          String phoneNumber, String addrCity, String addrDistrict,
                                                          List<Long> sports) {
@@ -728,9 +744,8 @@ public class MemberServiceTest {
             SportsEntity basketball = sports(2L, "basketball");
             List<SportsEntity> sportsEntities = new ArrayList<>(Arrays.asList(new SportsEntity[]{football, basketball}));
 
-            List<InterestedSportsEntity> interestedSportsEntities = new ArrayList<>();
-            interestedSportsEntities.add(InterestedSportsEntity.builder().sports(football).memberEntity(member).build());
-            interestedSportsEntities.add(InterestedSportsEntity.builder().sports(basketball).memberEntity(member).build());
+            List<InterestedSportsEntity> interestedSportsEntities = createInterestedSport(member, sportsEntities);
+
             List<String> interestedSportResult = new ArrayList<>(Arrays.asList(new String[]{"football", "basketball"}));
 
             //when
@@ -751,6 +766,7 @@ public class MemberServiceTest {
             MemberUpdate.Response response = memberService.updateMember(request, memberDto, memberId);
 
             log.info("{} - {}", response.getInterestedSports(), interestedSportResult);
+            log.info("{}", response.getRole());
             //then
             assertThat(response.getAccountName()).isEqualTo(request.getAccountName());
             assertThat(response.getName()).isEqualTo(request.getName());
@@ -760,6 +776,85 @@ public class MemberServiceTest {
             assertThat(response.getAddrCity()).isEqualTo(request.getAddrCity());
             assertThat(response.getAddrDistrict()).isEqualTo(request.getAddrDistrict());
             assertThat(response.getInterestedSports()).isEqualTo(interestedSportResult);
+            assertThat(response.getRole()).isEqualTo(Role.USER);
+        }
+
+        @Test
+        @DisplayName("USER 수정 실패, 입력한 스포츠를 찾을 수 없음")
+        void failUpdateSportsNotFound() {
+            //given
+            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L, 4L}));
+
+            MemberEntity member = createMember(Role.USER);
+
+            MemberUpdate.Request request = createMemberRequest(
+                    00000, "joons",
+                    "joons@gmail.com", "010-1234-1234",
+                    "Seoul", "Naro", sports
+            );
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            List<SportsEntity> sportsEntities = new ArrayList<>();
+            sportsEntities.add(sports(1L, "football"));
+            sportsEntities.add(sports(2L, "basketball"));
+            sportsEntities.add(sports(3L, "rugby"));
+
+            //when
+            when(memberRepository.findById(memberDto.getMemberId()))
+                    .thenReturn(Optional.of(member));
+
+            when(sportsRepository.findById(request.getInterestedSports().get(0)))
+                    .thenReturn(Optional.of(sportsEntities.get(0)));
+
+            when(sportsRepository.findById(request.getInterestedSports().get(1)))
+                    .thenReturn(Optional.of(sportsEntities.get(1)));
+
+            when(sportsRepository.findById(request.getInterestedSports().get(2)))
+                    .thenReturn(Optional.empty());
+
+
+            MyException exception = catchThrowableOfType(
+                    ()-> memberService.updateMember(request, memberDto, memberId), MyException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SPORTS_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("USER 수정 실패, 최소 한 개의 스포츠를 선택해야 함")
+        void failUpdateMemberNeedMinSport() {
+            //given
+            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{}));
+
+            MemberEntity member = createMember(Role.USER);
+
+            MemberUpdate.Request request = createMemberRequest(
+                    00000, "joons",
+                    "joons@gmail.com", "010-1234-1234",
+                    "Seoul", "Naro", sports
+            );
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            List<SportsEntity> sportsEntities = new ArrayList<>();
+            sportsEntities.add(sports(1L, "football"));
+            sportsEntities.add(sports(2L, "basketball"));
+            sportsEntities.add(sports(3L, "rugby"));
+
+            //when
+            when(memberRepository.findById(memberDto.getMemberId()))
+                    .thenReturn(Optional.of(member));
+
+            MemberException exception = catchThrowableOfType(
+                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NEED_AT_LEAST_ONE_SPORTS);
         }
     }
 }
