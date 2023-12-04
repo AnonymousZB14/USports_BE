@@ -1311,6 +1311,7 @@ public class MemberServiceTest {
         }
 
         @Test
+        @DisplayName("인증 번호 다시 보내기 성공")
         void successResendEmailAuth() {
             //given
             MemberEntity member = createMember(Role.USER);
@@ -1327,6 +1328,29 @@ public class MemberServiceTest {
 
             //then
             assertThat(response.getMessage()).isEqualTo(MailConstant.AUTH_EMAIL_SEND);
+        }
+
+        @Test
+        @DisplayName("인증 번호 다시 보내기 실패 - 유저를 찾을 수 없음")
+        void failResendEmaiAuthMemberNotFound() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            //when
+            when(memberRepository.existsById(memberId))
+                    .thenReturn(false);
+
+            MemberException exception = catchThrowableOfType(
+                    () -> memberService.resendEmailAuth(memberDto, memberId), MemberException.class
+            );
+
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
         }
     }
 }
