@@ -169,9 +169,18 @@ public class MemberServiceTest {
                     .build();
 
             //when
+            /*
+            DB에 저장이 되는 것이 아니라서, 서비스 메서드 내에서 repository에 접근했을 때
+            나타날 수 있는 경우를 찾는다 (여기서는 accountName이 중복이 되면 true를 반환한다.)
+            예외처리하기 전에
+             */
             when(memberRepository.existsByAccountName(request.getAccountName()))
                     .thenReturn(true);
 
+
+           /*
+            실제 메서드를 실행할 때에, 나타날 수 있는 예외 클래스를 리턴해준다
+             */
             MemberException exception =
                     catchThrowableOfType(() ->
                             memberService.registerMember(request), MemberException.class);
@@ -181,8 +190,8 @@ public class MemberServiceTest {
         }
 
         @Test
-        @DisplayName("회원가입 실패 - 닉네임이 이미 있음")
-        void failAccountAlreadyExist() {
+        @DisplayName("회원가입 실패 - 이메일이 이미 있음")
+        void failEmailAlreadyExist() {
             //given
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
