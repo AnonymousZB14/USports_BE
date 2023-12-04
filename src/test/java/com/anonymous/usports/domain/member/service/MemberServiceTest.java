@@ -689,11 +689,9 @@ public class MemberServiceTest {
 
         public List<InterestedSportsEntity> createInterestedSport(MemberEntity member, List<SportsEntity> sports) {
             List<InterestedSportsEntity> interestedSportsEntities = new ArrayList<>();
-            Long id = 1L;
 
             for (SportsEntity sport : sports) {
                 interestedSportsEntities.add(InterestedSportsEntity.builder()
-                                .interestedSportsId(id ++)
                                 .memberEntity(member)
                                 .sports(sport)
                         .build());
@@ -959,6 +957,121 @@ public class MemberServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_ALREADY_EXISTS);
         }
 
+        @Test
+        @DisplayName("회원, 변경할 이메일이 이미 존재함")
+        void failUpdateMemberEmailAlreadyExist() {
+            //given
+            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
 
+            MemberEntity member = createMember(Role.UNAUTH);
+
+            MemberUpdate.Request request = createMemberRequest(
+                    00000, "jjjjj3333",
+                    "joonstest4@gmail.com", "010-1234-1234",
+                    "Seoul", "Naro", sports
+            );
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            //when
+            when(memberRepository.findById(memberDto.getMemberId()))
+                    .thenReturn(Optional.of(member));
+
+            when(memberRepository.existsByAccountName(request.getAccountName()))
+                    .thenReturn(false);
+
+            when(memberRepository.existsByEmail(request.getEmail()))
+                    .thenReturn(true);
+
+            MemberException exception = catchThrowableOfType(
+                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
+        @Test
+        @DisplayName("회원, 변경할 핸드폰번호가 이미 존재함")
+        void failUpdateMemberPhoneAlreadyExist() {
+            //given
+            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
+
+            MemberEntity member = createMember(Role.UNAUTH);
+
+            MemberUpdate.Request request = createMemberRequest(
+                    00000, "jjjjj3333",
+                    "joonstest4@gmail.com", "010-1004-1004",
+                    "Seoul", "Naro", sports
+            );
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            //when
+            when(memberRepository.findById(memberDto.getMemberId()))
+                    .thenReturn(Optional.of(member));
+
+            when(memberRepository.existsByAccountName(request.getAccountName()))
+                    .thenReturn(false);
+
+            when(memberRepository.existsByEmail(request.getEmail()))
+                    .thenReturn(false);
+
+            when(memberRepository.existsByPhoneNumber(request.getPhoneNumber()))
+                    .thenReturn(true);
+
+            MemberException exception = catchThrowableOfType(
+                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXISTS);
+        }
+    }
+    
+    @Nested
+    @DisplayName("비밀번호 수정")
+    class UpdatePassword{
+
+        private MemberEntity createMember(Role role) {
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    true, role);
+
+            return member;
+        }
+
+        @Test
+        @DisplayName("비밀번호 수정 성공")
+        void successUpdatePassword() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            PasswordUpdate.Request request = new PasswordUpdate.Request(
+                    "abcd1234!", "qwer1234!", "qwer1234!");
+
+            //when
+            when(memberRepository.findById(memberId))
+                    .thenReturn(Optional.of(member));
+
+            when(passwordEncoder.matches(request.getCurrentPassword(), member.getPassword()))
+                    .thenReturn(true);
+
+            when(memberRepository.save(member))
+                    .thenReturn(member);
+
+            PasswordUpdate.Response response = memberService.updatePassword(request, memberId, memberDto);
+
+            //then
+            assertThat(response.getMessage()).isEqualTo(ResponseConstant.PASSWORD_CHANGE_SUCCESS);
+        }
     }
 }
