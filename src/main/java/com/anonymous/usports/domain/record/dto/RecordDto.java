@@ -24,28 +24,30 @@ public class RecordDto {
 
   private Long sportsId;
 
+  private String accountName;
+
   private String recordContent;
 
   private LocalDateTime registeredAt;
 
   private LocalDateTime updatedAt;
 
-  private List<String> images;
+  private Long countComment;
 
-  public static RecordDto fromEntity(RecordEntity recordEntity,
-      List<RecordImageEntity> recordImages) {
-    List<String> imageAddresses = recordImages.stream()
-        .map(RecordImageEntity::getImageAddress)
-        .collect(Collectors.toList());
+  private List<String> imageAddressList;
 
+
+  public static RecordDto fromEntity(RecordEntity recordEntity, List<RecordImageEntity> recordImageEntities) {
     return RecordDto.builder()
         .recordId(recordEntity.getRecordId())
         .memberId(recordEntity.getMember().getMemberId())
         .sportsId(recordEntity.getSports().getSportsId())
+        .accountName(recordEntity.getMember().getAccountName())
         .recordContent(recordEntity.getRecordContent())
         .registeredAt(recordEntity.getRegisteredAt())
         .updatedAt(recordEntity.getUpdatedAt())
-        .images(imageAddresses)
+        .countComment(recordEntity.getCountComment())
+        .imageAddressList(recordImageEntities.stream().map(x->x.getImageAddress()).collect(Collectors.toList()))
         .build();
   }
 }

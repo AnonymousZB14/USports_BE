@@ -25,4 +25,12 @@ public class RecordImageDto {
         .imageAddress(imageAddress)
         .build();
   }
+
+  public static RecordImageDto fromEntity(RecordImageDto recordImageDto) {
+    return RecordImageDto.builder()
+        .imageId(recordImageDto.getImageId())
+        .recordId(recordImageDto.getRecordId())
+        .imageAddress(recordImageDto.getImageAddress())
+        .build();
+  }
 }
