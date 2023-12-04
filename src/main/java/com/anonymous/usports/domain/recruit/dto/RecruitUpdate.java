@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.recruit.dto;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.type.Gender;
 import java.time.LocalDateTime;
+import javax.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,8 +22,12 @@ public class RecruitUpdate {
     private String title;
     private String content;
     private String placeName;
+    private String region;
+    private String streetNameAddr; // 도로명 주소
+    private String streetNumberAddr; // 지번 주소
     private String lat;
     private String lnt;
+
     private int cost;
     private Gender gender;
     private int recruitCount;

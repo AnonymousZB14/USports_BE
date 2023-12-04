@@ -62,6 +62,15 @@ public class RecruitEntity {
   @Column(name = "place_name", nullable = false)
   private String placeName;
 
+  @Column(name = "region", nullable = false)
+  private String region;
+
+  @Column(name = "street_name_addr")
+  private String streetNameAddr; // 도로명 주소
+
+  @Column(name = "street_number_addr")
+  private String streetNumberAddr; // 지번 주소
+
   @Column(name = "lat", nullable = false)
   private String lat;
 
@@ -107,6 +116,9 @@ public class RecruitEntity {
     this.title = request.getTitle();
     this.content = request.getContent();
     this.placeName = request.getPlaceName();
+    this.region = request.getRegion();
+    this.streetNameAddr = request.getStreetNameAddr();
+    this.streetNumberAddr = request.getStreetNumberAddr();
     this.lat = request.getLat();
     this.lnt = request.getLnt();
     this.cost = request.getCost();
