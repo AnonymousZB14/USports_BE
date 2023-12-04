@@ -1269,6 +1269,31 @@ public class MemberServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PHONE_NUMBER_UNMATCH);
         }
 
+        @Test
+        @DisplayName("비밀번호 분실 실패 - 이메일로 찾은 유저 정보가 없음")
+        void faillostPasswordMemberNotFound() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            PasswordLostResponse.Request request = PasswordLostResponse.Request
+                    .builder()
+                    .email("joons@gmail.com")
+                    .name("JayJay")
+                    .phoneNumber("010-1004-1004")
+                    .build();
+
+            //when
+            when(memberRepository.findByEmail(request.getEmail()))
+                    .thenReturn(Optional.empty());
+
+            MemberException exception = catchThrowableOfType(
+                    () -> memberService.lostPassword(request), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
 
     }
 }
