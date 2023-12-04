@@ -118,7 +118,7 @@ public class MemberServiceTest {
 
     @Nested
     @DisplayName("첫 회원가입")
-    class RegisterMember {
+    class RegisterMemberTest {
 
         @Test
         @DisplayName("회원가입 성공")
@@ -260,7 +260,7 @@ public class MemberServiceTest {
 
     @Nested
     @DisplayName("로그인")
-    class Login{
+    class LoginTest{
 
         private MemberEntity createMember() {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -360,7 +360,7 @@ public class MemberServiceTest {
 
     @Nested
     @DisplayName("로그아웃")
-    class Logout {
+    class LogoutTest {
         private MemberEntity createMember() {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
@@ -410,7 +410,7 @@ public class MemberServiceTest {
 
     @Nested
     @DisplayName("회원 탈퇴")
-    class DeleteMember{
+    class DeleteMemberTest{
 
         private MemberEntity createMember(Role role) {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -675,7 +675,7 @@ public class MemberServiceTest {
 
     @Nested
     @DisplayName("회원 수정")
-    class UpdateMember{
+    class UpdateMemberTest{
 
         private MemberEntity createMember(Role role) {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -1033,7 +1033,7 @@ public class MemberServiceTest {
     
     @Nested
     @DisplayName("비밀번호 수정")
-    class UpdatePassword{
+    class UpdatePasswordTest{
 
         private MemberEntity createMember(Role role) {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -1181,7 +1181,7 @@ public class MemberServiceTest {
 
     @Nested
     @DisplayName("비밀번호 분실")
-    class LostPassword{
+    class LostPasswordTest{
 
         private MemberEntity createMember(Role role) {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -1294,6 +1294,39 @@ public class MemberServiceTest {
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
         }
 
+    }
 
+    @Nested
+    @DisplayName("이메일 인증 번호 다시 보내기")
+    class ResendEmailAuthTest{
+
+        private MemberEntity createMember(Role role) {
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    true, role);
+
+            return member;
+        }
+
+        @Test
+        void successResendEmailAuth() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            //when
+            when(memberRepository.existsById(memberId))
+                    .thenReturn(true);
+
+            MailResponse response = memberService.resendEmailAuth(memberDto, memberId);
+
+            //then
+            assertThat(response.getMessage()).isEqualTo(MailConstant.AUTH_EMAIL_SEND);
+        }
     }
 }
