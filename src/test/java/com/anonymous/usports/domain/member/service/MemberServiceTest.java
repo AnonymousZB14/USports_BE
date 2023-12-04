@@ -1175,7 +1175,75 @@ public class MemberServiceTest {
             );
 
             //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_ID_UNMATCH);
         }
+    }
+
+    @Nested
+    @DisplayName("비밀번호 분실")
+    class LostPassword{
+
+        private MemberEntity createMember(Role role) {
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    true, role);
+
+            return member;
+        }
+
+        @Test
+        @DisplayName("비밀번호 분실 성공")
+        void successLostPassword() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            PasswordLostResponse.Request request = PasswordLostResponse.Request
+                    .builder()
+                    .email("joons@gmail.com")
+                    .name("Je Joon")
+                    .phoneNumber("010-1234-1234")
+                    .build();
+
+            //when
+            when(memberRepository.findByEmail(request.getEmail()))
+                    .thenReturn(Optional.of(member));
+
+            when(memberRepository.save(member))
+                    .thenReturn(member);
+
+            PasswordLostResponse.Response response = memberService.lostPassword(request);
+
+            //then
+            assertThat(response.getMessage()).isEqualTo(request.getEmail() + MailConstant.TEMP_PASSWORD_SUCCESSFULLY_SENT);
+        }
+
+        @Test
+        @DisplayName("비밀번호 분실 실패 - 이름 잘 못 입력")
+        void faillostPasswordNameUnmatch() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            PasswordLostResponse.Request request = PasswordLostResponse.Request
+                    .builder()
+                    .email("joons@gmail.com")
+                    .name("JayJay")
+                    .phoneNumber("010-1234-1234")
+                    .build();
+
+            //when
+            when(memberRepository.findByEmail(request.getEmail()))
+                    .thenReturn(Optional.of(member));
+
+            MemberException exception = catchThrowableOfType(
+                    () -> memberService.lostPassword(request), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NAME_UNMATCH);
+        }
+
+
     }
 }
