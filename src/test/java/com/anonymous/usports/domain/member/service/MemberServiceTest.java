@@ -928,15 +928,15 @@ public class MemberServiceTest {
         }
 
         @Test
-        @DisplayName("회원, 회원을 찾을 수 없음")
-        void failUpdateMemberNotFound() {
+        @DisplayName("회원, 변경할 닉네임이 이미 존재함")
+        void failUpdateMemberAccountAlreadyExist() {
             //given
             List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
 
             MemberEntity member = createMember(Role.UNAUTH);
 
             MemberUpdate.Request request = createMemberRequest(
-                    00000, "joons",
+                    00000, "jjjjj3333",
                     "joons@gmail.com", "010-1234-1234",
                     "Seoul", "Naro", sports
             );
@@ -946,15 +946,19 @@ public class MemberServiceTest {
 
             //when
             when(memberRepository.findById(memberDto.getMemberId()))
-                    .thenReturn(Optional.empty());
+                    .thenReturn(Optional.of(member));
 
+            when(memberRepository.existsByAccountName(request.getAccountName()))
+                    .thenReturn(true);
 
             MemberException exception = catchThrowableOfType(
                     ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
             );
 
             //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_ALREADY_EXISTS);
         }
+
+
     }
 }
