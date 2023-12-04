@@ -1352,5 +1352,24 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
         }
+
+        @Test
+        @DisplayName("인증 번호 다시 보내기 실패 - 아이디가 일치하지 않음")
+        void failResendEmaiAuthIdUnmatch() {
+            //given
+            MemberEntity member = createMember(Role.USER);
+
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1111L;
+
+            //when
+            MemberException exception = catchThrowableOfType(
+                    () -> memberService.resendEmailAuth(memberDto, memberId), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_ID_UNMATCH);
+        }
     }
 }
