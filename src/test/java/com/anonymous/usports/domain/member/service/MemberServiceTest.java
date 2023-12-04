@@ -856,5 +856,45 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NEED_AT_LEAST_ONE_SPORTS);
         }
+
+        @Test
+        @DisplayName("UNAUTH 회원, 이메일 인증 번호 잘 못 입력")
+        void failUpdateMemberAuthUnmatch() {
+            //given
+            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{}));
+
+            MemberEntity member = createMember(Role.UNAUTH);
+
+            MemberUpdate.Request request = createMemberRequest(
+                    00000, "joons",
+                    "joons@gmail.com", "010-1234-1234",
+                    "Seoul", "Naro", sports
+            );
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            List<SportsEntity> sportsEntities = new ArrayList<>();
+            sportsEntities.add(sports(1L, "football"));
+            sportsEntities.add(sports(2L, "basketball"));
+            sportsEntities.add(sports(3L, "rugby"));
+
+            //when
+            when(memberRepository.findById(memberDto.getMemberId()))
+                    .thenReturn(Optional.of(member));
+
+            log.info("{}", memberDto.getEmailAuthAt());
+            log.info("{}", memberDto.getRole());
+
+            when(authRedisRepository.getEmailAuthNumber(request.getEmail()))
+                    .thenReturn(12345);
+
+            MemberException exception = catchThrowableOfType(
+                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_AUTH_NUMBER_UNMATCH);
+        }
     }
 }
