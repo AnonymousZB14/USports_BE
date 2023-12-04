@@ -52,7 +52,7 @@ public class ParticipantServiceImpl implements ParticipantService {
         participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
             recruitEntity, ParticipantStatus.ING, pageRequest);
 
-    return ParticipantListDto.fromEntityPage(findPage);
+    return new ParticipantListDto(findPage);
   }
 
   @Override
