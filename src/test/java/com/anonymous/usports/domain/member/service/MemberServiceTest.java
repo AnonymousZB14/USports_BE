@@ -153,10 +153,6 @@ public class MemberServiceTest {
             //given
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
-                    true, Role.UNAUTH);
-
             MemberRegister.Request request = MemberRegister.Request.builder()
                     .accountName("joons")
                     .name("Je Joon")
@@ -195,10 +191,6 @@ public class MemberServiceTest {
             //given
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
-                    true, Role.UNAUTH);
-
             MemberRegister.Request request = MemberRegister.Request.builder()
                     .accountName("joons")
                     .name("Je Joon")
@@ -212,6 +204,8 @@ public class MemberServiceTest {
 
             //when
             when(memberRepository.existsByAccountName(request.getAccountName()))
+                    .thenReturn(false); // 이건 굳이 없어도 됨
+            when(memberRepository.existsByEmail(request.getEmail()))
                     .thenReturn(true);
 
             MemberException exception =
@@ -219,8 +213,10 @@ public class MemberServiceTest {
                             memberService.registerMember(request), MemberException.class);
 
             //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_ALREADY_EXISTS);
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
+
+
     }
 
 }
