@@ -1,12 +1,5 @@
 package com.anonymous.usports.domain.recruit.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.anyLong;
-import static org.mockito.BDDMockito.when;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
@@ -20,12 +13,8 @@ import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -35,6 +24,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -66,7 +64,6 @@ class RecruitServiceTest {
         .phoneNumber("010-1111-2222")
         .birthDate(LocalDate.now())
         .gender(Gender.MALE)
-        .status(MemberStatus.NEED_UPDATE)
         .role(Role.USER)
         .profileOpen(true)
         .build();

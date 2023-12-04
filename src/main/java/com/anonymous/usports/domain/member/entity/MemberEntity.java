@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity(name = "Member")
 @AllArgsConstructor
@@ -115,5 +116,18 @@ public class MemberEntity {
         this.addrCity = request.getAddrCity();
         this.addrDistrict = request.getAddrDistrict();
         this.role = Role.USER;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MemberEntity that = (MemberEntity) o;
+        return Objects.equals(memberId, that.memberId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(memberId);
     }
 }

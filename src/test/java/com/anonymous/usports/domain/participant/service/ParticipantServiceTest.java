@@ -1,13 +1,5 @@
 package com.anonymous.usports.domain.participant.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
@@ -24,15 +16,9 @@ import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.MemberStatus;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,6 +29,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ParticipantServiceTest {
@@ -73,7 +68,6 @@ class ParticipantServiceTest {
         .phoneNumber("010-1111-2222")
         .birthDate(LocalDate.now())
         .gender(Gender.MALE)
-        .status(MemberStatus.NEED_UPDATE)
         .role(Role.USER)
         .profileOpen(true)
         .build();
@@ -268,7 +262,6 @@ class ParticipantServiceTest {
           .phoneNumber("010-1111-2222")
           .birthDate(LocalDate.now())
           .gender(Gender.MALE)
-          .status(MemberStatus.NEED_UPDATE)
           .role(Role.USER)
           .profileOpen(true)
           .build();
@@ -319,7 +312,6 @@ class ParticipantServiceTest {
           .phoneNumber("010-1111-2222")
           .birthDate(LocalDate.now())
           .gender(Gender.MALE)
-          .status(MemberStatus.NEED_UPDATE)
           .role(Role.USER)
           .profileOpen(true)
           .build();
