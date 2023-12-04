@@ -1,9 +1,6 @@
 package com.anonymous.usports.domain.member.service;
 
-import com.anonymous.usports.domain.member.dto.MemberDto;
-import com.anonymous.usports.domain.member.dto.MemberLogin;
-import com.anonymous.usports.domain.member.dto.MemberRegister;
-import com.anonymous.usports.domain.member.dto.MemberWithdraw;
+import com.anonymous.usports.domain.member.dto.*;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
@@ -35,6 +32,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -669,6 +669,97 @@ public class MemberServiceTest {
 
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PASSWORD_UNMATCH);
+        }
+    }
+
+    @Nested
+    @DisplayName("회원 수정")
+    class UpdateMember{
+
+        private MemberEntity createMember(Role role) {
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    true, role);
+
+            return member;
+        }
+
+        private MemberUpdate.Request createMemberRequest(int emailAuthNumber, String accountName, String email,
+                                                         String phoneNumber, String addrCity, String addrDistrict,
+                                                         List<Long> sports) {
+            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            return MemberUpdate.Request.builder()
+                    .emailAuthNumber(emailAuthNumber)
+                    .accountName(accountName)
+                    .name("joons")
+                    .email(email)
+                    .phoneNumber(phoneNumber)
+                    .birthDate(birthDate)
+                    .gender(Gender.FEMALE)
+                    .profileContent("content")
+                    .profileImage("picture")
+                    .addrCity(addrCity)
+                    .addrDistrict(addrDistrict)
+                    .profileOpen("close")
+                    .interestedSports(sports)
+                    .build();
+        }
+
+        @Test
+        @DisplayName("UNAUTH 회원, 수정 성공 후 USER로 전환")
+        void successFirstUpdate() {
+            //given
+            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
+
+            MemberEntity member = createMember(Role.UNAUTH);
+            MemberUpdate.Request request = createMemberRequest(
+                    00000, "joons",
+                    "joons@gmail.com", "010-1234-1234",
+                    "Seoul", "Naro", sports
+                    );
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            SportsEntity football = sports(1L, "football");
+            SportsEntity basketball = sports(2L, "basketball");
+            List<SportsEntity> sportsEntities = new ArrayList<>(Arrays.asList(new SportsEntity[]{football, basketball}));
+
+            List<InterestedSportsEntity> interestedSportsEntities = new ArrayList<>();
+            interestedSportsEntities.add(InterestedSportsEntity.builder().sports(football).memberEntity(member).build());
+            interestedSportsEntities.add(InterestedSportsEntity.builder().sports(basketball).memberEntity(member).build());
+            List<String> interestedSportResult = new ArrayList<>(Arrays.asList(new String[]{"football", "basketball"}));
+
+            //when
+            when(memberRepository.findById(memberDto.getMemberId()))
+                    .thenReturn(Optional.of(member));
+
+            for (int i = 0; i < request.getInterestedSports().size(); i++) {
+                when(sportsRepository.findById(request.getInterestedSports().get(i)))
+                        .thenReturn(Optional.of(sportsEntities.get(i)));
+            }
+
+            when(interestedSportsRepository.saveAll(interestedSportsEntities))
+                    .thenReturn(interestedSportsEntities);
+
+            when(interestedSportsRepository.findAllByMemberEntity(member))
+                    .thenReturn(interestedSportsEntities);
+
+            MemberUpdate.Response response = memberService.updateMember(request, memberDto, memberId);
+
+            log.info("{} - {}", response.getInterestedSports(), interestedSportResult);
+            //then
+            assertThat(response.getAccountName()).isEqualTo(request.getAccountName());
+            assertThat(response.getName()).isEqualTo(request.getName());
+            assertThat(response.getEmail()).isEqualTo(request.getEmail());
+            assertThat(response.getPhoneNumber()).isEqualTo(request.getPhoneNumber());
+            assertThat(response.getBirthDate()).isEqualTo(request.getBirthDate());
+            assertThat(response.getAddrCity()).isEqualTo(request.getAddrCity());
+            assertThat(response.getAddrDistrict()).isEqualTo(request.getAddrDistrict());
+            assertThat(response.getInterestedSports()).isEqualTo(interestedSportResult);
         }
     }
 }

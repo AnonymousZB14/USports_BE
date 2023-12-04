@@ -154,7 +154,6 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     }
 
     // 관심 운동이 있을 경우, 수정을 했을 상황을 대비해, 이미 저장되어 있는 데이터는 다 삭제하고 다시 저장하기
-    // 관심 운동 있으면 회원 상태를 ACTIVE으로 전환
     private List<InterestedSportsEntity> saveInterestedSports(List<Long> allSelectedSports, MemberEntity memberEntity){
 
         List<InterestedSportsEntity> list = new ArrayList<>();
