@@ -896,5 +896,65 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_AUTH_NUMBER_UNMATCH);
         }
+
+        @Test
+        @DisplayName("회원, 회원을 찾을 수 없음")
+        void failUpdateMemberNotFound() {
+            //given
+            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
+
+            MemberEntity member = createMember(Role.UNAUTH);
+
+            MemberUpdate.Request request = createMemberRequest(
+                    00000, "joons",
+                    "joons@gmail.com", "010-1234-1234",
+                    "Seoul", "Naro", sports
+            );
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            //when
+            when(memberRepository.findById(memberDto.getMemberId()))
+                    .thenReturn(Optional.empty());
+
+
+            MemberException exception = catchThrowableOfType(
+                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("회원, 회원을 찾을 수 없음")
+        void failUpdateMemberNotFound() {
+            //given
+            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
+
+            MemberEntity member = createMember(Role.UNAUTH);
+
+            MemberUpdate.Request request = createMemberRequest(
+                    00000, "joons",
+                    "joons@gmail.com", "010-1234-1234",
+                    "Seoul", "Naro", sports
+            );
+            MemberDto memberDto = MemberDto.fromEntity(member);
+
+            Long memberId = 1L;
+
+            //when
+            when(memberRepository.findById(memberDto.getMemberId()))
+                    .thenReturn(Optional.empty());
+
+
+            MemberException exception = catchThrowableOfType(
+                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
     }
 }
