@@ -26,6 +26,9 @@ public class RecruitRegister {
     private String title;
     private String content;
     private String placeName;
+    private String region;
+    private String streetNameAddr;
+    private String streetNumberAddr;
     private String lat;
     private String lnt;
     private int cost;
@@ -45,6 +48,9 @@ public class RecruitRegister {
           .title(request.getTitle())
           .content(request.getContent())
           .placeName(request.getPlaceName())
+          .region(request.getRegion())
+          .streetNameAddr(request.getStreetNameAddr())
+          .streetNumberAddr(request.getStreetNumberAddr())
           .lat(request.getLat())
           .lnt(request.getLnt())
           .cost(request.getCost())

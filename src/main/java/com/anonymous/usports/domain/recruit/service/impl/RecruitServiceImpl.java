@@ -6,24 +6,32 @@ import com.anonymous.usports.domain.participant.repository.ParticipantRepository
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
+import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
+import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.exception.SportsException;
+import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
+import io.jsonwebtoken.lang.Strings;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -130,9 +138,33 @@ public class RecruitServiceImpl implements RecruitService {
 
   @Override
   @Transactional
-  public void getRecruitsByConditions(int page, String search, String place, String sports,
-      String gender, String close) {
+  public RecruitSearchListDto getRecruitsByConditions(
+      int page, String search, String region, String sports, Gender gender, boolean closeInclude) {
 
+    if (!StringUtils.hasText(search)) {
+      search = null;
+    }
+    if (!StringUtils.hasText(region)) {
+      region = null;
+    }
+    SportsEntity sportsEntity = null;
+    if (Strings.hasText(sports)) {
+      sportsEntity = sportsRepository.findBySportsName(sports)
+          .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
+    }
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT, Sort.by("registeredAt").descending());
+
+    Page<RecruitEntity> findPage = Page.empty();
+
+    if(closeInclude){
+      findPage = recruitRepository.findAllByConditionIncludeEND(
+          search, region, sportsEntity, gender, pageRequest);
+    }else{
+      findPage = recruitRepository.findAllByConditionNotIncludeEND(
+          search, region, sportsEntity, gender, pageRequest);
+    }
+
+    return new RecruitSearchListDto(findPage);
   }
 
   private void validateAuthority(MemberEntity member, Long memberId) {

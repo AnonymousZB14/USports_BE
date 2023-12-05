@@ -42,6 +42,12 @@ public class RecruitDto {
 
   private String placeName;
 
+  private String region;
+
+  private String streetNameAddr; // 도로명 주소
+
+  private String streetNumberAddr; // 지번 주소
+
   private String lat;
 
   private String lnt;
@@ -72,6 +78,9 @@ public class RecruitDto {
         .title(recruitEntity.getTitle())
         .content(recruitEntity.getContent())
         .placeName(recruitEntity.getPlaceName())
+        .region(recruitEntity.getRegion())
+        .streetNameAddr(recruitEntity.getStreetNameAddr())
+        .streetNumberAddr(recruitEntity.getStreetNumberAddr())
         .lat(recruitEntity.getLat())
         .lnt(recruitEntity.getLnt())
         .cost(recruitEntity.getCost())
