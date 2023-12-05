@@ -8,6 +8,7 @@ public class MemberLogin {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class Request {
         private String email;
         private String password;
