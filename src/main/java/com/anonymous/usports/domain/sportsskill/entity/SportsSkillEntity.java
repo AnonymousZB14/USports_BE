@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.sportsskill.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -54,5 +55,22 @@ public class SportsSkillEntity {
   public void updateSportsSkill(int score){
     this.sportsScore += score;
     this.evaluateCount += 1;
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    SportsSkillEntity that = (SportsSkillEntity) object;
+    return Objects.equals(sportsSkillId, that.sportsSkillId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(sportsSkillId);
   }
 }

@@ -67,12 +67,14 @@ public class EvaluationServiceImpl implements EvaluationService {
     toMember.updateManners(MannerDto.fromEvaluationEntity(saved));
 
     //SportsSkillEntity에 업데이트
-    Optional<SportsSkillEntity> sportsSkill = sportsSkillRepository.findByMemberAndSports(
+    Optional<SportsSkillEntity> optionalSportsSkill = sportsSkillRepository.findByMemberAndSports(
         toMember, sports);
-    if (sportsSkill.isEmpty()) {
+    if (optionalSportsSkill.isEmpty()) {
       sportsSkillRepository.save(new SportsSkillEntity(toMember, sports, request.getSportsScore()));
     } else {
-      sportsSkill.get().updateSportsSkill(request.getSportsScore());
+      SportsSkillEntity sportsSkill = optionalSportsSkill.get();
+      sportsSkill.updateSportsSkill(request.getSportsScore());
+      sportsSkillRepository.save(sportsSkill);
     }
 
     //Participant에서 타인 평가 여부 변경

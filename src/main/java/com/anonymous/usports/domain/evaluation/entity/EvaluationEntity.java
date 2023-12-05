@@ -4,6 +4,7 @@ package com.anonymous.usports.domain.evaluation.entity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
@@ -64,4 +65,20 @@ public class EvaluationEntity {
   @Column(name = "registered_at", nullable = false)
   private LocalDateTime registeredAt; //평가 일시
 
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    EvaluationEntity that = (EvaluationEntity) object;
+    return Objects.equals(evaluationId, that.evaluationId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(evaluationId);
+  }
 }
