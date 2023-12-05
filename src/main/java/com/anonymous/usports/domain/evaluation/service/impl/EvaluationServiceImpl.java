@@ -57,7 +57,7 @@ public class EvaluationServiceImpl implements EvaluationService {
         participantRepository.findByMemberAndRecruit(toMember, recruit)
             .orElseThrow(() -> new ParticipantException(ErrorCode.PARTICIPANT_NOT_FOUND));
 
-    this.validateRecruitStatusIsFinished(recruit);
+    this.validateRecruitIsFinished(recruit);
     this.validateEvaluationAlreadyExists(recruit, fromMember, toMember);
 
     EvaluationEntity saved =
@@ -83,7 +83,7 @@ public class EvaluationServiceImpl implements EvaluationService {
     return EvaluationRegister.Response.fromEntity(saved);
   }
 
-  private void validateRecruitStatusIsFinished(RecruitEntity recruit) {
+  private void validateRecruitIsFinished(RecruitEntity recruit) {
     if (recruit.getMeetingDate().isAfter(LocalDateTime.now())) {
       throw new EvaluationException(ErrorCode.RECRUIT_NOT_FINISHED);
     }
