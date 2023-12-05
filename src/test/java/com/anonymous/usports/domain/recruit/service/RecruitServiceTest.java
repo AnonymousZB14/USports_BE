@@ -453,7 +453,7 @@ class RecruitServiceTest {
       SportsEntity sports = createSports(1000L);
       MemberEntity member = createMember(1L);
       RecruitEntity recruit = createRecruit(10L, member, sports);
-      recruit.setRecruitStatus(RecruitStatus.ALMOST_FINISHED);
+      recruit.setRecruitStatus(RecruitStatus.ALMOST_END);
 
       //given
       when(recruitRepository.findById(10L))
@@ -517,7 +517,7 @@ class RecruitServiceTest {
       //then
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getMessage()).isEqualTo(ResponseConstant.END_RECRUIT_CANCELED);
-      assertThat(recruit.getRecruitStatus()).isEqualTo(RecruitStatus.ALMOST_FINISHED);
+      assertThat(recruit.getRecruitStatus()).isEqualTo(RecruitStatus.ALMOST_END);
     }
 
     @Test
