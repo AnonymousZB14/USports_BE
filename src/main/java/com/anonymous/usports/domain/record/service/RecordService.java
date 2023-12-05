@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.record.service;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister;
+import com.anonymous.usports.domain.record.dto.RecordUpdate;
 import com.anonymous.usports.global.type.RecordType;
 import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +21,7 @@ public interface RecordService {
    */
   RecordListDto getRecordsPage(RecordType recordType, int page, Long loginMemberId);
 
-  void updateRecord();
+  RecordDto updateRecord(Long recordId, RecordUpdate.Request request, Long loginMemberId);
 
   /**
    * 기록 게시글 삭제
