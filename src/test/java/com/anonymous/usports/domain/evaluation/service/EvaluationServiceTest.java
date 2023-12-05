@@ -1,8 +1,10 @@
 package com.anonymous.usports.domain.evaluation.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.BDDMockito.times;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.when;
 
 import com.anonymous.usports.domain.evaluation.dto.EvaluationRegister;
 import com.anonymous.usports.domain.evaluation.dto.EvaluationRegister.Request;
@@ -16,15 +18,12 @@ import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
-import com.anonymous.usports.domain.recruit.service.impl.RecruitServiceImpl;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
-import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.EvaluationException;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
-import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
@@ -32,12 +31,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -116,7 +113,7 @@ class EvaluationServiceTest {
   }
 
   private EvaluationEntity createEvaluation(
-      Long id, RecruitEntity recruit, MemberEntity fromMember, MemberEntity toMember){
+      Long id, RecruitEntity recruit, MemberEntity fromMember, MemberEntity toMember) {
     return EvaluationEntity.builder()
         .evaluationId(id)
         .recruit(recruit)
@@ -132,17 +129,22 @@ class EvaluationServiceTest {
 
   @Nested
   @DisplayName("평가 등록하기")
-  class RegisterEvaluation{
+  class RegisterEvaluation {
+
     @Test
     @DisplayName("성공 1 : SportsSkill 첫 등록")
-    void registerEvaluation_SportsSkill_doesnt_exists(){
+    void registerEvaluation_SportsSkill_doesnt_exists() {
       MemberEntity recruitOwnerMember = createMember(3L);
       SportsEntity sports = createSports(99L, "축구");
       RecruitEntity recruit = createRecruit(999L, recruitOwnerMember, sports);
-      MemberEntity fromMember = createMember(1L);
-      MemberEntity toMember = createMember(2L);
+
+      MemberEntity fromMember = createMember(1L); //평가자
+      MemberEntity toMember = createMember(2L); //피 평가자
+
+      //첫번째 멤버의 기록, participant의 evaluate_at을 변경하기 위함
       ParticipantEntity participantOfFromMember = createParticipant(100L, fromMember, recruit);
-      ParticipantEntity participantOfToMember = createParticipant(101L, toMember, recruit);
+      ParticipantEntity participantOfToMember = createParticipant(101L, toMember, recruit); //해당 participant는 사용되지는 않음.
+
       EvaluationEntity evaluation = createEvaluation(1000L, recruit, fromMember, toMember);
 
       EvaluationRegister.Request request =
@@ -155,7 +157,6 @@ class EvaluationServiceTest {
               .sportsScore(5)
               .build();
 
-
       //given
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(fromMember));
@@ -167,7 +168,8 @@ class EvaluationServiceTest {
           .thenReturn(Optional.of(participantOfFromMember));
       when(participantRepository.findByMemberAndRecruit(toMember, recruit))
           .thenReturn(Optional.of(participantOfToMember));
-      when(evaluationRepository.existsByRecruitAndFromMemberAndToMember(recruit, fromMember, toMember))
+      when(evaluationRepository.existsByRecruitAndFromMemberAndToMember(recruit, fromMember,
+          toMember))
           .thenReturn(false);
 
       when(evaluationRepository.save(Request.toEntity(request, recruit, fromMember, toMember)))
@@ -192,20 +194,26 @@ class EvaluationServiceTest {
       assertThat(toMember.getPassionScore()).isEqualTo(5);
       assertThat(toMember.getTeamworkScore()).isEqualTo(5);
       assertThat(toMember.getMannerScore()).isEqualTo(5);
+
+      assertThat(participantOfFromMember.getEvaluationAt()).isNotNull();
     }
 
     @Test
     @DisplayName("성공 2 : 기존 SportsSkill update")
-    void registerEvaluation_SportsSkill_exists(){
+    void registerEvaluation_SportsSkill_exists() {
       MemberEntity recruitOwnerMember = createMember(3L);
       SportsEntity sports = createSports(99L, "축구");
       RecruitEntity recruit = createRecruit(999L, recruitOwnerMember, sports);
+
       MemberEntity fromMember = createMember(1L);
       MemberEntity toMember = createMember(2L);
+
       ParticipantEntity participantOfFromMember = createParticipant(100L, fromMember, recruit);
       ParticipantEntity participantOfToMember = createParticipant(101L, toMember, recruit);
+
       EvaluationEntity evaluation = createEvaluation(1000L, recruit, fromMember, toMember);
       SportsSkillEntity sportsSkill = new SportsSkillEntity(toMember, sports, 5);
+
       EvaluationRegister.Request request =
           EvaluationRegister.Request.builder()
               .recruitId(999L)
@@ -227,7 +235,8 @@ class EvaluationServiceTest {
           .thenReturn(Optional.of(participantOfFromMember));
       when(participantRepository.findByMemberAndRecruit(toMember, recruit))
           .thenReturn(Optional.of(participantOfToMember));
-      when(evaluationRepository.existsByRecruitAndFromMemberAndToMember(recruit, fromMember, toMember))
+      when(evaluationRepository.existsByRecruitAndFromMemberAndToMember(recruit, fromMember,
+          toMember))
           .thenReturn(false);
 
       when(evaluationRepository.save(Request.toEntity(request, recruit, fromMember, toMember)))
@@ -255,21 +264,27 @@ class EvaluationServiceTest {
 
       assertThat(sportsSkill.getEvaluateCount()).isEqualTo(2);
       assertThat(sportsSkill.getSportsScore()).isEqualTo(10);
+
+      assertThat(participantOfFromMember.getEvaluationAt()).isNotNull();
     }
 
     @Test
     @DisplayName("실패 : RECRUIT_NOT_FINISHED")
-    void registerEvaluation_RECRUIT_NOT_FINISHED(){
+    void registerEvaluation_RECRUIT_NOT_FINISHED() {
       MemberEntity recruitOwnerMember = createMember(3L);
       SportsEntity sports = createSports(99L, "축구");
       RecruitEntity recruit = createRecruit(999L, recruitOwnerMember, sports);
-      recruit.setMeetingDate(LocalDateTime.now().plusHours(1L));
+      recruit.setMeetingDate(LocalDateTime.now().plusHours(1L)); //meetingDate가 지나지 않은 경우를 가정
+
       MemberEntity fromMember = createMember(1L);
       MemberEntity toMember = createMember(2L);
+
       ParticipantEntity participantOfFromMember = createParticipant(100L, fromMember, recruit);
       ParticipantEntity participantOfToMember = createParticipant(101L, toMember, recruit);
+
       EvaluationEntity evaluation = createEvaluation(1000L, recruit, fromMember, toMember);
       SportsSkillEntity sportsSkill = new SportsSkillEntity(toMember, sports, 5);
+
       EvaluationRegister.Request request =
           EvaluationRegister.Request.builder()
               .recruitId(999L)
@@ -296,14 +311,15 @@ class EvaluationServiceTest {
       //then
       EvaluationException exception =
           catchThrowableOfType(() ->
-              evaluationService.registerEvaluation(request, fromMember.getMemberId()), EvaluationException.class);
+                  evaluationService.registerEvaluation(request, fromMember.getMemberId()),
+              EvaluationException.class);
 
       assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FINISHED);
     }
 
     @Test
     @DisplayName("실패 : EVALUATION_ALREADY_EXISTS")
-    void registerEvaluation_EVALUATION_ALREADY_EXISTS(){
+    void registerEvaluation_EVALUATION_ALREADY_EXISTS() {
       MemberEntity recruitOwnerMember = createMember(3L);
       SportsEntity sports = createSports(99L, "축구");
       RecruitEntity recruit = createRecruit(999L, recruitOwnerMember, sports);
@@ -334,18 +350,19 @@ class EvaluationServiceTest {
           .thenReturn(Optional.of(participantOfFromMember));
       when(participantRepository.findByMemberAndRecruit(toMember, recruit))
           .thenReturn(Optional.of(participantOfToMember));
-      when(evaluationRepository.existsByRecruitAndFromMemberAndToMember(recruit, fromMember, toMember))
+      when(evaluationRepository.existsByRecruitAndFromMemberAndToMember(recruit, fromMember,
+          toMember))
           .thenReturn(true);
 
       //when
       //then
       EvaluationException exception =
           catchThrowableOfType(() ->
-              evaluationService.registerEvaluation(request, fromMember.getMemberId()), EvaluationException.class);
+                  evaluationService.registerEvaluation(request, fromMember.getMemberId()),
+              EvaluationException.class);
 
       assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EVALUATION_ALREADY_EXISTS);
     }
-
 
   }
 
