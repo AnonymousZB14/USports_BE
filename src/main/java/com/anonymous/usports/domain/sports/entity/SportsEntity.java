@@ -1,15 +1,9 @@
 package com.anonymous.usports.domain.sports.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import javax.persistence.*;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -26,4 +20,17 @@ public class SportsEntity {
 
   @Column(name = "sports_name", nullable = false, unique = true)
   private String sportsName;
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    SportsEntity that = (SportsEntity) o;
+    return Objects.equals(sportsId, that.sportsId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(sportsId);
+  }
 }

@@ -23,6 +23,11 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 @Entity(name = "Member")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,88 +37,88 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class MemberEntity {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "member_id", nullable = false)
-  private Long memberId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "member_id", nullable = false)
+    private Long memberId;
 
-  @Column(name = "account_name", nullable = false, unique = true, length = 100)
-  private String accountName;
+    @Column(name = "account_name", nullable = false, unique = true, length = 100)
+    private String accountName;
 
-  @Column(name = "name", nullable = false, length = 100)
-  private String name;
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
 
-  @Column(name = "email", nullable = false, unique = true, length = 100)
-  private String email;
+    @Column(name = "email", nullable = false, unique = true, length = 100)
+    private String email;
 
-  @Column(name = "password", nullable = false)
-  private String password;
+    @Column(name = "password", nullable = false)
+    private String password;
 
-  @Column(name = "phone_number", nullable = false, unique = true, length = 100)
-  private String phoneNumber;
+    @Column(name = "phone_number", nullable = false, unique = true, length = 100)
+    private String phoneNumber;
 
-  @Column(name = "birth_date", nullable = false)
-  private LocalDate birthDate;
+    @Column(name = "birth_date", nullable = false)
+    private LocalDate birthDate;
 
-  @Column(name = "gender", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private Gender gender;
+    @Column(name = "gender", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
-  @Column(name = "profile_content", length = 100)
-  private String profileContent;
+    @Column(name = "profile_content", length = 100)
+    private String profileContent;
 
-  @Column(name = "profile_image")
-  private String profileImage;
+    @Column(name = "profile_image")
+    private String profileImage;
 
-  @Column(name = "registered_at", nullable = false)
-  @CreatedDate
-  private LocalDateTime registeredAt;
+    @Column(name = "registered_at", nullable = false)
+    @CreatedDate
+    private LocalDateTime registeredAt;
 
-  @Column(name = "updated_at", nullable = false)
-  @LastModifiedDate
-  private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
 
-  @Column(name = "email_auth_at")
-  private LocalDateTime emailAuthAt;
+    @Column(name = "email_auth_at")
+    private LocalDateTime emailAuthAt;
 
-  @Column(name = "address_city", length = 100)
-  private String addrCity;
+    @Column(name = "address_city", length = 100)
+    private String addrCity;
 
-  @Column(name = "address_district", length = 100)
-  private String addrDistrict;
+    @Column(name = "address_district", length = 100)
+    private String addrDistrict;
 
-  @Column(name = "profile_open", nullable = false)
-  private boolean profileOpen;
+    @Column(name = "profile_open", nullable = false)
+    private boolean profileOpen;
 
   @Column(name = "manner_score")
   private Double mannerScore;
 
-  @Column(name = "kindness_score")
-  private Long kindnessScore;
+    @Column(name = "kindness_score")
+    private Long kindnessScore;
 
-  @Column(name = "passion_score")
-  private Long passionScore;
+    @Column(name = "passion_score")
+    private Long passionScore;
 
-  @Column(name = "teamwork_score")
-  private Long teamworkScore;
+    @Column(name = "teamwork_score")
+    private Long teamworkScore;
 
-  @Column(name = "evaluation_count")
-  private Long evaluationCount;
+    @Column(name = "evaluation_count")
+    private Long evaluationCount;
 
-  @Column(name = "role", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private Role role;
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 
-  public void updateMember(MemberUpdate.Request request) {
+    public void updateMember(MemberUpdate.Request request) {
 
-    String profileOpen = request.getProfileOpen().toLowerCase();
+        String profileOpen = request.getProfileOpen().toLowerCase();
 
-    if (profileOpen.equals("open")) {
-      this.profileOpen = true;
-    } else {
-      this.profileOpen = false;
-    }
+        if (profileOpen.equals("open")) {
+            this.profileOpen = true;
+        } else {
+            this.profileOpen = false;
+        }
 
     this.accountName = request.getAccountName();
     this.name = request.getName();

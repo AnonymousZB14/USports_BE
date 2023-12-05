@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -78,6 +79,7 @@ public class MemberUpdate {
         private String profileImage;
         private String addrCity;
         private String addrDistrict;
+        private Role role;
         private List<String> interestedSports;
 
         public static MemberUpdate.Response fromEntity(MemberEntity memberEntity) {
@@ -93,6 +95,7 @@ public class MemberUpdate {
                     .profileImage(memberEntity.getProfileImage())
                     .addrCity(memberEntity.getAddrCity())
                     .addrDistrict(memberEntity.getAddrDistrict())
+                    .role(memberEntity.getRole())
                     .build();
         }
 

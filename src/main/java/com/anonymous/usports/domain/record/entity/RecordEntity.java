@@ -2,8 +2,12 @@ package com.anonymous.usports.domain.record.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
+import com.anonymous.usports.global.config.StringListConverter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
@@ -31,6 +35,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @DynamicInsert //TODO @ColumnDefault가 create할 때 작동하기 때문에 넣었습니다. 나중에 제거할 생각입니다.
 public class RecordEntity {
+
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "record_id", nullable = false)
@@ -58,4 +63,10 @@ public class RecordEntity {
   @Column(name = "count_comment", nullable = false)
   @ColumnDefault("0")
   private Long countComment;
+
+  @Convert(converter = StringListConverter.class)
+  @Column(name = "image_address", columnDefinition = "TEXT")
+  private List<String> imageAddress = new ArrayList<>();
+
+
 }

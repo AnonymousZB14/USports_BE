@@ -12,7 +12,8 @@ public interface RecordService {
   /**
    * 기록 게시글 등록
    */
-  RecordDto saveRecord(RecordRegister.Request request, Long loginMemberId, List<MultipartFile> images);
+  RecordDto saveRecord(RecordRegister.Request request, Long loginMemberId,
+      List<MultipartFile> images);
 
   /**
    * 기록 게시글 리스트 출력
