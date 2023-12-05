@@ -225,7 +225,7 @@ public class MemberServiceTest {
         }
 
         @Test
-        @DisplayName("회원가입 실패 - 이메일이 이미 있음")
+        @DisplayName("회원가입 실패 - 폰번호가 이미 있음")
         void failPhoneNumberAlreadyExist() {
             //given
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -483,7 +483,7 @@ public class MemberServiceTest {
             MemberWithdraw.Request request = new MemberWithdraw.Request("abcd1234!");
 
             //when
-            when(memberRepository.findById(memberId))
+            when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.empty());
 
             MemberException exception =
@@ -504,7 +504,7 @@ public class MemberServiceTest {
             MemberWithdraw.Request request = new MemberWithdraw.Request("bcd1234!");
 
             //when
-            when(memberRepository.findById(memberId))
+            when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.of(member));
             when(passwordEncoder.matches(request.getPassword(), member.getPassword()))
                     .thenReturn(false);
@@ -527,7 +527,7 @@ public class MemberServiceTest {
             MemberWithdraw.Request request = new MemberWithdraw.Request("abcd1234!");
 
             //when
-            when(memberRepository.findById(memberId))
+            when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.of(member));
             when(passwordEncoder.matches(request.getPassword(), member.getPassword()))
                     .thenReturn(true);
@@ -567,7 +567,7 @@ public class MemberServiceTest {
             MemberWithdraw.Request request = new MemberWithdraw.Request("abcd1234!");
 
             //when
-            when(memberRepository.findById(memberId))
+            when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.empty());
 
             MemberException exception =
@@ -588,7 +588,7 @@ public class MemberServiceTest {
             MemberWithdraw.Request request = new MemberWithdraw.Request("bcd1234!");
 
             //when
-            when(memberRepository.findById(memberId))
+            when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.of(member));
             when(passwordEncoder.matches(request.getPassword(), member.getPassword()))
                     .thenReturn(false);
@@ -1321,7 +1321,7 @@ public class MemberServiceTest {
             Long memberId = 1L;
 
             //when
-            when(memberRepository.existsById(memberId))
+            when(memberRepository.existsById(memberDto.getMemberId()))
                     .thenReturn(true);
 
             MailResponse response = memberService.resendEmailAuth(memberDto, memberId);
@@ -1341,7 +1341,7 @@ public class MemberServiceTest {
             Long memberId = 1L;
 
             //when
-            when(memberRepository.existsById(memberId))
+            when(memberRepository.existsById(memberDto.getMemberId()))
                     .thenReturn(false);
 
             MemberException exception = catchThrowableOfType(
