@@ -33,4 +33,18 @@ public class MyExceptionHandler {
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
   }
 
+  @ExceptionHandler(RecruitException.class)
+  public ResponseEntity<ErrorResponse> handleRecordException(RecruitException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+    return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
+
+  @ExceptionHandler(ParticipantException.class)
+  public ResponseEntity<ErrorResponse> handleRecordException(ParticipantException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+    return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
+
+
+
 }

@@ -7,6 +7,7 @@ import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
@@ -21,9 +22,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -116,6 +119,21 @@ public class RecruitEntity {
 
   public void participantAdded(){
     this.currentCount = this.currentCount + 1;
+    if(this.currentCount == this.recruitCount){
+      this.recruitStatus = RecruitStatus.END;
+    }else if((double)this.currentCount / this.recruitCount >= 0.7){
+      this.recruitStatus = RecruitStatus.ALMOST_FINISHED;
+    }
+  }
+
+  public void participantCanceled(){
+    if(this.currentCount == 0){
+      return;
+    }
+    this.currentCount = this.currentCount - 1;
+    if(this.recruitStatus == RecruitStatus.ALMOST_FINISHED && (double)this.currentCount / this.recruitCount <= 0.7){
+      this.recruitStatus = RecruitStatus.RECRUITING;
+    }
   }
 
   public void statusToEnd(){
@@ -131,4 +149,20 @@ public class RecruitEntity {
   }
 
 
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    RecruitEntity that = (RecruitEntity) object;
+    return Objects.equals(recruitId, that.recruitId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(recruitId);
+  }
 }

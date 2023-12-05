@@ -14,6 +14,8 @@ public class ResponseConstant {
   public static final String END_RECRUIT_COMPLETE = "모집 마감이 완료되었습니다.";
   public static final String END_RECRUIT_CANCELED = "모집 마감이 취소되고, 다시 등록되었습니다.";
   public static final String END_RECRUIT_CANCEL_REFUSED = "인원 수가 가득 차서 마감을 취소할 수 없습니다.";
+  public static final String CANCEL_JOIN_RECRUIT = "모집 신청이 취소되었습니다.";
+
 
   // 맴버 관련
   public static final String MEMBER_DELETE_SUCCESS = "회원 탈퇴를 성공적으로 했습니다";
@@ -22,6 +24,7 @@ public class ResponseConstant {
 
   // 기록 관련
   public static final String CREATE_RECORD = "기록이 저장되었습니다.";
+  public static final String DELETE_RECORD = "기록이 삭제되었습니다.";
 
   //팔로우 관련
   public static final String REGISTER_FOLLOW = "팔로우를 신청했습니다.";

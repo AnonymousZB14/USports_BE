@@ -1,9 +1,9 @@
 package com.anonymous.usports.domain.participant.controller;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
-import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
+import com.anonymous.usports.domain.participant.dto.ParticipateCancel;
 import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 import com.anonymous.usports.domain.participant.service.ParticipantService;
 import io.swagger.annotations.ApiOperation;
@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,8 +55,20 @@ public class ParticipantController {
 
     ParticipantManage.Response result =
         participantService.manageJoinRecruit(request, recruitId,
-        loginMember.getMemberId());
+            loginMember.getMemberId());
 
     return ResponseEntity.ok(result);
   }
+
+
+  @ApiOperation("운동 모집 신청 취소")
+  @PutMapping("/recruit/{recruitId}/cancel")
+  public ResponseEntity<?> cancelJoinRecruit(@PathVariable Long recruitId,
+      @AuthenticationPrincipal MemberDto loginMember) {
+    ParticipateCancel result =
+        participantService.cancelJoinRecruit(recruitId, loginMember.getMemberId());
+
+    return ResponseEntity.ok(result);
+  }
+
 }

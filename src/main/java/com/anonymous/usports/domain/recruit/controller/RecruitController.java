@@ -73,7 +73,7 @@ public class RecruitController {
   @DeleteMapping("/recruit/{recruitId}")
   public ResponseEntity<?> deleteRecruit(@PathVariable Long recruitId,
       @AuthenticationPrincipal MemberDto loginMember) {
-    //TODO : 게시글 삭제 전에 Participant 모두 삭제? 멘토님께 여쭤보기.
+
     RecruitDto result = recruitService.deleteRecruit(recruitId, loginMember.getMemberId());
     return ResponseEntity.ok(new RecruitDeleteResponse(result));
   }

@@ -14,4 +14,5 @@ import org.springframework.stereotype.Repository;
 public interface ParticipantRepository extends JpaRepository<ParticipantEntity, Long> {
   Optional<ParticipantEntity> findByMemberAndRecruitAndStatus(MemberEntity member, RecruitEntity recruit, ParticipantStatus status);
   Page<ParticipantEntity> findAllByRecruitAndStatusOrderByParticipantId(RecruitEntity recruit, ParticipantStatus status, Pageable pageable);
+  void deleteAllByRecruit(RecruitEntity recruit);
 }
