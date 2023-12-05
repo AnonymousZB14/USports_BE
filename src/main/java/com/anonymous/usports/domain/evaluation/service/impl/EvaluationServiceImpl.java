@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.evaluation.service.impl;
 import com.anonymous.usports.domain.evaluation.dto.EvaluationRegister;
 import com.anonymous.usports.domain.evaluation.dto.EvaluationRegister.Request;
 import com.anonymous.usports.domain.evaluation.dto.EvaluationRegister.Response;
+import com.anonymous.usports.domain.evaluation.dto.MannerDto;
 import com.anonymous.usports.domain.evaluation.entity.EvaluationEntity;
 import com.anonymous.usports.domain.evaluation.repository.EvaluationRepository;
 import com.anonymous.usports.domain.evaluation.service.EvaluationService;
@@ -10,6 +11,7 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
+import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.EvaluationException;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
@@ -53,6 +55,7 @@ public class EvaluationServiceImpl implements EvaluationService {
     EvaluationEntity saved =
         evaluationRepository.save(Request.toEntity(request, recruit, fromMember, toMember));
 
+    toMember.updateManners(MannerDto.fromEvaluationEntity(saved));
 
     return EvaluationRegister.Response.fromEntity(saved);
   }
