@@ -120,18 +120,22 @@ public class RecordServiceImpl implements RecordService {
           throw new RecordException(ErrorCode.INVALID_IMAGE_EXTENSION);
         }
       }
+      return recordImages;
     } catch (RecordException e) {
-      for (String imageAddress : recordImages) {
-        deleteImageFromS3(imageAddress);
+      if(!recordImages.isEmpty()){
+        for (String imageAddress : recordImages) {
+          deleteImageFromS3(imageAddress);
+        }
       }
       throw new RecordException(e.getErrorCode(),e.getErrorMessage());
     } catch (Exception e) {
-      for (String imageAddress : recordImages) {
-        deleteImageFromS3(imageAddress);
+      if(!recordImages.isEmpty()){
+        for (String imageAddress : recordImages) {
+          deleteImageFromS3(imageAddress);
+        }
       }
       throw new MyException(ErrorCode.IMAGE_SAVE_ERROR);
     }
-    return recordImages;
   }
 
   /**
