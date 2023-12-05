@@ -16,6 +16,9 @@ public class ResponseConstant {
   public static final String END_RECRUIT_CANCEL_REFUSED = "인원 수가 가득 차서 마감을 취소할 수 없습니다.";
   public static final String CANCEL_JOIN_RECRUIT = "모집 신청이 취소되었습니다.";
 
+  //평가 관련
+  public static final String EVALUATION_SUCCEED = "평가가 완료되었습니다.";
+
 
   // 맴버 관련
   public static final String MEMBER_DELETE_SUCCESS = "회원 탈퇴를 성공적으로 했습니다";

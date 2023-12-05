@@ -53,7 +53,7 @@ public class MemberDto implements UserDetails {
 
     private boolean profileOpen;
 
-    private Long mannerScore;
+    private Double mannerScore;
 
     private Long kindnessScore;
 
@@ -61,7 +61,7 @@ public class MemberDto implements UserDetails {
 
     private Long teamworkScore;
 
-    private Long evaulationCount;
+    private Long evaluationCount;
 
     private Role role;
 
@@ -87,7 +87,7 @@ public class MemberDto implements UserDetails {
                 .kindnessScore(memberEntity.getKindnessScore())
                 .passionScore(memberEntity.getPassionScore())
                 .teamworkScore(memberEntity.getTeamworkScore())
-                .evaulationCount(memberEntity.getEvaluationCount())
+                .evaluationCount(memberEntity.getEvaluationCount())
                 .role(memberEntity.getRole())
                 .build();
     }

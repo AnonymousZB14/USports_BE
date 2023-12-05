@@ -36,6 +36,11 @@ public enum ErrorCode {
   APPLICANT_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "지원자 회원을 찾을 수 없습니다."),
   PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, "모집 글 참여 신청 건을 찾을 수 없습니다."),
   RECRUIT_ALREADY_END(HttpStatus.NOT_FOUND, "이미 마감 된 모집 글 입니다."),
+  RECRUIT_NOT_FINISHED(HttpStatus.NOT_FOUND, "아직 모임이 종료되지 않았습니다. 종료 후에 평가할 수 있습니다."),
+
+  //Evaluation 관련
+  EVALUATION_ALREADY_EXISTS(HttpStatus.NOT_FOUND, "이미 평가가 완료된 건 입니다."),
+
 
 
 

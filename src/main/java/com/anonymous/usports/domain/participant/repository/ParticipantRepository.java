@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ParticipantRepository extends JpaRepository<ParticipantEntity, Long> {
   Optional<ParticipantEntity> findByMemberAndRecruitAndStatus(MemberEntity member, RecruitEntity recruit, ParticipantStatus status);
+  Optional<ParticipantEntity> findByMemberAndRecruit(MemberEntity member, RecruitEntity recruit);
   Page<ParticipantEntity> findAllByRecruitAndStatusOrderByParticipantId(RecruitEntity recruit, ParticipantStatus status, Pageable pageable);
   void deleteAllByRecruit(RecruitEntity recruit);
 }
