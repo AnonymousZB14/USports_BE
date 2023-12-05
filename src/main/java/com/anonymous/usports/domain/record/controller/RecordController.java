@@ -1,6 +1,5 @@
 package com.anonymous.usports.domain.record.controller;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.record.dto.RecordDelete;
 import com.anonymous.usports.domain.record.dto.RecordDto;
@@ -37,9 +36,9 @@ public class RecordController {
   }
 
   @ApiOperation("팔로우, 추천 기록 내용 보기")
-  @GetMapping("/home/{recordType}")
+  @GetMapping("/home")
   public ResponseEntity<RecordListDto> getRecordList(
-      @PathVariable RecordType recordType,
+      @RequestParam(value = "type", defaultValue = "RECOMMENDATION") RecordType recordType,
       @RequestParam("page") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
     RecordListDto records = recordService.getRecordsPage(recordType, page,
