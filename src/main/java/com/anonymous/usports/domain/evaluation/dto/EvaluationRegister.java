@@ -13,11 +13,13 @@ import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
+import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.format.annotation.DateTimeFormat;
 
 public class EvaluationRegister {
@@ -29,12 +31,19 @@ public class EvaluationRegister {
   public static class Request {
 
     private Long recruitId; //모집글 Id
+
     private Long toMemberId; //피평가자 Id
 
+    @Range(min = 1, max = 10)
     private int kindness;
+
+    @Range(min = 1, max = 10)
     private int passion;
+
+    @Range(min = 1, max = 10)
     private int teamwork;
 
+    @Range(min = 1, max = 10)
     private int sportsScore;
 
     public static EvaluationEntity toEntity(
