@@ -47,6 +47,10 @@ public enum ErrorCode {
   INVALID_IMAGE_URL(HttpStatus.BAD_REQUEST,"이용할 수 없는 이미지 URL입니다."),
   UNABLE_TO_CONVERT_LIST_TO_STRING(HttpStatus.BAD_REQUEST,"이미지 리스트를 저장하는 과정에서 오류가 발생했습니다."),
   UNABLE_TO_CONVERT_STRING_TO_LIST(HttpStatus.BAD_REQUEST, "이미지 리스트를 불러오는 과정에서 오류가 발생했습니다."),
+  MINIMUM_IMAGE_RESTRICT(HttpStatus.BAD_REQUEST,"적어도 한 개 이상의 이미지가 게시글에 있어야 합니다."),
+  RECORD_UPDATE_ERROR(HttpStatus.BAD_REQUEST,"기록 수정 중 에러가 발생했습니다."),
+  RECORD_DELETE_ERROR(HttpStatus.BAD_REQUEST,"기록 삭제 중 에러가 발생했습니다."),
+  INVALID_IMAGE_EXTENSION(HttpStatus.BAD_REQUEST,"업로드 할 수 없는 확장자입니다."),
 
   //Follow 관련
   FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND,"팔로우를 찾을 수 없습니다."),

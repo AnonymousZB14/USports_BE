@@ -6,6 +6,7 @@ import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister;
 import com.anonymous.usports.domain.record.dto.RecordRegister.Response;
+import com.anonymous.usports.domain.record.dto.RecordUpdate;
 import com.anonymous.usports.domain.record.service.RecordService;
 import com.anonymous.usports.global.type.RecordType;
 import io.swagger.annotations.ApiOperation;
@@ -17,6 +18,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,6 +69,15 @@ public class RecordController {
       @AuthenticationPrincipal MemberDto loginMember) {
     RecordDto recordDto = recordService.deleteRecord(recordId, loginMember.getMemberId());
     return ResponseEntity.ok(new RecordDelete.Response(recordDto));
+  }
+
+  @ApiOperation("기록 수정하기")
+  @PutMapping("/record/{recordId}")
+  public ResponseEntity<RecordUpdate.Response> updateRecord(@PathVariable Long recordId,
+      @RequestBody RecordUpdate.Request request,
+      @AuthenticationPrincipal MemberDto loginMember) {
+    RecordDto updateRecord = recordService.updateRecord(recordId, request, loginMember.getMemberId());
+    return ResponseEntity.ok(new RecordUpdate.Response(updateRecord));
   }
 
 }
