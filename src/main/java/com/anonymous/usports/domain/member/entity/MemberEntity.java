@@ -86,7 +86,7 @@ public class MemberEntity {
   private boolean profileOpen;
 
   @Column(name = "manner_score")
-  private double mannerScore;
+  private Double mannerScore;
 
   @Column(name = "kindness_score")
   private Long kindnessScore;

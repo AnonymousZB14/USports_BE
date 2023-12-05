@@ -53,7 +53,7 @@ public class MemberDto implements UserDetails {
 
     private boolean profileOpen;
 
-    private double mannerScore;
+    private Double mannerScore;
 
     private Long kindnessScore;
 
