@@ -30,7 +30,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = getTokenFromRequest(request);
 
-        if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
+        if (StringUtils.hasText(token) && tokenProvider.validateToken(token)
+                && !tokenProvider.isAccessTokenDenied(token)) {
             // 토큰 유효성 검증
             Authentication auth = tokenProvider.getAuthentication(token);
 

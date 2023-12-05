@@ -14,12 +14,14 @@ import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
+import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.recruit.service.impl.RecruitServiceImpl;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
+import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
@@ -29,6 +31,13 @@ import com.anonymous.usports.global.exception.SportsException;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,6 +46,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -94,13 +106,17 @@ class RecruitServiceTest {
         .recruitCount(10)
         .meetingDate(LocalDateTime.now())
         .recruitStatus(RecruitStatus.RECRUITING)
+        .registeredAt(LocalDateTime.now())
         .gradeFrom(1)
         .gradeTo(10)
         .build();
   }
-
   private SportsEntity createSports(Long id) {
-    return new SportsEntity(id, "sportsName");
+    return new SportsEntity(id, "football");
+  }
+
+  private SportsEntity createSports(Long id, String sportsName) {
+    return new SportsEntity(id, sportsName);
   }
 
   @Nested
@@ -594,6 +610,90 @@ class RecruitServiceTest {
 
       assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NO_AUTHORITY_ERROR);
     }
+  }
 
+  @Nested
+  @DisplayName("Recruit 필터링 검색")
+  class GetRecruitsByConditions{
+    @Test
+    @DisplayName("성공")
+    void getRecruitsByConditions(){
+      MemberEntity memberEntity = createMember(1L);
+      SportsEntity football = createSports(1000L, "축구");
+      List<RecruitEntity> recruitList = new ArrayList<>();
+
+      int page = 1;
+      String search = "title";
+      String region = "대구";
+      String footballString = "축구";
+      Gender gender = Gender.MALE;
+      boolean closeInclude = false;
+
+      for(long i = 101; i <= 108; i++){
+        RecruitEntity recruit = createRecruit(i, memberEntity, football);
+        recruit.setRegion(region);
+        recruit.setGender(gender);
+        recruitList.add(recruit);
+      }
+      //given
+      when(sportsRepository.findBySportsName(footballString))
+          .thenReturn(Optional.of(football));
+
+      when(recruitRepository.findAllByConditionNotIncludeEND(
+          search, region, football, gender,
+          PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT, Sort.by("registeredAt").descending())))
+          .thenReturn(new PageImpl<>(recruitList));
+      //when
+      RecruitSearchListDto result =
+          recruitService.getRecruitsByConditions(
+              page, search, region, footballString, gender, closeInclude);
+
+      //then
+      assertThat(result.getCurrentElements()).isEqualTo(8);
+      assertThat(result.getTotalPages()).isEqualTo(1);
+      List<RecruitDto> list = result.getList();
+      for (RecruitDto r : list){
+        assertThat(r.getTitle().contains(search)).isTrue();
+        assertThat(r.getRegion()).isEqualTo(region);
+        assertThat(r.getSportsId()).isEqualTo(football.getSportsId());
+        assertThat(r.getGender()).isEqualTo(Gender.MALE);
+        assertThat(r.getRecruitStatus()).isNotEqualTo(RecruitStatus.END);
+      }
+    }
+
+    @Test
+    @DisplayName("실패 - SPORTS_NOT_FOUND")
+    void getRecruitsByConditions_SPORTS_NOT_FOUND(){
+      MemberEntity memberEntity = createMember(1L);
+      SportsEntity football = createSports(1000L, "축구");
+      List<RecruitEntity> recruitList = new ArrayList<>();
+
+      int page = 1;
+      String search = "title";
+      String region = "대구";
+      String footballString = "축구";
+      Gender gender = Gender.MALE;
+      boolean closeInclude = false;
+
+      for(long i = 101; i <= 108; i++){
+        RecruitEntity recruit = createRecruit(i, memberEntity, football);
+        recruit.setRegion(region);
+        recruit.setGender(gender);
+        recruitList.add(recruit);
+      }
+      //given
+      when(sportsRepository.findBySportsName(footballString))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      SportsException exception =
+          catchThrowableOfType(() ->
+              recruitService.getRecruitsByConditions(
+                  page, search, region, footballString, gender, closeInclude), SportsException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SPORTS_NOT_FOUND);
+
+    }
   }
 }

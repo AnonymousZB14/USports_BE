@@ -1,10 +1,8 @@
 package com.anonymous.usports.domain.record.dto;
 
 import com.anonymous.usports.domain.record.entity.RecordEntity;
-import com.anonymous.usports.domain.record.entity.RecordImageEntity;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,7 +35,7 @@ public class RecordDto {
   private List<String> imageAddressList;
 
 
-  public static RecordDto fromEntity(RecordEntity recordEntity, List<RecordImageEntity> recordImageEntities) {
+  public static RecordDto fromEntity(RecordEntity recordEntity) {
     return RecordDto.builder()
         .recordId(recordEntity.getRecordId())
         .memberId(recordEntity.getMember().getMemberId())
@@ -47,7 +45,7 @@ public class RecordDto {
         .registeredAt(recordEntity.getRegisteredAt())
         .updatedAt(recordEntity.getUpdatedAt())
         .countComment(recordEntity.getCountComment())
-        .imageAddressList(recordImageEntities.stream().map(x->x.getImageAddress()).collect(Collectors.toList()))
+        .imageAddressList(recordEntity.getImageAddress())
         .build();
   }
 }

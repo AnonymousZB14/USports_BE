@@ -6,6 +6,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.util.IOUtils;
 import com.anonymous.usports.domain.follow.entity.FollowEntity;
 import com.anonymous.usports.domain.follow.repository.FollowRepository;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
@@ -13,12 +14,9 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.record.dto.RecordDto;
-import com.anonymous.usports.domain.record.dto.RecordImageDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister.Request;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
-import com.anonymous.usports.domain.record.entity.RecordImageEntity;
-import com.anonymous.usports.domain.record.repository.RecordImageRepository;
 import com.anonymous.usports.domain.record.repository.RecordRepository;
 import com.anonymous.usports.domain.record.service.RecordService;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
@@ -29,6 +27,8 @@ import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.RecordException;
 import com.anonymous.usports.global.type.FollowStatus;
 import com.anonymous.usports.global.type.RecordType;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -49,12 +50,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RecordServiceImpl implements RecordService {
 
   private final MemberRepository memberRepository;
   private final RecordRepository recordRepository;
   private final SportsRepository sportsRepository;
-  private final RecordImageRepository recordImageRepository;
   private final InterestedSportsRepository interestedSportsRepository;
   private final FollowRepository followRepository;
   private final AmazonS3 amazonS3;
@@ -78,36 +79,30 @@ public class RecordServiceImpl implements RecordService {
     SportsEntity sports = sportsRepository.findById(request.getSportsId())
         .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND));
 
+    List<String> recordImageList = saveImages(images);
+
     RecordEntity recordEntity = recordRepository.save(
-        Request.toEntity(request, member, sports));
+        Request.toEntity(request, member, sports, recordImageList));
 
-    List<RecordImageEntity> recordImageEntities = saveImages(recordEntity, images);
-
-    return RecordDto.fromEntity(recordEntity, recordImageEntities);
+    return RecordDto.fromEntity(recordEntity);
   }
 
   /**
-   * RecordImageEntity에 이미지 정보 저장
+   * List<MultipartFile>을 List<String>으로 변경
    *
-   * @param recordEntity 연관 Record
-   * @param images       저장할 Images
-   * @return 저장한 List<RecordImageEntity>
+   * @param images 저장할 Images
+   * @return 저장한 List<String> 이미지 주소 반환
    */
-  private List<RecordImageEntity> saveImages(RecordEntity recordEntity,
-      List<MultipartFile> images) {
+  private List<String> saveImages(List<MultipartFile> images) {
     // 이미지 수 체크
     validateImageCount(images);
 
-    List<RecordImageEntity> recordImages = new ArrayList<>();
+    List<String> recordImages = new ArrayList<>();
 
     try {
       for (MultipartFile image : images) {
         String storedImagePath = uploadImageToS3(image);
-
-        RecordImageEntity recordImage = RecordImageDto.toEntity(recordEntity, storedImagePath);
-
-        RecordImageEntity savedImage = recordImageRepository.save(recordImage);
-        recordImages.add(savedImage);
+        recordImages.add(storedImagePath);
       }
     } catch (Exception e) {
       throw new RecordException(ErrorCode.IMAGE_SAVE_ERROR);
@@ -121,17 +116,21 @@ public class RecordServiceImpl implements RecordService {
    * @param image 저장할 image
    * @return 객체 URL을 반환
    */
-  private String uploadImageToS3(MultipartFile image) {
+  private String uploadImageToS3(MultipartFile image) throws IOException {
     // 이미지를 S3에 업로드하고 이미지의 URL을 반환
     String originName = image.getOriginalFilename(); // 원본 이미지 이름
     String ext = originName.substring(originName.lastIndexOf(".")); // 확장자
     String changedName = changedImageName(originName); // 새로 생성된 이미지 이름
-    ObjectMetadata metadata = new ObjectMetadata(); // 메타데이터
+    ObjectMetadata metadata = new ObjectMetadata();// 메타데이터
     metadata.setContentType("image/" + ext);
+    byte[] bytes = IOUtils.toByteArray(image.getInputStream());
+    metadata.setContentLength(bytes.length);
+    ByteArrayInputStream byteArrayIs = new ByteArrayInputStream(bytes);
+
     try {
       PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(
           //bucketname, key, inputStream, metadata
-          bucketName, changedName, image.getInputStream(), metadata
+          bucketName, changedName, byteArrayIs, metadata
       ).withCannedAcl(CannedAccessControlList.PublicRead));
 
     } catch (Exception e) {
@@ -185,8 +184,10 @@ public class RecordServiceImpl implements RecordService {
       List<SportsEntity> sportsList = interestedSportsEntityList.stream()
           .map(InterestedSportsEntity::getSports)
           .collect(Collectors.toList());
-      recordEntityPage = recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList,
-          pageRequest);
+      List<RecordEntity> recommendationRecords = recordRepository.findAllOpenProfileRecordsBySportsIn(
+          sportsList);
+      recordEntityPage = new PageImpl<>(recommendationRecords, pageRequest,
+          recommendationRecords.size());
     } else {
       List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
           FollowStatus.ACTIVE);
@@ -199,11 +200,6 @@ public class RecordServiceImpl implements RecordService {
     }
 
     RecordListDto recordListDto = new RecordListDto(recordEntityPage);
-    List<RecordDto> recordDtos = new ArrayList<>();
-    for (RecordEntity r : recordEntityPage.getContent()) {
-      recordDtos.add(RecordDto.fromEntity(r, recordImageRepository.findAllByRecord(r)));
-    }
-    recordListDto.setList(recordDtos);
     return recordListDto;
   }
 
@@ -227,27 +223,13 @@ public class RecordServiceImpl implements RecordService {
       throw new RecordException(ErrorCode.NO_AUTHORITY_ERROR);
     }
 
-    List<RecordImageEntity> recordImageEntities = deleteRecordImages(recordEntity);
+    for (String recordImageAddress : recordEntity.getImageAddress()) {
+      deleteImageFromS3(recordImageAddress);
+    }
 
     recordRepository.delete(recordEntity);
 
-    return RecordDto.fromEntity(recordEntity, recordImageEntities);
-  }
-
-  /**
-   * 기록 게시글에 연관된 이미지 삭제
-   *
-   * @param recordEntity 기록 게시글 엔티티
-   * @return List<RecordImageEntity> 해당 기록 게시글의 이미지 리스트를 반환
-   */
-  private List<RecordImageEntity> deleteRecordImages(RecordEntity recordEntity) {
-    List<RecordImageEntity> recordImages = recordImageRepository.findAllByRecord(recordEntity);
-
-    for (RecordImageEntity recordImage : recordImages) {
-      deleteImageFromS3(recordImage.getImageAddress());
-      recordImageRepository.delete(recordImage);
-    }
-    return recordImages;
+    return RecordDto.fromEntity(recordEntity);
   }
 
   /**

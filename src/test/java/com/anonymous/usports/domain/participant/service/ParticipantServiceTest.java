@@ -41,7 +41,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -152,7 +151,7 @@ class ParticipantServiceTest {
       assertThat(participants.getCurrentPage()).isEqualTo(1);
       assertThat(participants.getPageSize()).isEqualTo(7);
       assertThat(participants.getTotalPages()).isEqualTo(1);
-      assertThat(participants.getTotalElements()).isEqualTo(7);
+      assertThat(participants.getTotalElement()).isEqualTo(7);
 
       List<ParticipantDto> list = participants.getList();
       for (int i = 0; i < list.size(); i++) {
