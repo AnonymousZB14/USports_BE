@@ -56,6 +56,9 @@ public class NotificationEntity{
   @Column(name = "message")
   private String message;
 
+  @Column(name = "url")
+  private String url;
+
   @CreatedDate
   @Column(name = "created_at")
   private LocalDateTime createdAt;

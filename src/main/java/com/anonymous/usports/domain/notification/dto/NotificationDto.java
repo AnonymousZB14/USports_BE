@@ -29,6 +29,8 @@ public class NotificationDto {
 
   private String message;
 
+  private String url;
+
   private LocalDateTime createdAt;
 
   private LocalDateTime readAt;
@@ -41,6 +43,7 @@ public class NotificationDto {
         .entityType(notification.getEntityType())
         .targetEntityId(notification.getTargetEntityId())
         .message(notification.getMessage())
+        .url(notification.getUrl())
         .createdAt(notification.getCreatedAt())
         .readAt(notification.getReadAt())
         .build();

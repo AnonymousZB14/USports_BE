@@ -59,14 +59,8 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public NotificationDto notify(MemberEntity member, NotificationCreateDto notificationCreateDto) {
-    NotificationEntity notification = NotificationEntity.builder()
-        .member(member)
-        .type(notificationCreateDto.getType())
-        .entityType(notificationCreateDto.getEntityType())
-        .targetEntityId(notificationCreateDto.getTargetEntityId())
-        .message(notificationCreateDto.getEvent())
-        .build();
-    NotificationEntity saved = notificationRepository.save(notification);
+    NotificationEntity saved =
+        notificationRepository.save(NotificationCreateDto.toEntity(notificationCreateDto, member));
 
     this.sendToClient(member.getMemberId(), notificationCreateDto.getEvent());
 
