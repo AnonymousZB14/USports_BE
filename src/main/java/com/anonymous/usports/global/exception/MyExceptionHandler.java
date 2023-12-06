@@ -29,7 +29,7 @@ public class MyExceptionHandler {
   }
 
   @ExceptionHandler(FollowException.class)
-  public ResponseEntity<ErrorResponse> handleRecordException(FollowException e) {
+  public ResponseEntity<ErrorResponse> handleFollowException(FollowException e) {
     ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
   }
