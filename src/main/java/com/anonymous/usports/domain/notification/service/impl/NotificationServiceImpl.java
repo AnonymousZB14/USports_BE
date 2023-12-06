@@ -36,11 +36,18 @@ public class NotificationServiceImpl implements NotificationService {
   public List<NotificationDto> getNotifications(Long memberId) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+    //TODO : 알림을 모두 읽음 처리 (세션 변경)
 
     List<NotificationEntity> notificationList =
         notificationRepository.findByMemberOrderByCreatedAtDesc(member);
 
-    return notificationList.stream()
+    for(NotificationEntity n : notificationList){
+      n.readNow();
+    }
+    List<NotificationEntity> saved = notificationRepository.saveAll(
+        notificationList);
+
+    return saved.stream()
         .map(NotificationDto::fromEntity)
         .collect(Collectors.toList());
   }

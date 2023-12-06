@@ -66,4 +66,7 @@ public class NotificationEntity{
   @Column(name = "read_at")
   private LocalDateTime readAt;
 
+  public void readNow(){
+    this.readAt = LocalDateTime.now();
+  }
 }
