@@ -7,9 +7,9 @@ import com.anonymous.usports.global.type.FollowListType;
 
 public interface FollowService {
 
-  FollowResponse changeFollow(Long fromMemberId, Long toMemberId);
+  FollowResponse changeFollow(Long loginMemberId, Long toMemberId);
 
-  FollowListDto getFollowPage(FollowListType type, int page, Long memberId);
+  FollowListDto getFollowPage(FollowListType type, int page, Long loginMemberId);
 
-  FollowResponse manageFollow(Long fromMemberId, Long toMemberId, FollowDecisionType decision);
+  FollowResponse manageFollow(Long fromMemberId, Long loginMemberId, FollowDecisionType decision);
 }
