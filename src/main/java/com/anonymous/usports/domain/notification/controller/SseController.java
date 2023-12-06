@@ -3,7 +3,9 @@ package com.anonymous.usports.domain.notification.controller;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
 import com.anonymous.usports.domain.notification.service.NotificationService;
+import com.anonymous.usports.global.type.NotificationEntityType;
 import com.anonymous.usports.global.type.NotificationType;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +41,13 @@ public class SseController {
   @GetMapping(value = "/send/{id}")
   public void sendDate(@PathVariable Long id, @RequestParam String d) {
     MemberEntity member = memberRepository.findById(id).get();
-    notificationService.notify(member, NotificationType.PARTICIPANT, 5L, d);
+    NotificationCreateDto req = NotificationCreateDto.builder()
+        .type(NotificationType.NOTICE)
+        .entityType(NotificationEntityType.PARTICIPANT)
+        .targetEntityId(5L)
+        .event(d)
+        .build();
+    notificationService.notify(member, req);
   }
 
 }

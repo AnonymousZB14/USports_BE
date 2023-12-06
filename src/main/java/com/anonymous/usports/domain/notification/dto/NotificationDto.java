@@ -1,21 +1,14 @@
 package com.anonymous.usports.domain.notification.dto;
 
-import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.notification.entity.NotificationEntity;
+import com.anonymous.usports.global.type.NotificationEntityType;
 import com.anonymous.usports.global.type.NotificationType;
 import java.time.LocalDateTime;
-import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
 
 @Getter
 @Setter
@@ -30,6 +23,8 @@ public class NotificationDto {
 
   private NotificationType type;
 
+  private NotificationEntityType entityType;
+
   private Long targetEntityId;
 
   private String message;
@@ -43,6 +38,7 @@ public class NotificationDto {
         .notificationId(notification.getNotificationId())
         .memberId(notification.getMember().getMemberId())
         .type(notification.getType())
+        .entityType(notification.getEntityType())
         .targetEntityId(notification.getTargetEntityId())
         .message(notification.getMessage())
         .createdAt(notification.getCreatedAt())
