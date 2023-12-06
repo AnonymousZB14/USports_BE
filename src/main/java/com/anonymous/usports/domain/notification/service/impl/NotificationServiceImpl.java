@@ -104,7 +104,6 @@ public class NotificationServiceImpl implements NotificationService {
     emitter.onTimeout(() -> emitterRepository.deleteById(id));
 
     return emitter;
-
   }
 
 }
