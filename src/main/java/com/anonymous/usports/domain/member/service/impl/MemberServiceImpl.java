@@ -138,8 +138,8 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             }
         }
 
-        if (!memberEntity.getEmail().equals(request.getEmail())) {
-            if (memberRepository.existsByEmail(request.getEmail())) {
+        if (!memberEntity.getEmail().equals(memberDto.getEmail())) {
+            if (memberRepository.existsByEmail(memberDto.getEmail())) {
                 throw new MemberException(ErrorCode.EMAIL_ALREADY_EXISTS);
             }
         }
@@ -184,7 +184,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
 
         if (memberDto.getRole() == Role.UNAUTH && memberDto.getEmailAuthAt() == null) {
-            int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(request.getEmail());
+            int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(memberDto.getEmail());
 
             if (redisEmailAuthNumber != request.getEmailAuthNumber()) {
                 throw new MemberException(ErrorCode.EMAIL_AUTH_NUMBER_UNMATCH);

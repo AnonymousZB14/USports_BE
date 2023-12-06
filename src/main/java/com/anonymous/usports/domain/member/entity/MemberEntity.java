@@ -66,11 +66,8 @@ public class MemberEntity {
     @Column(name = "email_auth_at")
     private LocalDateTime emailAuthAt;
 
-    @Column(name = "address_city", length = 100)
-    private String addrCity;
-
-    @Column(name = "address_district", length = 100)
-    private String addrDistrict;
+    @Column(name = "active_region", length = 100)
+    private String activeRegion;
 
     @Column(name = "profile_open", nullable = false)
     private boolean profileOpen;
@@ -113,8 +110,7 @@ public class MemberEntity {
         this.gender = request.getGender();
         this.profileContent = request.getProfileContent();
         this.profileImage = request.getProfileImage();
-        this.addrCity = request.getAddrCity();
-        this.addrDistrict = request.getAddrDistrict();
+        this.activeRegion = request.getAddrCity();
         this.role = Role.USER;
     }
 

@@ -6,7 +6,6 @@ import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -30,11 +29,6 @@ public class MemberUpdate {
         @NotBlank(message="이름은 필수 입력 사항입니다")
         private String name;
 
-        @NotBlank(message="이메일은 필수 입력 사항입니다")
-        @Email(message="이메일 형식에 맞지 않습니다",
-                regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+.[A-Za-z]{2,6}$")
-        private String email;
-
         @NotBlank(message="전화번호는 필수 입력 사항입니다")
         @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$",
                 message = "010-0000-0000 형식으로 입력해주세요")
@@ -54,10 +48,7 @@ public class MemberUpdate {
         private String profileImage;
 
         @NotBlank(message="자주 활동하는 '시'를 꼭 입력해주세요")
-        private String addrCity;
-
-        @NotBlank(message="자주 활동하는 '동'을 꼭 입력해주세요")
-        private String addrDistrict;
+        private String activeRegion;
 
         private List<Long> interestedSports;
     }
@@ -75,10 +66,8 @@ public class MemberUpdate {
         private LocalDate birthDate;
         private Gender gender;
         private boolean profileOpen;
-        private String profileContent;
         private String profileImage;
-        private String addrCity;
-        private String addrDistrict;
+        private String activeRegion;
         private Role role;
         private List<String> interestedSports;
 
@@ -91,10 +80,8 @@ public class MemberUpdate {
                     .phoneNumber(memberEntity.getPhoneNumber())
                     .birthDate(memberEntity.getBirthDate())
                     .gender(memberEntity.getGender())
-                    .profileContent(memberEntity.getProfileContent())
                     .profileImage(memberEntity.getProfileImage())
-                    .addrCity(memberEntity.getAddrCity())
-                    .addrDistrict(memberEntity.getAddrDistrict())
+                    .activeRegion(memberEntity.getActiveRegion())
                     .role(memberEntity.getRole())
                     .build();
         }

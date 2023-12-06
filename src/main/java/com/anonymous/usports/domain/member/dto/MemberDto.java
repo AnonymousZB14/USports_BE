@@ -80,7 +80,7 @@ public class MemberDto implements UserDetails {
                 .registeredAt(memberEntity.getRegisteredAt())
                 .updatedAt(memberEntity.getUpdatedAt())
                 .emailAuthAt(memberEntity.getEmailAuthAt())
-                .addrCity(memberEntity.getAddrCity())
+                .addrCity(memberEntity.getActiveRegion())
                 .addrDistrict(memberEntity.getAddrDistrict())
                 .profileOpen(memberEntity.isProfileOpen())
                 .mannerScore(memberEntity.getMannerScore())
