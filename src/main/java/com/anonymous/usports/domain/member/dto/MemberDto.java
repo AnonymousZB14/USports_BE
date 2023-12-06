@@ -37,8 +37,6 @@ public class MemberDto implements UserDetails {
 
     private Gender gender;
 
-    private String profileContent;
-
     private String profileImage;
 
     private LocalDateTime registeredAt;
@@ -47,9 +45,7 @@ public class MemberDto implements UserDetails {
 
     private LocalDateTime emailAuthAt;
 
-    private String addrCity;
-
-    private String addrDistrict;
+    private String activeRegion;
 
     private boolean profileOpen;
 
@@ -75,13 +71,11 @@ public class MemberDto implements UserDetails {
                 .phoneNumber(memberEntity.getPhoneNumber())
                 .birthDate(memberEntity.getBirthDate())
                 .gender(memberEntity.getGender())
-                .profileContent(memberEntity.getProfileContent())
                 .profileImage(memberEntity.getProfileImage())
                 .registeredAt(memberEntity.getRegisteredAt())
                 .updatedAt(memberEntity.getUpdatedAt())
                 .emailAuthAt(memberEntity.getEmailAuthAt())
-                .addrCity(memberEntity.getActiveRegion())
-                .addrDistrict(memberEntity.getAddrDistrict())
+                .activeRegion(memberEntity.getActiveRegion())
                 .profileOpen(memberEntity.isProfileOpen())
                 .mannerScore(memberEntity.getMannerScore())
                 .kindnessScore(memberEntity.getKindnessScore())

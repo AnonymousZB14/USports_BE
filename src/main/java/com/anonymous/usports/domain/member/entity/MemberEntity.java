@@ -39,7 +39,7 @@ public class MemberEntity {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "phone_number", nullable = false, unique = true, length = 100)
+    @Column(name = "phone_number", length = 100)
     private String phoneNumber;
 
     @Column(name = "birth_date", nullable = false)
@@ -48,9 +48,6 @@ public class MemberEntity {
     @Column(name = "gender", nullable = false)
     @Enumerated(EnumType.STRING)
     private Gender gender;
-
-    @Column(name = "profile_content", length = 100)
-    private String profileContent;
 
     @Column(name = "profile_image")
     private String profileImage;
@@ -104,13 +101,11 @@ public class MemberEntity {
 
         this.accountName = request.getAccountName();
         this.name = request.getName();
-        this.email = request.getEmail();
         this.phoneNumber = request.getPhoneNumber();
         this.birthDate = request.getBirthDate();
         this.gender = request.getGender();
-        this.profileContent = request.getProfileContent();
         this.profileImage = request.getProfileImage();
-        this.activeRegion = request.getAddrCity();
+        this.activeRegion = request.getActiveRegion();
         this.role = Role.USER;
     }
 

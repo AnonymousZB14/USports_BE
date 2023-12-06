@@ -44,7 +44,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     private final AuthRedisRepository authRedisRepository;
     private final MailService mailService;
 
-    private void checkDuplication(String accountName, String email, String phoneNumber){
+    private void checkDuplication(String accountName, String email){
         if (memberRepository.existsByAccountName(accountName)) {
             throw new MemberException(ErrorCode.ACCOUNT_ALREADY_EXISTS);
         }
@@ -53,9 +53,6 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             throw new MemberException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new MemberException(ErrorCode.PHONE_ALREADY_EXISTS);
-        }
     }
 
     private MemberRegister.Response saveMember(MemberRegister.Request request) {
@@ -74,7 +71,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     @Override
     public MemberRegister.Response registerMember(MemberRegister.Request request) {
 
-        checkDuplication(request.getAccountName(), request.getEmail(), request.getPhoneNumber());
+        checkDuplication(request.getAccountName(), request.getEmail());
 
         return saveMember(request);
     }
@@ -144,12 +141,6 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             }
         }
 
-        if (!memberEntity.getPhoneNumber().equals(request.getPhoneNumber())) {
-            if (memberRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-                throw new MemberException(ErrorCode.PHONE_ALREADY_EXISTS);
-            }
-        }
-
         return memberEntity;
     }
 
@@ -179,7 +170,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
         }
 
-        // 닉네임, 이메일, 핸드폰 번호를 수정 할 때, 겹치지 않게
+        // 닉네임, 이메일를 수정 할 때, 겹치지 않게
         // 하는 김에 MemberEntity 가지고 오기
         MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
 

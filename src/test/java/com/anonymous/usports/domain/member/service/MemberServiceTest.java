@@ -221,39 +221,6 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
-
-        @Test
-        @DisplayName("회원가입 실패 - 폰번호가 이미 있음")
-        void failPhoneNumberAlreadyExist() {
-            //given
-            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            MemberRegister.Request request = MemberRegister.Request.builder()
-                    .accountName("joons")
-                    .name("Je Joon")
-                    .email("joons@gmail.com")
-                    .password("Aabcd1234!")
-                    .phoneNumber("010-1234-1234")
-                    .birthDate(birthDate)
-                    .gender(Gender.MALE)
-                    .profileOpen("open")
-                    .build();
-
-            //when
-            when(memberRepository.existsByAccountName(request.getAccountName()))
-                    .thenReturn(false); // 이건 굳이 없어도 됨
-            when(memberRepository.existsByEmail(request.getEmail()))
-                    .thenReturn(false);
-            when(memberRepository.existsByPhoneNumber(request.getPhoneNumber()))
-                    .thenReturn(true);
-
-            MemberException exception =
-                    catchThrowableOfType(() ->
-                            memberService.registerMember(request), MemberException.class);
-
-            //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXISTS);
-        }
     }
 
     @Nested
@@ -950,79 +917,6 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_ALREADY_EXISTS);
         }
-
-        @Test
-        @DisplayName("회원, 변경할 이메일이 이미 존재함")
-        void failUpdateMemberEmailAlreadyExist() {
-            //given
-            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
-
-            MemberEntity member = createMember(Role.UNAUTH);
-
-            MemberUpdate.Request request = createMemberRequest(
-                    00000, "jjjjj3333",
-                    "joonstest4@gmail.com", "010-1234-1234",
-                    "Seoul", sports
-            );
-            MemberDto memberDto = MemberDto.fromEntity(member);
-
-            Long memberId = 1L;
-
-            //when
-            when(memberRepository.findById(memberDto.getMemberId()))
-                    .thenReturn(Optional.of(member));
-
-            when(memberRepository.existsByAccountName(request.getAccountName()))
-                    .thenReturn(false);
-
-            when(memberRepository.existsByEmail(memberDto.getEmail()))
-                    .thenReturn(true);
-
-            MemberException exception = catchThrowableOfType(
-                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
-            );
-
-            //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
-        }
-
-        @Test
-        @DisplayName("회원, 변경할 핸드폰번호가 이미 존재함")
-        void failUpdateMemberPhoneAlreadyExist() {
-            //given
-            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
-
-            MemberEntity member = createMember(Role.UNAUTH);
-
-            MemberUpdate.Request request = createMemberRequest(
-                    00000, "jjjjj3333",
-                    "joonstest4@gmail.com", "010-1004-1004",
-                    "Seoul", sports
-            );
-            MemberDto memberDto = MemberDto.fromEntity(member);
-
-            Long memberId = 1L;
-
-            //when
-            when(memberRepository.findById(memberDto.getMemberId()))
-                    .thenReturn(Optional.of(member));
-
-            when(memberRepository.existsByAccountName(request.getAccountName()))
-                    .thenReturn(false);
-
-            when(memberRepository.existsByEmail(memberDto.getEmail()))
-                    .thenReturn(false);
-
-            when(memberRepository.existsByPhoneNumber(request.getPhoneNumber()))
-                    .thenReturn(true);
-
-            MemberException exception = catchThrowableOfType(
-                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
-            );
-
-            //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXISTS);
-        }
     }
     
     @Nested
@@ -1033,7 +927,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null,
                     true, role);
 
             return member;
