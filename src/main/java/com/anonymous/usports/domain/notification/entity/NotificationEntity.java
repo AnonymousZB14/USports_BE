@@ -43,10 +43,10 @@ public class NotificationEntity{
 
   @Enumerated(EnumType.STRING)
   @Column(name = "type", nullable = false)
-  private NotificationType type;
+  private NotificationType type; //어떤 엔티티에 대한 알림인지 타입
 
   @Column(name = "target_entity_id", nullable = false)
-  private Long targetEntityId;
+  private Long targetEntityId; //type에서 선택된 타겟 엔티티의 id(PK)값
 
   @Column(name = "message")
   private String message;

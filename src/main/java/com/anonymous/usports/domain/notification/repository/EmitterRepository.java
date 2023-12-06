@@ -6,6 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+/**
+ * Emitter를 저장하기위한 Repository
+ * 동시성 이슈로 ConcurrentHashMap 사용
+ */
 @RequiredArgsConstructor
 @Repository
 public class EmitterRepository {
