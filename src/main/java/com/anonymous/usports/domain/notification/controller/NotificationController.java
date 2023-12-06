@@ -30,11 +30,4 @@ public class NotificationController {
     return ResponseEntity.ok(notifications);
   }
 
-  @ApiOperation("알림 읽기")
-  @GetMapping("/notifications/{notificationId}")
-  public ResponseEntity<?> getNotification(@PathVariable Long notificationId) {
-
-    return ResponseEntity.ok(null);
-  }
-
 }
