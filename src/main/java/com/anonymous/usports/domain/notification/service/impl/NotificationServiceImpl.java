@@ -43,7 +43,7 @@ public class NotificationServiceImpl implements NotificationService {
     List<NotificationEntity> notificationList =
         notificationRepository.findByMemberOrderByCreatedAtDesc(member);
 
-    for(NotificationEntity n : notificationList){
+    for (NotificationEntity n : notificationList) {
       n.readNow();
     }
     List<NotificationEntity> saved = notificationRepository.saveAll(
@@ -77,13 +77,14 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public void setUnreadNotificationSession(HttpServletRequest httpServletRequest, boolean isUnread) {
+  public void setUnreadNotificationSession(HttpServletRequest httpServletRequest,
+      boolean isUnread) {
     HttpSession session = httpServletRequest.getSession(); // 세션이 없으면 세션 생성
     session.setAttribute(UNREAD_NOTIFICATION, isUnread);
   }
 
   @Override
-  public void checkUnreadNotificationAndSetSession(Long memberId,
+  public boolean checkUnreadNotificationAndSetSession(Long memberId,
       HttpServletRequest httpServletRequest) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
@@ -92,6 +93,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     HttpSession session = httpServletRequest.getSession(); // 세션이 없으면 세션 생성
     session.setAttribute(UNREAD_NOTIFICATION, result);
+
+    return result;
   }
 
 

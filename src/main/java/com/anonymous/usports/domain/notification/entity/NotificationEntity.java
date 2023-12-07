@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.NotificationEntityType;
 import com.anonymous.usports.global.type.NotificationType;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
@@ -68,5 +69,22 @@ public class NotificationEntity{
 
   public void readNow(){
     this.readAt = LocalDateTime.now();
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) {
+      return true;
+    }
+    if (object == null || getClass() != object.getClass()) {
+      return false;
+    }
+    NotificationEntity that = (NotificationEntity) object;
+    return Objects.equals(notificationId, that.notificationId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(notificationId);
   }
 }

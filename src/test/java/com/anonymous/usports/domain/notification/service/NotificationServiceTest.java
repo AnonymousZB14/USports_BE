@@ -1,21 +1,25 @@
-package com.anonymous.usports.domain.notification.service.impl;
+package com.anonymous.usports.domain.notification.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.amazonaws.services.s3.model.Owner;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
 import com.anonymous.usports.domain.notification.dto.NotificationDto;
 import com.anonymous.usports.domain.notification.entity.NotificationEntity;
 import com.anonymous.usports.domain.notification.repository.EmitterRepository;
 import com.anonymous.usports.domain.notification.repository.NotificationRepository;
+import com.anonymous.usports.domain.notification.service.impl.NotificationServiceImpl;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
@@ -46,6 +50,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 import org.junit.jupiter.api.DisplayName;
@@ -57,6 +63,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -165,14 +172,103 @@ class NotificationServiceTest {
   }
 
   @Test
-  void getNotifications() {
-  }
-
-  @Test
-  void subscribe() {
-  }
-
-  @Test
+  @DisplayName("알림 생성")
   void testNotify() {
+    //given
+    MemberEntity memberEntity = createMember(1L);
+    NotificationEntity notification = createNotification(10L, memberEntity);
+    NotificationCreateDto createDto = NotificationCreateDto.builder()
+        .type(notification.getType())
+        .entityType(notification.getEntityType())
+        .targetEntityId(notification.getTargetEntityId())
+        .event(notification.getMessage())
+        .url(notification.getUrl())
+        .build();
+
+    when(notificationRepository.save(NotificationCreateDto.toEntity(createDto, memberEntity)))
+        .thenReturn(notification);
+    //when
+    NotificationDto result = notificationService.notify(memberEntity, createDto);
+
+    //then
+    assertThat(result.getType()).isEqualTo(createDto.getType());
+    assertThat(result.getEntityType()).isEqualTo(createDto.getEntityType());
+    assertThat(result.getTargetEntityId()).isEqualTo(createDto.getTargetEntityId());
+    assertThat(result.getMessage()).isEqualTo(createDto.getEvent());
+    assertThat(result.getUrl()).isEqualTo(createDto.getUrl());
   }
+
+  @Nested
+  @DisplayName("로그인 시 안읽은 알림 여부 확인")
+  class CheckUnreadNotificationAndSetSession{
+    @Test
+    @DisplayName("성공 - 안읽은 알림 있음")
+    void checkUnreadNotificationAndSetSession_is_true(){
+      MemberEntity member = createMember(1L);
+
+      HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+      HttpSession session = mock(HttpSession.class);
+
+      //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
+      when(notificationRepository.existsByMemberAndReadAtIsNull(member))
+          .thenReturn(true);
+      when(httpServletRequest.getSession())
+          .thenReturn(session);
+
+      //when
+      boolean result = notificationService
+          .checkUnreadNotificationAndSetSession(1L, httpServletRequest);
+
+      //then
+      assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("성공 - 안읽은 알림 없음")
+    void checkUnreadNotificationAndSetSession_is_false(){
+      MemberEntity member = createMember(1L);
+
+      HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+      HttpSession session = mock(HttpSession.class);
+
+      //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
+      when(notificationRepository.existsByMemberAndReadAtIsNull(member))
+          .thenReturn(false);
+      when(httpServletRequest.getSession())
+          .thenReturn(session);
+
+      //when
+      boolean result = notificationService
+          .checkUnreadNotificationAndSetSession(1L, httpServletRequest);
+
+      //then
+      assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("실패 : MEMBER_NOT_FOUND")
+    void checkUnreadNotificationAndSetSession_MEMBER_NOT_FOUND(){
+      MemberEntity member = createMember(1L);
+
+      HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+      HttpSession session = mock(HttpSession.class);
+
+      //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      MemberException exception =
+          catchThrowableOfType(() ->
+              notificationService
+                  .checkUnreadNotificationAndSetSession(1L, httpServletRequest), MemberException.class);
+    }
+
+  }
+
 }
