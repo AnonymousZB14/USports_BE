@@ -30,12 +30,11 @@ public class NotificationSseController {
   private final MemberRepository memberRepository;
 
   @ApiOperation(value = "구독을 시작하기 위한 메서드", notes = "테스트를 위해 id를 PathVariable로 설정했지만, 실제로는 loginMemberId를 사용")
-  @GetMapping(value = "/subscribe/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter subscribe(@PathVariable Long id,
       @AuthenticationPrincipal MemberDto loginMember) {
-    //FIXME : {id} Pathvariable을 없애고, loginMember.getMemberId()로 변경하기
-    //return notificationService.subscribe(loginMember.getMemberId());
-    return notificationService.subscribe(id);
+
+    return notificationService.subscribe(loginMember.getMemberId());
   }
 
   /**

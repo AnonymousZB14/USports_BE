@@ -26,12 +26,8 @@ public class NotificationController {
       @AuthenticationPrincipal MemberDto loginMember,
       HttpServletRequest httpServletRequest) {
 
-    //FIXME : 테스트용
     List<NotificationDto> notifications =
-        notificationService.getNotifications(1L);//loginMember.getMemberId());
-
-//    List<NotificationDto> notifications =
-//        notificationService.getNotifications(loginMember.getMemberId());
+        notificationService.getNotifications(loginMember.getMemberId());
 
     //알림 리스트 조회 시 "안읽은 알림 없음 상태" 로 변경
     notificationService.setUnreadNotificationSession(httpServletRequest, false);
