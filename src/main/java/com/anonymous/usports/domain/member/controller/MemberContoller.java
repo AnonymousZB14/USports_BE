@@ -3,7 +3,9 @@ package com.anonymous.usports.domain.member.controller;
 import com.anonymous.usports.domain.member.dto.*;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.MemberService;
+import com.anonymous.usports.domain.notification.service.NotificationService;
 import io.swagger.annotations.ApiOperation;
+import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +21,7 @@ public class MemberContoller {
 
     private final MemberService memberService;
     private final TokenProvider tokenProvider;
+    private final NotificationService notificationService;
 
     /**
      * 회원 가입
@@ -40,10 +43,13 @@ public class MemberContoller {
     @PostMapping("/login")
     @ApiOperation(value = "회원 로그인 하기", notes = "access token과 refresh token 생성")
     public ResponseEntity<MemberLogin.Response> login(
-            @RequestBody MemberLogin.Request request
+            @RequestBody MemberLogin.Request request,
+        HttpServletRequest httpServletRequest
     ){
 
         MemberDto memberDto = memberService.loginMember(request);
+
+        notificationService.checkUnreadNotificationAndSetSession(memberDto.getMemberId(), httpServletRequest);
 
         return ResponseEntity.ok(MemberLogin.Response.builder()
                         .tokenDto(tokenProvider.saveTokenInRedis(memberDto.getEmail()))

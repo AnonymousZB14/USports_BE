@@ -78,8 +78,20 @@ public class NotificationServiceImpl implements NotificationService {
 
   @Override
   public void setUnreadNotificationSession(HttpServletRequest httpServletRequest, boolean isUnread) {
-    HttpSession session = httpServletRequest.getSession();
+    HttpSession session = httpServletRequest.getSession(); // 세션이 없으면 세션 생성
     session.setAttribute(UNREAD_NOTIFICATION, isUnread);
+  }
+
+  @Override
+  public void checkUnreadNotificationAndSetSession(Long memberId,
+      HttpServletRequest httpServletRequest) {
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    boolean result = notificationRepository.existsByMemberAndReadAtIsNull(member);
+
+    HttpSession session = httpServletRequest.getSession(); // 세션이 없으면 세션 생성
+    session.setAttribute(UNREAD_NOTIFICATION, result);
   }
 
 

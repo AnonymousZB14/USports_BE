@@ -30,4 +30,9 @@ public interface NotificationService {
    */
   void setUnreadNotificationSession(HttpServletRequest httpServletRequest, boolean isUnread);
 
+  /**
+   * Notification 중, 읽지 않은 알림이 있는지 확인 후 세션 값 세팅
+   */
+  void checkUnreadNotificationAndSetSession(Long memberId, HttpServletRequest httpServletRequest);
+
 }

@@ -13,4 +13,6 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
   List<NotificationEntity> findByMemberOrderByCreatedAtDesc(MemberEntity member);
 
   Integer deleteAllByCreatedAtBefore(LocalDateTime time);
+
+  boolean existsByMemberAndReadAtIsNull(MemberEntity member);
 }
