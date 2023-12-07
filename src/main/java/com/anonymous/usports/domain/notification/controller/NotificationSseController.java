@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-public class SseController {
+public class NotificationSseController {
 
   private final NotificationService notificationService;
   private final MemberRepository memberRepository;
