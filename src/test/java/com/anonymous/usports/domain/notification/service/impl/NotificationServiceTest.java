@@ -1,0 +1,178 @@
+package com.anonymous.usports.domain.notification.service.impl;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.notification.dto.NotificationDto;
+import com.anonymous.usports.domain.notification.entity.NotificationEntity;
+import com.anonymous.usports.domain.notification.repository.EmitterRepository;
+import com.anonymous.usports.domain.notification.repository.NotificationRepository;
+import com.anonymous.usports.domain.participant.dto.ParticipantDto;
+import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
+import com.anonymous.usports.domain.participant.dto.ParticipantManage;
+import com.anonymous.usports.domain.participant.dto.ParticipantManage.Request;
+import com.anonymous.usports.domain.participant.dto.ParticipateCancel;
+import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
+import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
+import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
+import com.anonymous.usports.domain.participant.service.impl.ParticipantServiceImpl;
+import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
+import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
+import com.anonymous.usports.domain.sports.entity.SportsEntity;
+import com.anonymous.usports.global.constant.NumberConstant;
+import com.anonymous.usports.global.constant.ResponseConstant;
+import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.MemberException;
+import com.anonymous.usports.global.exception.ParticipantException;
+import com.anonymous.usports.global.exception.RecruitException;
+import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.NotificationEntityType;
+import com.anonymous.usports.global.type.NotificationType;
+import com.anonymous.usports.global.type.ParticipantStatus;
+import com.anonymous.usports.global.type.RecruitStatus;
+import com.anonymous.usports.global.type.Role;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
+@Slf4j
+@ExtendWith(MockitoExtension.class)
+class NotificationServiceTest {
+  @Mock
+  private EmitterRepository emitterRepository;
+  @Mock
+  private NotificationRepository notificationRepository;
+  @Mock
+  private MemberRepository memberRepository;
+
+  @InjectMocks
+  private NotificationServiceImpl notificationService;
+
+  private MemberEntity createMember(Long id) {
+    return MemberEntity.builder()
+        .memberId(id)
+        .accountName("accountName" + id)
+        .name("name" + id)
+        .email("test@test.com")
+        .password("password" + id)
+        .phoneNumber("010-1111-2222")
+        .birthDate(LocalDate.now())
+        .gender(Gender.MALE)
+        .role(Role.USER)
+        .profileOpen(true)
+        .build();
+  }
+
+  private NotificationEntity createNotification(Long id, MemberEntity member){
+    return NotificationEntity.builder()
+        .member(member)
+        .type(NotificationType.ALERT)
+        .entityType(NotificationEntityType.PARTICIPANT)
+        .targetEntityId(id + 10000)
+        .message("test message" + id)
+        .url("/test/" + id)
+        .createdAt(LocalDateTime.now())
+        .build();
+  }
+
+  @Nested
+  @DisplayName("Notification 리스트 조회")
+  class GetNotifications{
+
+    @Test
+    @DisplayName("성공")
+    void getNotifications(){
+      MemberEntity member = createMember(1L);
+      List<NotificationEntity> notificationList = new ArrayList<>();
+      for(long i = 0; i < 10; i++){
+        notificationList.add(createNotification(10L + i, member));
+      }
+      List<NotificationEntity> savedNotificationList = new ArrayList<>();
+      for(long i = 0; i < 10; i++){
+        NotificationEntity notification = createNotification(10L + i, member);
+        notification.readNow();
+        savedNotificationList.add(notification);
+      }
+      //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
+      when(notificationRepository.findByMemberOrderByCreatedAtDesc(member))
+          .thenReturn(notificationList);
+      when(notificationRepository.saveAll(notificationList))
+          .thenReturn(savedNotificationList);
+
+      //when
+      List<NotificationDto> notifications =
+          notificationService.getNotifications(member.getMemberId());
+
+      //then
+      for (NotificationDto n : notifications){
+        assertThat(n.getReadAt()).isNotNull();
+      }
+    }
+
+    @Test
+    @DisplayName("실패 : MEMBER_NOT_FOUND")
+    void getNotifications_MEMBER_NOT_FOUND(){
+      MemberEntity member = createMember(1L);
+      List<NotificationEntity> notificationList = new ArrayList<>();
+      for(long i = 0; i < 10; i++){
+        notificationList.add(createNotification(10L + i, member));
+      }
+      List<NotificationEntity> savedNotificationList = new ArrayList<>();
+      for(long i = 0; i < 10; i++){
+        NotificationEntity notification = createNotification(10L + i, member);
+        notification.readNow();
+        savedNotificationList.add(notification);
+      }
+      //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.empty());
+
+      //when
+      //then
+      MemberException exception =
+          catchThrowableOfType(() ->
+                  notificationService.getNotifications(member.getMemberId()), MemberException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+
+    }
+
+  }
+
+  @Test
+  void getNotifications() {
+  }
+
+  @Test
+  void subscribe() {
+  }
+
+  @Test
+  void testNotify() {
+  }
+}
