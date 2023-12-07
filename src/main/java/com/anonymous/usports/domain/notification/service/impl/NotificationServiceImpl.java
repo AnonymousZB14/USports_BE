@@ -13,6 +13,8 @@ import com.anonymous.usports.global.exception.MemberException;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -27,6 +29,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.SseEvent
 public class NotificationServiceImpl implements NotificationService {
 
   private static final Long DEFAULT_TIMEOUT = 1000 * 60 * 60L;
+  private static final String UNREAD_NOTIFICATION = "unreadNotification";
   private final EmitterRepository emitterRepository;
   private final NotificationRepository notificationRepository;
   private final MemberRepository memberRepository;
@@ -36,7 +39,6 @@ public class NotificationServiceImpl implements NotificationService {
   public List<NotificationDto> getNotifications(Long memberId) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
-    //TODO : 알림을 모두 읽음 처리 (세션 변경)
 
     List<NotificationEntity> notificationList =
         notificationRepository.findByMemberOrderByCreatedAtDesc(member);
@@ -73,6 +75,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     return NotificationDto.fromEntity(saved);
   }
+
+  @Override
+  public void setUnreadNotificationSession(HttpServletRequest httpServletRequest, boolean isUnread) {
+    HttpSession session = httpServletRequest.getSession();
+    session.setAttribute(UNREAD_NOTIFICATION, isUnread);
+  }
+
 
   /**
    * 클라이언트에게 데이터 전송
