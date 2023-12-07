@@ -267,6 +267,8 @@ class NotificationServiceTest {
           catchThrowableOfType(() ->
               notificationService
                   .checkUnreadNotificationAndSetSession(1L, httpServletRequest), MemberException.class);
+
+      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
     }
 
   }
