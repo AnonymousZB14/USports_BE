@@ -124,7 +124,7 @@ class FollowServiceImplTest {
       FollowResponse response = followService.changeFollow(fromMember.getMemberId(),
           toMember.getMemberId());
 
-      verify(followRepository, times(1)).delete(any(FollowEntity.class));
+      verify(followRepository, times(1)).delete(follow);
 
       assertEquals(response.getMessage(), ResponseConstant.DELETE_FOLLOW);
     }
@@ -146,6 +146,7 @@ class FollowServiceImplTest {
               MemberException.class);
       assertEquals(exception.getErrorCode(), ErrorCode.MEMBER_NOT_FOUND);
     }
+
     @Test
     @DisplayName("실패 - SELF_FOLLOW_NOT_ALLOWED")
     void fail_SelfFollowNotAllowed() {
@@ -283,8 +284,8 @@ class FollowServiceImplTest {
           pageRequest))
           .thenReturn(new PageImpl<>(paginatedFollowEntities, pageRequest, followEntities.size()));
 
-      FollowListDto result = followService.getFollowPage(FollowListType.REQUESTED_FOLLOW, page,
-          loginMember.getMemberId());
+      FollowListDto result = followService.getFollowPage(
+          FollowListType.REQUESTED_FOLLOW, page, loginMember.getMemberId());
 
       assertNotNull(result);
       assertEquals(followEntities.size(), result.getTotalElements());
@@ -330,8 +331,8 @@ class FollowServiceImplTest {
 
       when(memberRepository.findById(1L)).thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L)).thenReturn(Optional.of(loginMember));
-      when(followRepository.findByFromMemberAndToMember(fromMember, loginMember)).thenReturn(
-          Optional.of(follow));
+      when(followRepository.findByFromMemberAndToMember(fromMember, loginMember))
+          .thenReturn(Optional.of(follow));
 
       FollowResponse response = followService.manageFollow(fromMember.getMemberId(),
           loginMember.getMemberId(), decision);
@@ -353,8 +354,8 @@ class FollowServiceImplTest {
 
       when(memberRepository.findById(1L)).thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L)).thenReturn(Optional.of(loginMember));
-      when(followRepository.findByFromMemberAndToMember(fromMember, loginMember)).thenReturn(
-          Optional.of(follow));
+      when(followRepository.findByFromMemberAndToMember(fromMember, loginMember))
+          .thenReturn(Optional.of(follow));
 
       FollowResponse response = followService.manageFollow(fromMember.getMemberId(),
           loginMember.getMemberId(), decision);
@@ -393,8 +394,8 @@ class FollowServiceImplTest {
 
       when(memberRepository.findById(1L)).thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L)).thenReturn(Optional.of(loginMember));
-      when(followRepository.findByFromMemberAndToMember(fromMember, loginMember)).thenReturn(
-          Optional.empty());
+      when(followRepository.findByFromMemberAndToMember(fromMember, loginMember))
+          .thenReturn(Optional.empty());
       FollowException exception =
           catchThrowableOfType(() ->
               followService.manageFollow(fromMember.getMemberId(), loginMember.getMemberId(),
@@ -414,8 +415,8 @@ class FollowServiceImplTest {
 
       when(memberRepository.findById(1L)).thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L)).thenReturn(Optional.of(loginMember));
-      when(followRepository.findByFromMemberAndToMember(fromMember, loginMember)).thenReturn(
-          Optional.of(follow));
+      when(followRepository.findByFromMemberAndToMember(fromMember, loginMember))
+          .thenReturn(Optional.of(follow));
       FollowException exception =
           catchThrowableOfType(() ->
               followService.manageFollow(fromMember.getMemberId(), loginMember.getMemberId(),
