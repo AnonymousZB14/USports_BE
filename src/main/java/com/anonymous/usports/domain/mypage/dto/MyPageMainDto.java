@@ -19,4 +19,6 @@ public class MyPageMainDto {
 
   private List<SportsSkillDto> sportsSkills;
 
+  private List<RecruitAndParticipants> recruitAndParticipants;
+
 }

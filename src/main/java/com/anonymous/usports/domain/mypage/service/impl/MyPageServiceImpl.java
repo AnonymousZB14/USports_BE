@@ -1,18 +1,28 @@
 package com.anonymous.usports.domain.mypage.service.impl;
 
+import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.dto.MyPageMainDto;
 import com.anonymous.usports.domain.mypage.dto.MyPageMember;
+import com.anonymous.usports.domain.mypage.dto.RecruitAndParticipants;
 import com.anonymous.usports.domain.mypage.service.MyPageService;
+import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
+import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
+import com.anonymous.usports.domain.recruit.dto.RecruitDto;
+import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
+import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.sportsskill.dto.SportsSkillDto;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
+import com.anonymous.usports.global.type.ParticipantStatus;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +37,8 @@ public class MyPageServiceImpl implements MyPageService {
   private final MemberRepository memberRepository;
   private final InterestedSportsRepository interestedSportsRepository;
   private final SportsSkillRepository sportsSkillRepository;
+  private final RecruitRepository recruitRepository;
+  private final ParticipantRepository participantRepository;
 
   @Override
   public MyPageMainDto getMyPageMainData(Long memberId) {
@@ -35,11 +47,17 @@ public class MyPageServiceImpl implements MyPageService {
 
     //회원 정보
     MyPageMember myPageMember = this.getMyPageMember(member);
+
     //팝업으로 띄워줄 sportSkill
     List<SportsSkillDto> sportsSkills = this.getSportsSkills(member);
-    //평가를 하기 위한 내가 참여했던 Recruit와 참여자 리스트 - RecruitAndParticipants
-    //내 신청 현황
-    //내가 만든 모집 관리
+
+    //평가하기 : 평가를 하기 위한 내가 참여했던 Recruit와 참여자 리스트
+    List<RecruitAndParticipants> recruitAndParticipants = this.getRecruitAndParticipants(member);
+
+    //내 신청 현황 : 내가 신청한 참여신청(Participant) 리스트
+
+    //내 모집 관리 : 내가 만든 모집 관리
+
     //내 정보 수정
 
     return null;
@@ -83,6 +101,37 @@ public class MyPageServiceImpl implements MyPageService {
         .stream()
         .map(SportsSkillDto::new)
         .collect(Collectors.toList());
+  }
+
+  public List<RecruitAndParticipants> getRecruitAndParticipants(MemberEntity member) {
+    //끝난지 48시간 이내의 참여 신청 건
+    List<ParticipantEntity> findList = participantRepository
+        .findAllByMemberAndMeetingDateIsAfter(member, LocalDateTime.now().minusDays(2L));
+    if (findList.isEmpty()) {
+      return new ArrayList<>();
+    }
+
+    List<RecruitAndParticipants> recruitAndParticipants = new ArrayList<>();
+
+    for (ParticipantEntity loginMemberParticipate : findList) {
+      RecruitEntity recruit = loginMemberParticipate.getRecruit();
+
+      List<ParticipantEntity> otherParticipants =
+          participantRepository.findAllByRecruitAndStatus(recruit, ParticipantStatus.ACCEPTED);
+      List<MemberDto> memberList = new ArrayList<>();
+
+      for (ParticipantEntity otherParticipant : otherParticipants) {
+        MemberEntity participantMember = otherParticipant.getMember();
+        if (Objects.equals(participantMember, member)) {
+          continue;
+        }
+        memberList.add(MemberDto.fromEntity(participantMember));
+      }
+      recruitAndParticipants
+          .add(new RecruitAndParticipants(RecruitDto.fromEntity(recruit), memberList));
+
+    }
+    return recruitAndParticipants;
   }
 
 }
