@@ -70,7 +70,7 @@ public class CustomOAuth2MemberService extends DefaultOAuth2UserService {
             memberEntity = memberRepository.save(
                     MemberEntity.builder()
                             .accountName(tempAccountName.toString())
-                            .name("name")
+                            .name("name") // todo : 한글 db에 저장할 수 있도록 하기
                             .email(email)
                             .emailAuthAt(LocalDateTime.now())
                             .password(passwordEncoder.encode(UUID.randomUUID().toString().substring(0, 10)))

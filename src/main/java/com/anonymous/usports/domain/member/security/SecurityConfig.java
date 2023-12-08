@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.member.security;
 
+import com.anonymous.usports.domain.member.security.handler.OAuth2SuccessHandler;
 import com.anonymous.usports.domain.member.service.impl.CustomOAuth2MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +21,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter authenticationFilter;
     private final CustomOAuth2MemberService customOAuth2MemberService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -35,7 +37,8 @@ public class SecurityConfig {
 
          http
                  .oauth2Login().loginPage("/login")
-                 .userInfoEndpoint().userService(customOAuth2MemberService);
+                 .userInfoEndpoint().userService(customOAuth2MemberService)
+                 .and().successHandler(oAuth2SuccessHandler);
 
          http
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
