@@ -30,6 +30,8 @@ public class ParticipantDto {
 
   private LocalDateTime evaluationAt; //타인 평가 일시
 
+  private LocalDateTime meetingDate; //Recruit의 모임 일시
+
   public static ParticipantDto fromEntity(ParticipantEntity participant){
     return ParticipantDto.builder()
         .participantId(participant.getParticipantId())
@@ -39,6 +41,7 @@ public class ParticipantDto {
         .confirmedAt(participant.getConfirmedAt())
         .status(participant.getStatus())
         .evaluationAt(participant.getEvaluationAt())
+        .meetingDate(participant.getMeetingDate())
         .build();
   }
 }
