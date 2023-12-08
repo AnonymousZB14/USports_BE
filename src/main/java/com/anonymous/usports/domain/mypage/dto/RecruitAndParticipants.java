@@ -14,11 +14,11 @@ import lombok.Setter;
 @Builder
 public class RecruitAndParticipants {
 
-  private RecruitDto recruitDto;
+  private RecruitDto recruit;
   private List<MemberDto> memberList;
 
-  public RecruitAndParticipants(RecruitDto recruitDto, List<MemberDto> memberList) {
-    this.recruitDto = recruitDto;
+  public RecruitAndParticipants(RecruitDto recruit, List<MemberDto> memberList) {
+    this.recruit = recruit;
     this.memberList = memberList;
   }
 }

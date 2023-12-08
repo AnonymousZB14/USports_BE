@@ -16,16 +16,16 @@ import lombok.Setter;
 @Builder
 public class MyPageMainDto {
 
-  private MyPageMember memberProfile;
+  private MyPageMember memberProfile;//회원 정보
 
-  private List<SportsSkillDto> sportsSkills;
+  private List<SportsSkillDto> sportsSkills;//팝업으로 띄워줄 sportSkill
 
-  private List<RecruitAndParticipants> recruitAndParticipants;
+  private List<RecruitAndParticipants> recruitAndParticipants;//평가하기
 
-  private List<MyPageParticipant> participantList;
+  private List<MyPageParticipant> participateList;//내 신청 현황
 
-  private List<MyPageRecruit> myRecruitList;
+  private List<MyPageRecruit> myRecruitList;//내 모집 관리
 
-  private MemberDto memberEdit;
+  private MemberDto memberEdit;//내 정보 수정
 
 }

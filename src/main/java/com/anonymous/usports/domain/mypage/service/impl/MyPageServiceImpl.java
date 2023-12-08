@@ -71,7 +71,7 @@ public class MyPageServiceImpl implements MyPageService {
         .memberProfile(myPageMember)
         .sportsSkills(sportsSkills)
         .recruitAndParticipants(recruitAndParticipants)
-        .participantList(participantList)
+        .participateList(participantList)
         .myRecruitList(myRecruitList)
         .memberEdit(memberEdit)
         .build();
@@ -169,7 +169,7 @@ public class MyPageServiceImpl implements MyPageService {
 
   public List<MyPageRecruit> getMyRecruitList(MemberEntity member) {
     List<RecruitEntity> findList =
-        recruitRepository.findTop10ByMemberAndOrderByMeetingDateDesc(member);
+        recruitRepository.findTop10ByMemberOrderByMeetingDateDesc(member);
 
     List<MyPageRecruit> list = new ArrayList<>();
     for (RecruitEntity recruit : findList) {
