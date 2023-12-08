@@ -16,6 +16,7 @@ import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import com.anonymous.usports.global.redis.token.repository.TokenRepository;
+import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,12 +60,12 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         request.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        memberRepository.save(MemberRegister.Request.toEntity(request));
+        memberRepository.save(MemberRegister.Request.toEntity(request, LoginBy.USPORTS));
 
         mailService.sendEmailAuthMail(request.getEmail());
 
         return MemberRegister.Response.fromEntity(
-                MemberRegister.Request.toEntity(request), MailConstant.AUTH_EMAIL_SEND
+                MemberRegister.Request.toEntity(request, LoginBy.USPORTS), MailConstant.AUTH_EMAIL_SEND
         );
     }
 

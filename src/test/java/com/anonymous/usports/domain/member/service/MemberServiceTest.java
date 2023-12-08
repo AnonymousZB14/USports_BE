@@ -18,6 +18,7 @@ import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
@@ -141,7 +142,7 @@ public class MemberServiceTest {
                     .build();
 
             //when
-            when(memberRepository.save(MemberRegister.Request.toEntity(request)))
+            when(memberRepository.save(MemberRegister.Request.toEntity(request, LoginBy.USPORTS)))
                     .thenReturn(member);
 
             MemberRegister.Response response = memberService.registerMember(request);

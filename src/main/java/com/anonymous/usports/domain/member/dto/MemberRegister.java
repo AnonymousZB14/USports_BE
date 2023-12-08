@@ -2,14 +2,13 @@ package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.time.LocalDate;
 
 public class MemberRegister {
 
@@ -36,20 +35,13 @@ public class MemberRegister {
                 message = "비밀번호는 8~16자 영문, 숫자, 특수문자를 사용하세요.")
         private String password;
 
-        @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$",
-                message = "010-0000-0000 형식으로 입력해주세요")
-        private String phoneNumber;
-
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        private LocalDate birthDate;
-
         @NotNull(message="성별을 입력해주세요")
         private Gender gender;
 
         @NotBlank(message="공개 비공개 여부를 입력해주세요, open 또는 close을 입력해주세요")
         private String profileOpen;
 
-        public static MemberEntity toEntity(MemberRegister.Request request){
+        public static MemberEntity toEntity(MemberRegister.Request request, LoginBy loginBy){
 
             String profileOpen = request.getProfileOpen().toLowerCase();
             boolean po = false;
@@ -65,10 +57,9 @@ public class MemberRegister {
                     .name(request.getName())
                     .email(request.getEmail())
                     .password(request.getPassword())
-                    .phoneNumber(request.getPhoneNumber())
-                    .birthDate(request.getBirthDate())
                     .gender(request.getGender())
                     .role(Role.UNAUTH)
+                    .loginBy(loginBy)
                     .profileOpen(po)
                     .build();
         }

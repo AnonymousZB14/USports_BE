@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.member.entity;
 
 import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -42,7 +43,7 @@ public class MemberEntity {
     @Column(name = "phone_number", length = 100)
     private String phoneNumber;
 
-    @Column(name = "birth_date", nullable = false)
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
     @Column(name = "gender", nullable = false)
@@ -87,6 +88,10 @@ public class MemberEntity {
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Column(name="login_by", nullable=false)
+    @Enumerated(EnumType.STRING)
+    private LoginBy loginBy;
 
 
     public void updateMember(MemberUpdate.Request request) {

@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.member.security;
 
+import com.anonymous.usports.domain.member.service.impl.CustomOAuth2MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,18 +19,28 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter authenticationFilter;
+    private final CustomOAuth2MemberService customOAuth2MemberService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
+         http
                 .httpBasic().disable()
                 .csrf().disable()
                 .cors().and()
-                .headers().frameOptions().disable().and()
+                .headers().frameOptions().disable();
+
+         http
                 .authorizeRequests()
-                .antMatchers("/member/**").permitAll()
-                .and().addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                .antMatchers("/member/**").permitAll();
+
+         http
+                 .oauth2Login().loginPage("/login")
+                 .userInfoEndpoint().userService(customOAuth2MemberService);
+
+         http
+                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
     }
 
 //    @Bean
