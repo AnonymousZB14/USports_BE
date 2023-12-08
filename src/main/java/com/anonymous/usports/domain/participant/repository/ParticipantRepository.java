@@ -29,4 +29,6 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
       LocalDateTime datetime);
 
   List<ParticipantEntity> findAllByRecruitAndStatus(RecruitEntity recruit, ParticipantStatus status);
+
+  List<ParticipantEntity> findTop10ByMemberOrderByRegisteredAtDesc(MemberEntity member);
 }

@@ -7,6 +7,7 @@ import com.anonymous.usports.domain.member.repository.InterestedSportsRepository
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.dto.MyPageMainDto;
 import com.anonymous.usports.domain.mypage.dto.MyPageMember;
+import com.anonymous.usports.domain.mypage.dto.MyPageParticipant;
 import com.anonymous.usports.domain.mypage.dto.RecruitAndParticipants;
 import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
@@ -55,6 +56,7 @@ public class MyPageServiceImpl implements MyPageService {
     List<RecruitAndParticipants> recruitAndParticipants = this.getRecruitAndParticipants(member);
 
     //내 신청 현황 : 내가 신청한 참여신청(Participant) 리스트
+    List<MyPageParticipant> participantList = this.getParticipantList(member);
 
     //내 모집 관리 : 내가 만든 모집 관리
 
@@ -133,5 +135,25 @@ public class MyPageServiceImpl implements MyPageService {
     }
     return recruitAndParticipants;
   }
+
+  public List<MyPageParticipant> getParticipantList(MemberEntity member) {
+    List<MyPageParticipant> list = new ArrayList<>();
+
+    for (ParticipantEntity participant :
+        participantRepository.findTop10ByMemberOrderByRegisteredAtDesc(member)) {
+
+      RecruitEntity recruit = participant.getRecruit();
+
+      list.add(
+          new MyPageParticipant(
+              recruit.getSports().getSportsName(),
+              recruit.getTitle(),
+              participant.getStatus())
+      );
+    }
+
+    return list;
+  }
+
 
 }

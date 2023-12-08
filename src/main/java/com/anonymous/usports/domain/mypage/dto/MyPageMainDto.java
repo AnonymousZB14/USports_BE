@@ -21,4 +21,6 @@ public class MyPageMainDto {
 
   private List<RecruitAndParticipants> recruitAndParticipants;
 
+  private List<MyPageParticipant> participantList;
+
 }
