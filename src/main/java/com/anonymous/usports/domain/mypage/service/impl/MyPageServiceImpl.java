@@ -8,6 +8,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.dto.MyPageMainDto;
 import com.anonymous.usports.domain.mypage.dto.MyPageMember;
 import com.anonymous.usports.domain.mypage.dto.MyPageParticipant;
+import com.anonymous.usports.domain.mypage.dto.MyPageRecruit;
 import com.anonymous.usports.domain.mypage.dto.RecruitAndParticipants;
 import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
@@ -19,7 +20,9 @@ import com.anonymous.usports.domain.sportsskill.dto.SportsSkillDto;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
+import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.ParticipantStatus;
+import com.anonymous.usports.global.type.RecruitStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +32,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,6 +46,7 @@ public class MyPageServiceImpl implements MyPageService {
   private final ParticipantRepository participantRepository;
 
   @Override
+  @Transactional
   public MyPageMainDto getMyPageMainData(Long memberId) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
@@ -59,6 +64,7 @@ public class MyPageServiceImpl implements MyPageService {
     List<MyPageParticipant> participantList = this.getParticipantList(member);
 
     //내 모집 관리 : 내가 만든 모집 관리
+    List<MyPageRecruit> myRecruitList = this.getMyRecruitList(member);
 
     //내 정보 수정
 
@@ -152,6 +158,17 @@ public class MyPageServiceImpl implements MyPageService {
       );
     }
 
+    return list;
+  }
+
+  public List<MyPageRecruit> getMyRecruitList(MemberEntity member){
+    List<RecruitEntity> findList =
+        recruitRepository.findTop10ByMemberAndOrderByMeetingDateDesc(member);
+
+    List<MyPageRecruit> list = new ArrayList<>();
+    for (RecruitEntity recruit : findList) {
+      list.add(new MyPageRecruit(recruit));
+    }
     return list;
   }
 
