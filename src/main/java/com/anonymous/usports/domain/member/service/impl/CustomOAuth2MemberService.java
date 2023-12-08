@@ -6,6 +6,8 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.security.oauth2.KakaoMemberInfo;
 import com.anonymous.usports.domain.member.security.oauth2.OAuth2MemberInfo;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.LoginBy;
+import com.anonymous.usports.global.type.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,8 +18,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,24 +36,18 @@ public class CustomOAuth2MemberService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
-        log.info("안녕");
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        log.info("{}", oAuth2User);
 
-        // 서비스 구분을 위한 작업 (여기서 어느 서비스와 연동되는지 나옴. Kakao 또는 naver 등)
+        // 서비스 구분을 위한 작업 (여기서 어느 서비스와 연동되는지 나옴. kakao 또는 naver 등)
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         log.info("{}", registrationId);
 
         OAuth2MemberInfo memberInfo = checkResourceServer(registrationId, oAuth2User);
-        log.info("{}", memberInfo);
 
         String provider = memberInfo.getProvider();
         String providerId = memberInfo.getProviderId();
-        String name = memberInfo.getName();
         String nickName = memberInfo.getNickName();
         String email = memberInfo.getEmail();
-        String profileImg = memberInfo.getProfileImage();
-        String birthDay = memberInfo.getBirthDay();
         String gender = memberInfo.getGender();
 
         Optional<MemberEntity> member = memberRepository.findByEmail(email);
@@ -60,15 +57,27 @@ public class CustomOAuth2MemberService extends DefaultOAuth2UserService {
         if (member.isEmpty()) {
             log.info("{} : 새로운 유저입니다", email);
 
+            Gender saveGender = null;
+            if (gender.equals("male")) saveGender = Gender.MALE;
+            else if (gender.equals("female")) saveGender = Gender.FEMALE;
+
+            StringBuilder tempAccountName = new StringBuilder();
+            tempAccountName.append(email.split("@")[0]);
+            tempAccountName.append("%");
+            tempAccountName.append(UUID.randomUUID().toString().substring(0,6));
+            log.info("{}", tempAccountName);
+
             memberEntity = memberRepository.save(
                     MemberEntity.builder()
-                            .accountName(nickName)
-                            .name(name)
+                            .accountName(tempAccountName.toString())
+                            .name("name")
                             .email(email)
-                            .password(passwordEncoder.encode("abcd1234!")) // todo : 바꾸기
-                            .birthDate(LocalDate.now()) // todo : 바꾸기
-                            .gender(Gender.BOTH) //todo : 바꾸기
+                            .emailAuthAt(LocalDateTime.now())
+                            .password(passwordEncoder.encode(UUID.randomUUID().toString().substring(0, 10)))
+                            .gender(saveGender)
                             .profileOpen(false)
+                            .loginBy(LoginBy.KAKAO)
+                            .role(Role.UNAUTH)
                             .build());
         } else {
             memberEntity = member.get();

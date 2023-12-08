@@ -15,7 +15,6 @@ public class KakaoMemberInfo implements OAuth2MemberInfo{
 
     }
 
-
     @Override
     public String getProviderId() {
         return attributes.get("id").toString();
@@ -27,11 +26,6 @@ public class KakaoMemberInfo implements OAuth2MemberInfo{
     }
 
     @Override
-    public String getName() {
-        return kakaoAccountAttributes.get("name").toString();
-    }
-
-    @Override
     public String getNickName() {
         return profileAttributes.get("nickname").toString();
     }
@@ -39,16 +33,6 @@ public class KakaoMemberInfo implements OAuth2MemberInfo{
     @Override
     public String getEmail() {
         return kakaoAccountAttributes.get("email").toString();
-    }
-
-    @Override
-    public String getProfileImage() {
-        return profileAttributes.get("profile_image").toString();
-    }
-
-    @Override
-    public String getBirthDay() {
-        return kakaoAccountAttributes.get("birthday").toString();
     }
 
     @Override
