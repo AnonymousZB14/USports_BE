@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.mypage.dto;
 
+import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.sportsskill.dto.SportsSkillDto;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -15,12 +16,16 @@ import lombok.Setter;
 @Builder
 public class MyPageMainDto {
 
-  private MyPageMember member;
+  private MyPageMember memberProfile;
 
   private List<SportsSkillDto> sportsSkills;
 
   private List<RecruitAndParticipants> recruitAndParticipants;
 
   private List<MyPageParticipant> participantList;
+
+  private List<MyPageRecruit> myRecruitList;
+
+  private MemberDto memberEdit;
 
 }

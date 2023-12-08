@@ -20,9 +20,7 @@ import com.anonymous.usports.domain.sportsskill.dto.SportsSkillDto;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
-import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.ParticipantStatus;
-import com.anonymous.usports.global.type.RecruitStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +65,16 @@ public class MyPageServiceImpl implements MyPageService {
     List<MyPageRecruit> myRecruitList = this.getMyRecruitList(member);
 
     //내 정보 수정
+    MemberDto memberEdit = MemberDto.fromEntity(member);
 
-    return null;
+    return MyPageMainDto.builder()
+        .memberProfile(myPageMember)
+        .sportsSkills(sportsSkills)
+        .recruitAndParticipants(recruitAndParticipants)
+        .participantList(participantList)
+        .myRecruitList(myRecruitList)
+        .memberEdit(memberEdit)
+        .build();
   }
 
   public MyPageMember getMyPageMember(MemberEntity member) {
@@ -161,7 +167,7 @@ public class MyPageServiceImpl implements MyPageService {
     return list;
   }
 
-  public List<MyPageRecruit> getMyRecruitList(MemberEntity member){
+  public List<MyPageRecruit> getMyRecruitList(MemberEntity member) {
     List<RecruitEntity> findList =
         recruitRepository.findTop10ByMemberAndOrderByMeetingDateDesc(member);
 
