@@ -6,7 +6,6 @@ import static org.mockito.BDDMockito.when;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
-import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.dto.MyPageMember;
 import com.anonymous.usports.domain.mypage.dto.MyPageParticipant;
 import com.anonymous.usports.domain.mypage.dto.MyPageRecruit;
@@ -234,8 +233,9 @@ class MyPageServiceTest {
 
   }
 
-  @Test
-  @DisplayName("평가하기")
+  /**
+   * 평가하기
+   */
   void getRecruitAndParticipants() {
     /*
     LocalDateTime을 Mocking 하는 과정에서 문제가 생겨서
@@ -243,47 +243,8 @@ class MyPageServiceTest {
 
     해결 하려면 서비스 전체에서 Clock을 Bean으로 등록하여 사용해줘야 한다.
     이걸 지금 변경하기에는 시간이 너무 많이 들 것 같고,
-    이 문제 때문에 실제 서비스에서 문제 생길 일은 없을 것 같아서 그냥 넘어간다.
+    이 문제 때문에 실제 서비스에서 문제 생길 일은 없을 것 같아서 이 메서드는 단위 테스트를 하지 않는다.
     */
-//    MemberEntity member = createMember(1L);
-//    RecruitEntity recruit1 = createRecruit(10L, member, createSports(1000L));
-//    RecruitEntity recruit2 = createRecruit(20L, member, createSports(1000L));
-//
-//    //thisMemberParticipateList
-//    List<ParticipantEntity> thisMemberParticipateList = new ArrayList<>();
-//    ParticipantEntity thisMemberParticipant1 = createParticipant(100L, member, recruit1);
-//    thisMemberParticipant1.setMeetingDate(LocalDateTime.now().minusDays(1L));
-//
-//    ParticipantEntity thisMemberParticipant2 = createParticipant(101L, member, recruit2);
-//    thisMemberParticipant2.setMeetingDate(LocalDateTime.now().minusDays(1L));
-//
-//    thisMemberParticipateList.add(thisMemberParticipant1);
-//    thisMemberParticipateList.add(thisMemberParticipant2);
-//    when(participantRepository.findAllByMemberAndMeetingDateIsAfter(member, any(LocalDateTime.class)))
-//        .thenReturn(thisMemberParticipateList);
-//
-//    //otherParticipant1
-//    List<ParticipantEntity> otherParticipantRecruit1 = new ArrayList<>();
-//    otherParticipantRecruit1.add(createParticipant(2000L, createMember(2L), recruit1));
-//    otherParticipantRecruit1.add(createParticipant(2001L, createMember(3L), recruit1));
-//    otherParticipantRecruit1.add(createParticipant(2002L, createMember(4L), recruit1));
-//
-//    when(participantRepository.findAllByRecruitAndStatus(recruit1, ParticipantStatus.ACCEPTED))
-//        .thenReturn(otherParticipantRecruit1);
-//
-//    //otherParticipant2
-//    List<ParticipantEntity> otherParticipantRecruit2 = new ArrayList<>();
-//    otherParticipantRecruit1.add(createParticipant(3000L, createMember(2L), recruit2));
-//    otherParticipantRecruit1.add(createParticipant(3001L, createMember(3L), recruit2));
-//    otherParticipantRecruit1.add(createParticipant(3002L, createMember(4L), recruit2));
-//
-//    when(participantRepository.findAllByRecruitAndStatus(recruit2, ParticipantStatus.ACCEPTED))
-//        .thenReturn(otherParticipantRecruit2);
-//
-//    //then
-//    List<RecruitAndParticipants> result =
-//        myPageService.getRecruitAndParticipants(member);
-
   }
 
   @Test
