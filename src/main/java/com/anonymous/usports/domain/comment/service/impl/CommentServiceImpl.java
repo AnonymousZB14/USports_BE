@@ -27,6 +27,15 @@ public class CommentServiceImpl implements CommentService {
   private final RecordRepository recordRepository;
   private final CommentRepository commentRepository;
 
+  /**
+   * 댓글 작성 메서드
+   *
+   * @param recordId 기록 Id
+   * @param parentId parentId null이면 일반 댓글, 값이 있을 경우 해당 댓글의 대댓글
+   * @param request 댓글 content
+   * @param loginMemberId 로그인 한 회원 Id
+   * @return CommentDto로 반환
+   */
   @Override
   @Transactional
   public CommentDto registerComment(Long recordId, Long parentId, Request request, Long loginMemberId) {
@@ -44,6 +53,15 @@ public class CommentServiceImpl implements CommentService {
     return CommentDto.fromEntity(comment);
   }
 
+  /**
+   * 댓글 수정 메서드
+   *
+   * @param recordId
+   * @param commentId
+   * @param request
+   * @param loginMemberId
+   * @return
+   */
   @Override
   @Transactional
   public CommentDto updateComment(Long recordId, Long commentId, CommentUpdate.Request request,
@@ -72,6 +90,7 @@ public class CommentServiceImpl implements CommentService {
     List<CommentEntity> replies = commentRepository.findAllByParentId(commentId);
     if (!replies.isEmpty()) {
       commentRepository.deleteAll(replies);
+      record.setCountComment(record.getCountComment()-replies.size());
     }
     commentRepository.delete(comment);
     record.setCountComment(record.getCountComment()-1);
