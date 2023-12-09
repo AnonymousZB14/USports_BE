@@ -110,27 +110,27 @@ class CommentServiceImplTest {
     @Test
     @DisplayName("성공-댓글 등록")
     void success_Comment() {
+
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
+      CommentRegister.Request request = new Request("댓글 테스트입니다.");
 
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
       when(recordRepository.findById(100L))
           .thenReturn(Optional.of(record));
-
-
-      CommentRegister.Request request = new Request("댓글 테스트입니다.");
-
       when(commentRepository.save(Request.toEntity(request,member,record,null)))
           .thenReturn(comment);
 
-
-
+      //when
       CommentDto result =
           commentService.registerComment(record.getRecordId(),null,request,member.getMemberId());
 
+      //then
       verify(commentRepository,times(1)).save(new CommentEntity());
       verify(recordRepository,times(1)).save(record);
 
@@ -146,23 +146,26 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
       CommentEntity reply = createComment(1200L,member,record,1000L);
+      CommentRegister.Request request = new Request("댓글 테스트입니다.");
 
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
       when(recordRepository.findById(100L))
           .thenReturn(Optional.of(record));
-
-
-      CommentRegister.Request request = new Request("댓글 테스트입니다.");
-
+      when(commentRepository.existsByCommentId(1000L))
+          .thenReturn(true);
       when(commentRepository.save(Request.toEntity(request,member,record,comment.getCommentId())))
           .thenReturn(reply);
 
+      //when
       CommentDto result =
           commentService.registerComment(record.getRecordId(), comment.getCommentId(), request,member.getMemberId());
 
+      //then
       verify(commentRepository,times(1)).save(new CommentEntity());
       verify(recordRepository,times(1)).save(record);
 
@@ -173,19 +176,47 @@ class CommentServiceImplTest {
 
     }
     @Test
+    @DisplayName("실패-대댓글 등록할 원댓글 없음")
+    void fail_NotExistsComment() {
+      MemberEntity member = createMember(1L);
+      SportsEntity sports = createSports(10L,"축구");
+      RecordEntity record = createRecord(100L, member, sports);
+
+      //given
+      createComment(1000L,member,record,null);
+      createComment(1200L,member,record,1500L);
+      CommentRegister.Request request = new Request("댓글 테스트입니다.");
+
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
+      when(recordRepository.findById(100L))
+          .thenReturn(Optional.of(record));
+
+      //when
+      //then
+      CommentException exception =
+          catchThrowableOfType(()->
+                  commentService.registerComment(record.getRecordId(),1500L,request,member.getMemberId()),
+              CommentException.class);
+      assertEquals(exception.getErrorCode(),ErrorCode.COMMENT_NOT_FOUND);
+
+    }
+    @Test
     @DisplayName("실패-MEMBER_NOT_FOUND")
     void fail_MemberNotFound() {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
 
+      //given
+      CommentRegister.Request request = new Request("댓글 테스트입니다.");
       when(recordRepository.findById(100L))
           .thenReturn(Optional.of(record));
       when(memberRepository.findById(1L))
           .thenReturn(Optional.empty());
 
-      CommentRegister.Request request = new Request("댓글 테스트입니다.");
-
+      //when
+      //then
       MemberException exception =
           catchThrowableOfType(()->
               commentService.registerComment(record.getRecordId(),null,request,member.getMemberId()),
@@ -199,11 +230,14 @@ class CommentServiceImplTest {
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
 
+      //given
+      CommentRegister.Request request = new Request("댓글 테스트입니다.");
+
       when(recordRepository.findById(100L))
           .thenReturn(Optional.empty());
 
-      CommentRegister.Request request = new Request("댓글 테스트입니다.");
-
+      //when
+      //then
       RecordException exception =
           catchThrowableOfType(()->
                   commentService.registerComment(record.getRecordId(),null,request,member.getMemberId()),
@@ -233,6 +267,8 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
       CommentUpdate.Request request = new CommentUpdate.Request("댓글 수정 테스트입니다.");
       CommentEntity updateComment = createUpdateComment(comment,request);
@@ -248,10 +284,12 @@ class CommentServiceImplTest {
       when(commentRepository.save(comment))
           .thenReturn(updateComment);
 
+      //when
       CommentDto result =
           commentService.updateComment
               (record.getRecordId(), comment.getCommentId(), request,member.getMemberId());
 
+      //then
       verify(commentRepository,times(1)).save(updateComment);
 
       assertEquals(result.getMemberId(),comment.getMember().getMemberId());
@@ -266,6 +304,8 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
       CommentUpdate.Request request = new CommentUpdate.Request("댓글 수정 테스트입니다.");
       List<CommentEntity> customRepliesList = Arrays.asList(
@@ -282,6 +322,8 @@ class CommentServiceImplTest {
       when(commentRepository.findAllByParentId(1000L))
           .thenReturn(customRepliesList);
 
+      //when
+      //then
       CommentException exception =
           catchThrowableOfType(()->
                   commentService.updateComment(record.getRecordId(), comment.getCommentId(), request,member.getMemberId()),
@@ -294,13 +336,16 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
       CommentUpdate.Request request = new CommentUpdate.Request("댓글 수정 테스트입니다.");
 
       when(recordRepository.findById(100L))
           .thenReturn(Optional.empty());
 
-
+      //when
+      //then
       RecordException exception =
           catchThrowableOfType(()->
                   commentService.updateComment(record.getRecordId(), comment.getCommentId(), request,member.getMemberId()),
@@ -313,6 +358,8 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
       CommentUpdate.Request request = new CommentUpdate.Request("댓글 수정 테스트입니다.");
 
@@ -321,6 +368,8 @@ class CommentServiceImplTest {
       when(commentRepository.findById(1000L))
           .thenReturn(Optional.empty());
 
+      //when
+      //then
       CommentException exception =
           catchThrowableOfType(()->
                   commentService.updateComment(record.getRecordId(), comment.getCommentId(), request,member.getMemberId()),
@@ -333,6 +382,8 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
       CommentUpdate.Request request = new CommentUpdate.Request("댓글 수정 테스트입니다.");
 
@@ -344,6 +395,8 @@ class CommentServiceImplTest {
       when(commentRepository.findById(1000L))
           .thenReturn(Optional.of(comment));
 
+      //when
+      //then
       MemberException exception =
           catchThrowableOfType(()->
                   commentService.updateComment(record.getRecordId(), comment.getCommentId(), request,member.getMemberId()),
@@ -354,9 +407,11 @@ class CommentServiceImplTest {
     @DisplayName("실패-NO_AUTHORITY_ERROR")
     void fail_NoAuthorityError(){
       MemberEntity member = createMember(1L);
-      MemberEntity otherMember = createMember(2L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
+      MemberEntity otherMember = createMember(2L);
       CommentEntity comment = createComment(1000L,otherMember,record,null);
       CommentUpdate.Request request = new CommentUpdate.Request("댓글 수정 테스트입니다.");
 
@@ -367,7 +422,8 @@ class CommentServiceImplTest {
       when(commentRepository.findById(1000L))
           .thenReturn(Optional.of(comment));
 
-
+      //when
+      //then
       MemberException exception =
           catchThrowableOfType(()->
                   commentService.updateComment(record.getRecordId(), comment.getCommentId(), request,member.getMemberId()),
@@ -385,6 +441,8 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
 
       when(memberRepository.findById(1L))
@@ -396,10 +454,12 @@ class CommentServiceImplTest {
       when(commentRepository.findAllByParentId(1000L))
           .thenReturn(Collections.emptyList());
 
+      //when
       CommentDto result =
           commentService.deleteComment
               (record.getRecordId(), comment.getCommentId(),member.getMemberId());
 
+      //then
       verify(commentRepository,times(1)).delete(comment);
 
       assertEquals(result.getCommentId(), comment.getCommentId());
@@ -408,9 +468,11 @@ class CommentServiceImplTest {
     @DisplayName("성공-대댓글이 달렸을 때 댓글 삭제")
     void success_deleteCommentExistReply(){
       MemberEntity member = createMember(1L);
-      MemberEntity otherMember = createMember(2L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
+      MemberEntity otherMember = createMember(2L);
       CommentEntity comment = createComment(1000L,member,record,null);
       List<CommentEntity> customRepliesList = Arrays.asList(
           createComment(2000L, otherMember, record, comment.getCommentId()),
@@ -426,11 +488,12 @@ class CommentServiceImplTest {
       when(commentRepository.findAllByParentId(1000L))
           .thenReturn(customRepliesList);
 
-
+      //when
       CommentDto result =
           commentService.deleteComment
               (record.getRecordId(), comment.getCommentId(),member.getMemberId());
 
+      //then
       verify(commentRepository,times(1)).delete(comment);
       verify(commentRepository,times(1)).deleteAll(customRepliesList);
 
@@ -442,11 +505,15 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
 
       when(recordRepository.findById(100L))
           .thenReturn(Optional.empty());
 
+      //when
+      //then
       RecordException exception =
           catchThrowableOfType(()->
                   commentService.deleteComment(record.getRecordId(), comment.getCommentId(),member.getMemberId()),
@@ -459,6 +526,8 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
 
       when(recordRepository.findById(100L))
@@ -466,6 +535,8 @@ class CommentServiceImplTest {
       when(commentRepository.findById(1000L))
           .thenReturn(Optional.empty());
 
+      //when
+      //then
       CommentException exception =
           catchThrowableOfType(()->
                   commentService.deleteComment(record.getRecordId(), comment.getCommentId(),member.getMemberId()),
@@ -478,6 +549,8 @@ class CommentServiceImplTest {
       MemberEntity member = createMember(1L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
       CommentEntity comment = createComment(1000L,member,record,null);
 
       when(recordRepository.findById(100L))
@@ -487,6 +560,8 @@ class CommentServiceImplTest {
       when(memberRepository.findById(1L))
           .thenReturn(Optional.empty());
 
+      //when
+      //then
       MemberException exception =
           catchThrowableOfType(()->
                   commentService.deleteComment(record.getRecordId(), comment.getCommentId(),member.getMemberId()),
@@ -498,9 +573,11 @@ class CommentServiceImplTest {
     @DisplayName("실패-NO_AUTHORITY_ERROR")
     void fail_NO_AUTHORITY_ERROR(){
       MemberEntity member = createMember(1L);
-      MemberEntity otherMember = createMember(2L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L, member, sports);
+
+      //given
+      MemberEntity otherMember = createMember(2L);
       CommentEntity comment = createComment(1000L,otherMember,record,null);
 
       when(memberRepository.findById(1L))
@@ -510,6 +587,8 @@ class CommentServiceImplTest {
       when(commentRepository.findById(1000L))
           .thenReturn(Optional.of(comment));
 
+      //when
+      //then
       MemberException exception =
           catchThrowableOfType(()->
                   commentService.deleteComment(record.getRecordId(), comment.getCommentId(),member.getMemberId()),

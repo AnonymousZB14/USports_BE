@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
   List<CommentEntity> findAllByParentId(Long parentId);
 
-  List<CommentEntity> findAllByRecord(RecordEntity recordEntity);
+  boolean existsByCommentId(Long commentId);
 
   boolean existsByRecord(RecordEntity recordEntity);
 

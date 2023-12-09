@@ -34,7 +34,10 @@ public class CommentServiceImpl implements CommentService {
         .orElseThrow(()->new RecordException(ErrorCode.RECORD_NOT_FOUND));
     MemberEntity loginMember = memberRepository.findById(loginMemberId)
         .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
-
+    boolean existsComment = commentRepository.existsByCommentId(parentId);
+    if(parentId!=null&&!existsComment){
+      throw new CommentException(ErrorCode.COMMENT_NOT_FOUND);
+    }
     CommentEntity comment = commentRepository.save(Request.toEntity(request,loginMember,record,parentId));
     record.setCountComment(record.getCountComment()+1);
     recordRepository.save(record);
@@ -49,11 +52,7 @@ public class CommentServiceImpl implements CommentService {
         .orElseThrow(()->new RecordException(ErrorCode.RECORD_NOT_FOUND));
     CommentEntity comment = commentRepository.findById(commentId)
         .orElseThrow(()->new CommentException(ErrorCode.COMMENT_NOT_FOUND));
-    memberRepository.findById(loginMemberId)
-        .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
-    if(!comment.getMember().getMemberId().equals(loginMemberId)){
-      throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
-    }
+    validateMemberAndAuthority(comment,loginMemberId);
     List<CommentEntity> replies = commentRepository.findAllByParentId(commentId);
     if (!replies.isEmpty()) {
       throw new CommentException(ErrorCode.CANNOT_EDIT_PARENT_COMMENT);
@@ -69,11 +68,7 @@ public class CommentServiceImpl implements CommentService {
         .orElseThrow(()->new RecordException(ErrorCode.RECORD_NOT_FOUND));
     CommentEntity comment = commentRepository.findById(commentId)
         .orElseThrow(()->new CommentException(ErrorCode.COMMENT_NOT_FOUND));
-    memberRepository.findById(loginMemberId)
-        .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
-    if(!comment.getMember().getMemberId().equals(loginMemberId)){
-      throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
-    }
+    validateMemberAndAuthority(comment, loginMemberId);
     List<CommentEntity> replies = commentRepository.findAllByParentId(commentId);
     if (!replies.isEmpty()) {
       commentRepository.deleteAll(replies);
@@ -82,5 +77,12 @@ public class CommentServiceImpl implements CommentService {
     record.setCountComment(record.getCountComment()-1);
     recordRepository.save(record);
     return CommentDto.fromEntity(comment);
+  }
+  private void validateMemberAndAuthority(CommentEntity comment, Long loginMemberId) {
+    memberRepository.findById(loginMemberId)
+        .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+    if(!comment.getMember().getMemberId().equals(loginMemberId)){
+      throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
+    }
   }
 }
