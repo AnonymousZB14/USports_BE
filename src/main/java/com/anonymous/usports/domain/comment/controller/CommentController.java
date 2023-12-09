@@ -7,6 +7,7 @@ import com.anonymous.usports.domain.comment.dto.CommentRegister.Response;
 import com.anonymous.usports.domain.comment.dto.CommentUpdate;
 import com.anonymous.usports.domain.comment.service.CommentService;
 import com.anonymous.usports.domain.member.dto.MemberDto;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +25,7 @@ public class CommentController {
 
   private final CommentService commentService;
 
+  @ApiOperation("댓글 작성")
   @PostMapping("/record/{recordId}/comment")
   public ResponseEntity<CommentRegister.Response> registerComment(
       @PathVariable Long recordId,
@@ -35,6 +37,7 @@ public class CommentController {
     return ResponseEntity.ok(new Response(commentDto));
   }
 
+  @ApiOperation("댓글 수정")
   @PutMapping("/record/{recordId}/comment/{commentId}")
   public ResponseEntity<CommentUpdate.Response> updateComment(
       @PathVariable Long recordId,
@@ -46,6 +49,7 @@ public class CommentController {
     return ResponseEntity.ok(new CommentUpdate.Response(commentDto));
   }
 
+  @ApiOperation("댓글 삭제")
   @DeleteMapping("/record/{recordId}/comment/{commentId}")
   public ResponseEntity<CommentDelete.Response> deleteComment(
       @PathVariable Long recordId,
