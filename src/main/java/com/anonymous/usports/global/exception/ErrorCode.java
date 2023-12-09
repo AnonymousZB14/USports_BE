@@ -63,6 +63,9 @@ public enum ErrorCode {
   SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신을 팔로우 할 수 없습니다."),
 
 
+  //기타
+  ADDRESS_API_ERROR(HttpStatus.BAD_REQUEST, "도로명 주소 입력값이 잘못되었습니다."),
+
   //BASIC
   NO_AUTHORITY_ERROR(HttpStatus.FORBIDDEN, "권한이 없습니다."),
   NOT_FOUND_ERROR(HttpStatus.NOT_FOUND, "404 NOT FOUND"),
