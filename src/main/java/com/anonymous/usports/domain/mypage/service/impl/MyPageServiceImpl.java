@@ -64,8 +64,6 @@ public class MyPageServiceImpl implements MyPageService {
     //내 모집 관리 : 내가 만든 모집 관리
     List<MyPageRecruit> myRecruitList = this.getMyRecruitList(member);
 
-    //내 정보 수정
-    MemberDto memberEdit = MemberDto.fromEntity(member);
 
     return MyPageMainDto.builder()
         .memberProfile(myPageMember)
@@ -73,7 +71,6 @@ public class MyPageServiceImpl implements MyPageService {
         .recruitAndParticipants(recruitAndParticipants)
         .participateList(participantList)
         .myRecruitList(myRecruitList)
-        .memberEdit(memberEdit)
         .build();
   }
 

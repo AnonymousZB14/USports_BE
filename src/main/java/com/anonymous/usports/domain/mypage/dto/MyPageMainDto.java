@@ -26,6 +26,4 @@ public class MyPageMainDto {
 
   private List<MyPageRecruit> myRecruitList;//내 모집 관리
 
-  private MemberDto memberEdit;//내 정보 수정
-
 }
