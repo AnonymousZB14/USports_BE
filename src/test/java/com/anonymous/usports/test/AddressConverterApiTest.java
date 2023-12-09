@@ -24,7 +24,7 @@ public class AddressConverterApiTest {
   @DisplayName("성공")
   void addressConverter() {
     String name = "전북 삼성동 100";
-    AddressDto addressDto = addressConverter.roadNameAddressToBuildingInfo(name);
+    AddressDto addressDto = addressConverter.roadNameAddressToLocationInfo(name);
     log.info(addressDto.toString());
   }
 
@@ -33,7 +33,7 @@ public class AddressConverterApiTest {
   void addressConverter_ADDRESS_API_ERROR() {
     String addr = "전남 삼!성!동! 1!0";
     try {
-      addressConverter.roadNameAddressToBuildingInfo(addr);
+      addressConverter.roadNameAddressToLocationInfo(addr);
     } catch (MyException e) {
       assertThat(e.getErrorCode()).isEqualTo(ErrorCode.ADDRESS_API_ERROR);
     }

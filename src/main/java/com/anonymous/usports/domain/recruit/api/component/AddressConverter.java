@@ -21,7 +21,7 @@ public class AddressConverter {
   @Value("${kakao.api_key}")
   private String kakaoApiKey;
 
-  public AddressDto roadNameAddressToBuildingInfo(String roadNameAddress) {
+  public AddressDto roadNameAddressToLocationInfo(String roadNameAddress) {
     String reqUrl = new StringBuilder()
         .append("https://dapi.kakao.com/v2/local/search/address.json")
         .append("?")
