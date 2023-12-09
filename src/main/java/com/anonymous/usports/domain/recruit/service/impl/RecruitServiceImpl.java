@@ -138,7 +138,7 @@ public class RecruitServiceImpl implements RecruitService {
     List<ParticipantEntity> participants =
         participantRepository.findAllByRecruitAndStatus(recruitEntity, ParticipantStatus.ING);
     for (ParticipantEntity participant : participants) {
-      participant.refuse();
+      participant.setStatus(ParticipantStatus.REFUSED);
     }
     recruitEntity.statusToEnd();
     return new RecruitEndResponse(recruitId, ResponseConstant.END_RECRUIT_COMPLETE);

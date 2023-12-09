@@ -78,7 +78,7 @@ public class EvaluationServiceImpl implements EvaluationService {
     }
 
     //Participant에서 타인 평가 여부 변경
-    participantOfFromMember.evaluation();
+    participantOfFromMember.setEvaluationAt(LocalDateTime.now());
 
     return EvaluationRegister.Response.fromEntity(saved);
   }
