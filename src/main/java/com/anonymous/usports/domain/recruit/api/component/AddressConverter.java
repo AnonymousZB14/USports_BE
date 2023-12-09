@@ -2,22 +2,14 @@ package com.anonymous.usports.domain.recruit.api.component;
 
 import com.anonymous.usports.domain.recruit.api.dto.AddressDto;
 import com.anonymous.usports.domain.recruit.api.dto.AddressResponse;
-import com.anonymous.usports.domain.recruit.api.dto.Document;
 import com.google.gson.Gson;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import javax.print.Doc;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.description.method.MethodDescription.TypeToken;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.BufferingClientHttpRequestFactory;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -42,7 +34,7 @@ public class AddressConverter {
 
     //HttpHeader
     HttpHeaders headers = new HttpHeaders();
-    headers.add("Authorization","KakaoAK " + kakaoApiKey);
+    headers.add("Authorization", "KakaoAK " + kakaoApiKey);
 
     HttpEntity<Object> httpEntity = new HttpEntity<>(null, headers);
 
