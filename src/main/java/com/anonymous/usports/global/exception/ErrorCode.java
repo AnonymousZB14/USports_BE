@@ -41,8 +41,10 @@ public enum ErrorCode {
   //Evaluation 관련
   EVALUATION_ALREADY_EXISTS(HttpStatus.NOT_FOUND, "이미 평가가 완료된 건 입니다."),
 
-
-
+  //Comment 관련
+  COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST,"댓글을 찾을 수 없습니다."),
+  CANNOT_EDIT_PARENT_COMMENT(HttpStatus.BAD_REQUEST,"원댓글은 수정할 수 없습니다."),
+  CANNOT_DELETE_PARENT_COMMENT(HttpStatus.BAD_REQUEST,"원댓글은 삭제할 수 없습니다."),
 
   //Record 관련
   IMAGE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"이미지 저장 오류가 발생했습니다."),
@@ -56,6 +58,7 @@ public enum ErrorCode {
   RECORD_UPDATE_ERROR(HttpStatus.BAD_REQUEST,"기록 수정 중 에러가 발생했습니다."),
   RECORD_DELETE_ERROR(HttpStatus.BAD_REQUEST,"기록 삭제 중 에러가 발생했습니다."),
   INVALID_IMAGE_EXTENSION(HttpStatus.BAD_REQUEST,"업로드 할 수 없는 확장자입니다."),
+  CANNOT_DELETE_RECORD_FOR_COMMENT(HttpStatus.BAD_REQUEST,"댓글이 있는 게시글은 삭제할 수 없습니다."),
 
   //Follow 관련
   FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND,"팔로우를 찾을 수 없습니다."),
