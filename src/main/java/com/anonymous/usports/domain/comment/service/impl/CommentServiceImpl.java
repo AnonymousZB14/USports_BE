@@ -56,11 +56,11 @@ public class CommentServiceImpl implements CommentService {
   /**
    * 댓글 수정 메서드
    *
-   * @param recordId
-   * @param commentId
-   * @param request
-   * @param loginMemberId
-   * @return
+   * @param recordId 기록 Id
+   * @param commentId 수정할 commentId
+   * @param request 댓글 content
+   * @param loginMemberId 로그인 한 회원 Id
+   * @return CommentDto로 반환
    */
   @Override
   @Transactional
@@ -79,6 +79,14 @@ public class CommentServiceImpl implements CommentService {
     return CommentDto.fromEntity(updatedComment);
   }
 
+  /**
+   * 댓글 삭제 메서드
+   *
+   * @param recordId 기록 Id
+   * @param commentId 수정할 commentId
+   * @param loginMemberId 로그인 한 회원 Id
+   * @return CommentDto로 반환
+   */
   @Override
   @Transactional
   public CommentDto deleteComment(Long recordId, Long commentId, Long loginMemberId) {
@@ -97,6 +105,13 @@ public class CommentServiceImpl implements CommentService {
     recordRepository.save(record);
     return CommentDto.fromEntity(comment);
   }
+
+  /**
+   * 회원 정보 조회 및 댓글 작성 회원과 일치 여부 확인
+   *
+   * @param comment 해당 댓글
+   * @param loginMemberId 로그인 한 회원 Id
+   */
   private void validateMemberAndAuthority(CommentEntity comment, Long loginMemberId) {
     memberRepository.findById(loginMemberId)
         .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
