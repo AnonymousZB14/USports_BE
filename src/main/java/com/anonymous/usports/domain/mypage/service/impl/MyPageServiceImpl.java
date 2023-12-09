@@ -119,15 +119,15 @@ public class MyPageServiceImpl implements MyPageService {
 
   public List<RecruitAndParticipants> getRecruitAndParticipants(MemberEntity member) {
     //끝난지 48시간 이내의 참여 신청 건
-    List<ParticipantEntity> findList = participantRepository
+    List<ParticipantEntity> thisMemberParticipateList = participantRepository
         .findAllByMemberAndMeetingDateIsAfter(member, LocalDateTime.now().minusDays(2L));
-    if (findList.isEmpty()) {
+    if (thisMemberParticipateList.isEmpty()) {
       return new ArrayList<>();
     }
 
     List<RecruitAndParticipants> recruitAndParticipants = new ArrayList<>();
 
-    for (ParticipantEntity loginMemberParticipate : findList) {
+    for (ParticipantEntity loginMemberParticipate : thisMemberParticipateList) {
       RecruitEntity recruit = loginMemberParticipate.getRecruit();
 
       List<ParticipantEntity> otherParticipants =
