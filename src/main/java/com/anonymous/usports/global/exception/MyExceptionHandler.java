@@ -52,6 +52,11 @@ public class MyExceptionHandler {
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
   }
 
+  @ExceptionHandler(CommentException.class)
+  public ResponseEntity<ErrorResponse> handleRecordException(CommentException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+    return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
 
 
 }
