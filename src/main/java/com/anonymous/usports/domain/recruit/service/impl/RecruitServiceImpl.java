@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.recruit.service.impl;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
@@ -21,8 +22,10 @@ import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.exception.SportsException;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import io.jsonwebtoken.lang.Strings;
+import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -131,9 +134,14 @@ public class RecruitServiceImpl implements RecruitService {
     }
 
     //RECRUITING or ALMOST_FINISHED-> 모집 마감 상태로 변경
+    //ING 상태의 Participants 모두 거절
+    List<ParticipantEntity> participants =
+        participantRepository.findAllByRecruitAndStatus(recruitEntity, ParticipantStatus.ING);
+    for (ParticipantEntity participant : participants) {
+      participant.refuse();
+    }
     recruitEntity.statusToEnd();
     return new RecruitEndResponse(recruitId, ResponseConstant.END_RECRUIT_COMPLETE);
-
   }
 
   @Override
