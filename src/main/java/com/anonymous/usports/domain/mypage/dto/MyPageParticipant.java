@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.mypage.dto;
 
+import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.global.type.ParticipantStatus;
 
 import lombok.AllArgsConstructor;
@@ -19,4 +20,9 @@ public class MyPageParticipant {
   private String recruitTile;
   private ParticipantStatus status;
 
+  public MyPageParticipant(ParticipantEntity participant) {
+    this.sportsName = participant.getRecruit().getSports().getSportsName();
+    this.recruitTile = participant.getRecruit().getTitle();
+    this.status = participant.getStatus();
+  }
 }

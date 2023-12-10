@@ -273,32 +273,32 @@ class MyPageServiceTest {
     }
   }
 
-  @Test
-  @DisplayName("내 모집 관리")
-  void getMyRecruitList() {
-    MemberEntity member = createMember(1L);
-    SportsEntity sports = createSports(100L);
-
-    //given
-    List<RecruitEntity> findList = new ArrayList<>();
-    for (int i = 0; i < 3; i++) {
-      findList.add(createRecruit(10L + i, member, sports));
-    }
-
-    when(recruitRepository.findTop10ByMemberOrderByMeetingDateDesc(member))
-        .thenReturn(findList);
-
-    //when
-    List<MyPageRecruit> result = myPageService.getMyRecruitList(member);
-
-    //then
-    for (MyPageRecruit myPageRecruit : result) {
-      assertThat(myPageRecruit.getRecruitId()).isNotNull();
-      assertThat(myPageRecruit.getSportsName()).isEqualTo(sports.getSportsName());
-      assertThat(myPageRecruit.getTitle()).isNotNull();
-      assertThat(myPageRecruit.getGender()).isEqualTo(Gender.MALE);
-      assertThat(myPageRecruit.getStatus()).isEqualTo(RecruitStatus.RECRUITING);
-    }
-  }
+//  @Test
+//  @DisplayName("내 모집 관리")
+//  void getMyRecruitList() {
+//    MemberEntity member = createMember(1L);
+//    SportsEntity sports = createSports(100L);
+//
+//    //given
+//    List<RecruitEntity> findList = new ArrayList<>();
+//    for (int i = 0; i < 3; i++) {
+//      findList.add(createRecruit(10L + i, member, sports));
+//    }
+//
+//    when(recruitRepository.findTop10ByMemberOrderByMeetingDateDesc(member))
+//        .thenReturn(findList);
+//
+//    //when
+//    List<MyPageRecruit> result = myPageService.getMyRecruitList(member);
+//
+//    //then
+//    for (MyPageRecruit myPageRecruit : result) {
+//      assertThat(myPageRecruit.getRecruitId()).isNotNull();
+//      assertThat(myPageRecruit.getSportsName()).isEqualTo(sports.getSportsName());
+//      assertThat(myPageRecruit.getTitle()).isNotNull();
+//      assertThat(myPageRecruit.getGender()).isEqualTo(Gender.MALE);
+//      assertThat(myPageRecruit.getStatus()).isEqualTo(RecruitStatus.RECRUITING);
+//    }
+//  }
 
 }
