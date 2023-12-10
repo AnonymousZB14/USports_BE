@@ -33,7 +33,9 @@ public class MailServiceImpl implements MailService {
             message.setRecipients(MimeMessage.RecipientType.TO, mail);
             message.setSubject(title);
             message.setText(String.valueOf(body), "UTF-8", "html");
+
         } catch(MessagingException e) {
+            log.info("catch");
             e.printStackTrace();
         }
 
@@ -42,32 +44,31 @@ public class MailServiceImpl implements MailService {
 
     @Override
     @Async
-    public int sendEmailAuthMail(String email) {
+    public void sendEmailAuthMail(String email) {
 
         String number = String.valueOf(RandomCreator.createNumber());
         String title = MailConstant.MEMBER_EMAIL_AUTH_TITLE;
         StringBuilder content = MailConstant.AUTH_EMAIL_CONTENT;
 
-        MimeMessage message = createMail(email, number, title, content);
-        javaMailSender.send(message);
+        sendEmail(email, number, title, content);
 
         authRedisRepository.saveEmailAuthNumber(email, number);
-
-        return Integer.parseInt(number);
     }
 
-
+    @Async
+    protected void sendEmail(String email, String tempPassword, String title, StringBuilder content){
+        MimeMessage message = createMail(email, tempPassword, title, content);
+        javaMailSender.send(message);
+    };
 
     @Override
-    @Async
     public String sendTempPassword(String email) {
 
         String tempPassword = RandomCreator.createPassword();
         String title = MailConstant.TEMP_PASSWORD_EMAIL_TITLE;
         StringBuilder content = MailConstant.TEMP_PASSWORD_EMAIL_CONTENT;
 
-        MimeMessage message = createMail(email, tempPassword, title, content);
-        javaMailSender.send(message);
+        sendEmail(email, tempPassword, title, content);
 
         return tempPassword;
     }

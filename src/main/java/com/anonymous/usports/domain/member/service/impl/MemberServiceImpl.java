@@ -244,6 +244,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         String tempPassword = mailService.sendTempPassword(request.getEmail());
 
+
         memberEntity.setPassword(passwordEncoder.encode(tempPassword));
 
         memberRepository.save(memberEntity);

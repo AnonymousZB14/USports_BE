@@ -17,7 +17,6 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,8 +29,6 @@ public class CustomOAuth2MemberService extends DefaultOAuth2UserService {
     private final MemberRepository memberRepository;
 
     private final PasswordEncoder passwordEncoder;
-
-    private final HttpSession httpSession;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -70,7 +67,7 @@ public class CustomOAuth2MemberService extends DefaultOAuth2UserService {
             memberEntity = memberRepository.save(
                     MemberEntity.builder()
                             .accountName(tempAccountName.toString())
-                            .name("name") // todo : 한글 db에 저장할 수 있도록 하기
+                            .name(nickName)
                             .email(email)
                             .emailAuthAt(LocalDateTime.now())
                             .password(passwordEncoder.encode(UUID.randomUUID().toString().substring(0, 10)))
@@ -81,6 +78,13 @@ public class CustomOAuth2MemberService extends DefaultOAuth2UserService {
                             .build());
         } else {
             memberEntity = member.get();
+
+            MemberDto memberDto = MemberDto.fromEntity(memberEntity);
+
+            if (memberDto.getEmailAuthAt() == null) {
+                memberEntity.setEmailAuthAt(LocalDateTime.now());
+                memberEntity = memberRepository.save(memberEntity);
+            }
         }
 
         MemberDto memberDto = MemberDto.fromEntity(memberEntity);

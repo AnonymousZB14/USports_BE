@@ -46,7 +46,7 @@ public class MemberEntity {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
