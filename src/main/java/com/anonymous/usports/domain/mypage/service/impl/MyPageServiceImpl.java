@@ -107,6 +107,9 @@ public class MyPageServiceImpl implements MyPageService {
     return new MyPageMember(member, interestSportsList, plusAlpha);
   }
 
+  /**
+   * 팝업으로 띄워줄 sportSkill
+   */
   public List<SportsSkillDto> getSportsSkills(MemberEntity member) {
     return sportsSkillRepository.findAllByMember(member)
         .stream()
@@ -114,6 +117,9 @@ public class MyPageServiceImpl implements MyPageService {
         .collect(Collectors.toList());
   }
 
+  /**
+   * 평가하기 : 평가를 하기 위한 내가 참여했던 Recruit와 참여자 리스트
+   */
   public List<RecruitAndParticipants> getRecruitAndParticipants(MemberEntity member) {
     //끝난지 48시간 이내의 참여 신청 건
     List<ParticipantEntity> thisMemberParticipateList = participantRepository
@@ -126,6 +132,9 @@ public class MyPageServiceImpl implements MyPageService {
 
     for (ParticipantEntity loginMemberParticipate : thisMemberParticipateList) {
       RecruitEntity recruit = loginMemberParticipate.getRecruit();
+      if(recruit.getMeetingDate().isAfter(LocalDateTime.now())){
+        continue;
+      }
 
       List<ParticipantEntity> otherParticipants =
           participantRepository.findAllByRecruitAndStatus(recruit, ParticipantStatus.ACCEPTED);
@@ -145,29 +154,28 @@ public class MyPageServiceImpl implements MyPageService {
     return recruitAndParticipants;
   }
 
+  /**
+   * 내 신청 현황 : 내가 신청한 참여신청(Participant) 리스트
+   */
   public List<MyPageParticipant> getParticipantList(MemberEntity member) {
     List<MyPageParticipant> list = new ArrayList<>();
 
     for (ParticipantEntity participant :
-        participantRepository.findTop10ByMemberOrderByRegisteredAtDesc(member)) {
+        participantRepository.findAllByMemberAndMeetingDateIsAfter(member, LocalDateTime.now())) {
 
-      RecruitEntity recruit = participant.getRecruit();
-
-      list.add(
-          new MyPageParticipant(
-              recruit.getSports().getSportsName(),
-              recruit.getTitle(),
-              participant.getStatus())
-      );
+      list.add(new MyPageParticipant(participant));
     }
+
 
     return list;
   }
 
+  /**
+   * 내 모집 관리 : 내가 만든 모집 관리
+   */
   public List<MyPageRecruit> getMyRecruitList(MemberEntity member) {
     List<RecruitEntity> findList =
-        recruitRepository.findTop10ByMemberOrderByMeetingDateDesc(member);
-
+        recruitRepository.findAllByMemberAndMeetingDateIsAfter(member, LocalDateTime.now().minusHours(6));
     List<MyPageRecruit> list = new ArrayList<>();
     for (RecruitEntity recruit : findList) {
       list.add(new MyPageRecruit(recruit));

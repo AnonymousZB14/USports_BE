@@ -22,9 +22,9 @@ public class EvaluationController {
 
   @ApiOperation("회원간에 평가를 진행한다.")
   @PostMapping("/evaluation")
-  public ResponseEntity<?> registerEvaluation(@RequestBody EvaluationRegister.Request request,
+  public ResponseEntity<EvaluationRegister.Response> registerEvaluation(@RequestBody EvaluationRegister.Request request,
       @AuthenticationPrincipal MemberDto loginMember){
-    Response response = evaluationService.registerEvaluation(request, loginMember.getMemberId());
+    EvaluationRegister.Response response = evaluationService.registerEvaluation(request, loginMember.getMemberId());
     return ResponseEntity.ok(response);
   }
 }

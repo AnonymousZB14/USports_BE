@@ -22,7 +22,7 @@ public class NotificationController {
 
   @ApiOperation("알림 리스트 보기")
   @GetMapping("/notifications")
-  public @ResponseBody ResponseEntity<?> notificationList(
+  public @ResponseBody ResponseEntity<List<NotificationDto>> notificationList(
       @AuthenticationPrincipal MemberDto loginMember,
       HttpServletRequest httpServletRequest) {
 

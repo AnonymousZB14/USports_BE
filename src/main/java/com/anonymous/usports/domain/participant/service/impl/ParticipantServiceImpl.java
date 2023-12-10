@@ -21,6 +21,7 @@ import com.anonymous.usports.global.exception.ParticipantException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -106,14 +107,14 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     //거절
     if (!request.isAccept()) {
-      participantEntity.refuse();
+      participantEntity.setStatus(ParticipantStatus.REFUSED);
       participantRepository.save(participantEntity);
       return new ParticipantManage.Response(recruitId, applicant.getMemberId(), false);
     }
 
     //수락 시
     //참여 수락 상태로 변경
-    participantEntity.confirm();
+    participantEntity.setStatus(ParticipantStatus.ACCEPTED);
     participantRepository.save(participantEntity);
 
     recruitEntity.participantAdded();//Recruit의 currentCount + 1

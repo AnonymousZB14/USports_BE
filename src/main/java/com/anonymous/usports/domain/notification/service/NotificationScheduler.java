@@ -1,9 +1,12 @@
 package com.anonymous.usports.domain.notification.service;
 
+import com.anonymous.usports.domain.notification.entity.NotificationEntity;
 import com.anonymous.usports.domain.notification.repository.NotificationRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +23,14 @@ public class NotificationScheduler {
   public void deleteNotifications() {
     log.info("[notification delete Scheduler start] Time: {}", LocalDateTime.now());
 
-    Integer count =
-        notificationRepository.deleteAllByCreatedAtBefore(LocalDateTime.now().minusDays(30L));
+    int size = 100;
+    while(size > 0){
+      List<NotificationEntity> list =
+          notificationRepository.findTop100ByCreatedAtBefore(LocalDateTime.now().minusDays(30L));
+      size = list.size();
+      notificationRepository.deleteAll(list);
+    }
 
-    log.info("[delete Complete] count={} Time: {}", count, LocalDateTime.now());
+    log.info("[delete Complete] Time: {}",  LocalDateTime.now());
   }
 }
