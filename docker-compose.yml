@@ -23,6 +23,22 @@ services:
       - backend
     restart: always
 
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    volumes:
+      - data:/data
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=rootuser
+      - MONGO_INITDB_ROOT_PASSWORD=rootpass
+    networks:
+      - backend
+
+volumes:
+  data: { }
+
 networks:
   backend:
     name: backend

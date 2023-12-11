@@ -37,6 +37,8 @@ dependencies {
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    //mongodb
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
     implementation 'com.google.code.gson:gson:2.9.0'
 
