@@ -1,5 +1,6 @@
-package com.anonymous.usports.domain.mongodbtest;
+package com.anonymous.usports.domain.chatting.dto;
 
+import com.anonymous.usports.domain.chatting.entity.ChattingEntity;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;

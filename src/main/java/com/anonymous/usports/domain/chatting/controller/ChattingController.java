@@ -1,5 +1,8 @@
-package com.anonymous.usports.domain.mongodbtest;
+package com.anonymous.usports.domain.chatting.controller;
 
+import com.anonymous.usports.domain.chatting.dto.ChattingDto;
+import com.anonymous.usports.domain.chatting.dto.ChattingInput;
+import com.anonymous.usports.domain.chatting.service.ChattingService;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

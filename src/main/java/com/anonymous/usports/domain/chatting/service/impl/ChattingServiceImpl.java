@@ -1,5 +1,10 @@
-package com.anonymous.usports.domain.mongodbtest;
+package com.anonymous.usports.domain.chatting.service.impl;
 
+import com.anonymous.usports.domain.chatting.dto.ChattingDto;
+import com.anonymous.usports.domain.chatting.dto.ChattingInput;
+import com.anonymous.usports.domain.chatting.entity.ChattingEntity;
+import com.anonymous.usports.domain.chatting.repository.ChattingRepository;
+import com.anonymous.usports.domain.chatting.service.ChattingService;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
