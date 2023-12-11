@@ -1,5 +1,6 @@
 package com.anonymous.usports.global.exception;
 
+import com.anonymous.usports.global.EvaluationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,7 +29,7 @@ public class MyExceptionHandler {
   }
 
   @ExceptionHandler(FollowException.class)
-  public ResponseEntity<ErrorResponse> handleRecordException(FollowException e) {
+  public ResponseEntity<ErrorResponse> handleFollowException(FollowException e) {
     ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
   }
@@ -45,6 +46,17 @@ public class MyExceptionHandler {
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
   }
 
+  @ExceptionHandler(EvaluationException.class)
+  public ResponseEntity<ErrorResponse> handleEvaluationException(EvaluationException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+    return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
+
+  @ExceptionHandler(CommentException.class)
+  public ResponseEntity<ErrorResponse> handleRecordException(CommentException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+    return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
 
 
 }

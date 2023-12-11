@@ -11,7 +11,7 @@ import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.FollowException;
-import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.type.FollowDecisionType;
 import com.anonymous.usports.global.type.FollowListType;
 import com.anonymous.usports.global.type.FollowStatus;
@@ -33,54 +33,59 @@ public class FollowServiceImpl implements FollowService {
    * 팔로우 신청, 취소 메서드
    */
   @Override
-  public FollowResponse changeFollow(Long fromMemberId, Long toMemberId) {
-    MemberEntity fromMember = memberRepository.findById(fromMemberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+  public FollowResponse changeFollow(Long loginMemberId, Long toMemberId) {
+    MemberEntity loginMember = memberRepository.findById(loginMemberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     MemberEntity toMember = memberRepository.findById(toMemberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    if(loginMember.getMemberId().equals(toMemberId)){
+      throw new FollowException(ErrorCode.SELF_FOLLOW_NOT_ALLOWED);
+    }
 
     Optional<FollowEntity> existingFollow = followRepository.findByFromMemberAndToMemberAndFollowStatus(
-        fromMember, toMember, FollowStatus.ACTIVE);
+        loginMember, toMember, FollowStatus.ACTIVE);
 
     if (existingFollow.isPresent()) {
       followRepository.delete(existingFollow.get());
       return FollowResponse.Response(null, ResponseConstant.DELETE_FOLLOW);
     }
-    FollowEntity follow = followRepository.save(FollowEntity.builder()
-        .fromMember(fromMember)
+    FollowEntity follow = FollowEntity.builder()
+        .fromMember(loginMember)
         .toMember(toMember)
-        .build());
-    if(toMember.isProfileOpen()){
+        .build();
+    if (toMember.isProfileOpen()) {
       follow.setFollowStatus(FollowStatus.ACTIVE);
       follow.setFollowDate(LocalDateTime.now());
     } else {
       follow.setFollowStatus(FollowStatus.WAITING);
     }
-    follow = followRepository.save(follow);
+    followRepository.save(follow);
     return FollowResponse.Response(follow.getFollowId(), ResponseConstant.REGISTER_FOLLOW);
   }
 
   /**
-   * 팔로우와 관련된 리스트를 출력하는 메서드 listType에 따라 다른 리스트를 출력
-   * FOLLOWING:내가 FOLLOW 하는 리스트
-   * REQUESTED_FOLLOW:나에게 들어온 FOLLOW 신청 리스트
-   * FOLLOWER: 나를 FOLLOW 하는 리스트
+   * 팔로우와 관련된 리스트를 출력하는 메서드 listType에 따라 다른 리스트를 출력 FOLLOWING:내가 FOLLOW 하는 리스트 REQUESTED_FOLLOW:나에게
+   * 들어온 FOLLOW 신청 리스트 FOLLOWER: 나를 FOLLOW 하는 리스트
    */
   @Override
-  public FollowListDto getFollowPage(FollowListType type, int page, Long memberId) {
-    MemberEntity member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+  public FollowListDto getFollowPage(FollowListType type, int page, Long loginMemberId) {
+    MemberEntity loginMember = memberRepository.findById(loginMemberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
 
     Page<FollowEntity> findPage;
     if (type == FollowListType.FOLLOWING) {
-      findPage = followRepository.findAllByFromMemberAndFollowStatusOrderByFollowDateDesc(member, FollowStatus.ACTIVE,pageRequest);
+      findPage = followRepository.findAllByFromMemberAndFollowStatusOrderByFollowDateDesc(loginMember,
+          FollowStatus.ACTIVE, pageRequest);
     } else if (type == FollowListType.REQUESTED_FOLLOW) {
-      findPage = followRepository.findAllByToMemberAndFollowStatus(member, FollowStatus.WAITING ,pageRequest);
+      findPage = followRepository.findAllByToMemberAndFollowStatus(loginMember, FollowStatus.WAITING,
+          pageRequest);
     } else {
-      findPage = followRepository.findAllByToMemberAndFollowStatusOrderByFollowDateDesc(member, FollowStatus.ACTIVE, pageRequest);
+      findPage = followRepository.findAllByToMemberAndFollowStatusOrderByFollowDateDesc(loginMember,
+          FollowStatus.ACTIVE, pageRequest);
     }
     return FollowListDto.fromEntityPage(findPage);
   }
@@ -89,18 +94,16 @@ public class FollowServiceImpl implements FollowService {
    * 팔로우 신청 수락 / 거절 메서드
    */
   @Override
-  public FollowResponse manageFollow(Long fromMemberId, Long toMemberId, FollowDecisionType decision) {
+  public FollowResponse manageFollow(Long fromMemberId, Long loginMemberId,
+      FollowDecisionType decision) {
     MemberEntity fromMember = memberRepository.findById(fromMemberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    MemberEntity toMember = memberRepository.findById(toMemberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
-    FollowEntity follow = followRepository.findByFromMemberAndToMember(fromMember,toMember)
+    MemberEntity loginMember = memberRepository.findById(loginMemberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+    FollowEntity follow = followRepository.findByFromMemberAndToMember(fromMember, loginMember)
         .orElseThrow(() -> new FollowException(ErrorCode.FOLLOW_NOT_FOUND));
-    if (!follow.getFromMember().equals(fromMember)) {
-      throw new MyException(ErrorCode.NO_AUTHORITY_ERROR);
-    }
-    if(follow.getFollowStatus()==FollowStatus.ACTIVE){
+    if (follow.getFollowStatus() == FollowStatus.ACTIVE) {
       throw new FollowException(ErrorCode.UNABLE_MANAGE_FOLLOW);
     }
     if (decision == FollowDecisionType.REFUSE) {

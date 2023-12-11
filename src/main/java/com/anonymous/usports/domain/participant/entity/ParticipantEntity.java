@@ -61,24 +61,19 @@ public class ParticipantEntity {
   @Column(name = "evaluation_at")
   private LocalDateTime evaluationAt; //타인 평가 일시
 
+  @Column(name = "meeting_date")
+  private LocalDateTime meetingDate;
+
   public ParticipantEntity(MemberEntity member, RecruitEntity recruit) {
     this.member = member;
     this.recruit = recruit;
     this.status = ParticipantStatus.ING;
+    this.meetingDate = recruit.getMeetingDate();
   }
 
-  public void confirm() {
+  public void setStatus(ParticipantStatus status){
     this.confirmedAt = LocalDateTime.now();
-    this.status = ParticipantStatus.ACCEPTED;
-  }
-
-  public void refuse(){
-    this.confirmedAt = LocalDateTime.now();
-    this.status = ParticipantStatus.REFUSED;
-  }
-
-  public void evaluation() {
-    this.evaluationAt = LocalDateTime.now();
+    this.status = status;
   }
 
   @Override

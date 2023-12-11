@@ -26,9 +26,9 @@ public class FollowController {
   @PostMapping("/follow/{toMemberId}")
   public ResponseEntity<FollowResponse> changeFollow(
       @PathVariable Long toMemberId,
-      @AuthenticationPrincipal MemberDto member) {
+      @AuthenticationPrincipal MemberDto loginMember) {
 
-    FollowResponse result = followService.changeFollow(member.getMemberId(), toMemberId);
+    FollowResponse result = followService.changeFollow(loginMember.getMemberId(), toMemberId);
     return ResponseEntity.ok(result);
   }
 
@@ -37,8 +37,8 @@ public class FollowController {
   public ResponseEntity<FollowListDto> getFollowList(
       @PathVariable FollowListType type,
       @RequestParam("page") int page,
-      @AuthenticationPrincipal MemberDto member) {
-    FollowListDto followList = followService.getFollowPage(type, page, member.getMemberId());
+      @AuthenticationPrincipal MemberDto loginMember) {
+    FollowListDto followList = followService.getFollowPage(type, page, loginMember.getMemberId());
     return ResponseEntity.ok(followList);
   }
 
@@ -46,9 +46,9 @@ public class FollowController {
   @PostMapping("/follow/{fromMemberId}/manage")
   public ResponseEntity<FollowResponse> manageFollow(
       @PathVariable Long fromMemberId,
-      @AuthenticationPrincipal MemberDto member,
+      @AuthenticationPrincipal MemberDto loginMember,
       @RequestParam("decision") FollowDecisionType decision) {
-    FollowResponse result = followService.manageFollow(fromMemberId, member.getMemberId(), decision);
+    FollowResponse result = followService.manageFollow(fromMemberId, loginMember.getMemberId(), decision);
     return ResponseEntity.ok(result);
   }
 

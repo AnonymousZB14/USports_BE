@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.follow.entity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.FollowStatus;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -47,5 +48,20 @@ public class FollowEntity {
   @Column(name="follow_date")
   private LocalDateTime followDate;
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    FollowEntity follow = (FollowEntity) o;
+    return Objects.equals(followId, follow.followId);
+  }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(followId);
+  }
 }

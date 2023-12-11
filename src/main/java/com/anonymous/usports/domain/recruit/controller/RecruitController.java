@@ -43,7 +43,7 @@ public class RecruitController {
 
   @ApiOperation("운동 모집 게시글 등록하기")
   @PostMapping("/recruit")
-  public ResponseEntity<?> registerRecruit(@RequestBody RecruitRegister.Request request,
+  public ResponseEntity<RecruitRegister.Response> registerRecruit(@RequestBody RecruitRegister.Request request,
       @AuthenticationPrincipal MemberDto loginMember) {
 
     RecruitDto result = recruitService.registerRecruit(request, loginMember.getMemberId());
@@ -53,7 +53,7 @@ public class RecruitController {
 
   @ApiOperation("운동 모집 게시글 한 건 조회하기")
   @GetMapping("/recruit/{recruitId}")
-  public ResponseEntity<?> getRecruit(@PathVariable Long recruitId) {
+  public ResponseEntity<RecruitDto> getRecruit(@PathVariable Long recruitId) {
     RecruitDto result = recruitService.getRecruit(recruitId);
     return ResponseEntity.ok(result);
   }
@@ -61,12 +61,13 @@ public class RecruitController {
   @ApiOperation("운동 모집 게시글 수정 페이지")
   @GetMapping("/recruit/{recruitId}/update")
   public ResponseEntity<?> updateRecruitPage(@PathVariable Long recruitId) {
+    //TODO
     return ResponseEntity.ok(null);
   }
 
   @ApiOperation("운동 모집 게시글 수정")
   @PutMapping("/recruit/{recruitId}")
-  public ResponseEntity<?> updateRecruit(@PathVariable Long recruitId,
+  public ResponseEntity<RecruitUpdate.Response> updateRecruit(@PathVariable Long recruitId,
       @RequestBody RecruitUpdate.Request request,
       @AuthenticationPrincipal MemberDto loginMember) {
     RecruitDto result = recruitService.updateRecruit(request, recruitId, loginMember.getMemberId());
@@ -75,7 +76,7 @@ public class RecruitController {
 
   @ApiOperation("운동 모집 게시글 삭제")
   @DeleteMapping("/recruit/{recruitId}")
-  public ResponseEntity<?> deleteRecruit(@PathVariable Long recruitId,
+  public ResponseEntity<RecruitDeleteResponse> deleteRecruit(@PathVariable Long recruitId,
       @AuthenticationPrincipal MemberDto loginMember) {
 
     RecruitDto result = recruitService.deleteRecruit(recruitId, loginMember.getMemberId());
@@ -84,7 +85,7 @@ public class RecruitController {
 
   @ApiOperation("운동 모집 마감 / 마감 취소")
   @PutMapping ("/recruit/{recruitId}/end")
-  public ResponseEntity<?> endRecruiting(@PathVariable Long recruitId,
+  public ResponseEntity<RecruitEndResponse> endRecruiting(@PathVariable Long recruitId,
       @AuthenticationPrincipal MemberDto loginMember) {
 
     RecruitEndResponse response = recruitService.endRecruit(recruitId,

@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
+
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -61,30 +62,36 @@ public class MemberRegister {
                     .role(Role.UNAUTH)
                     .loginBy(loginBy)
                     .profileOpen(po)
+                    .mannerScore(0.0)
+                    .kindnessScore(0L)
+                    .passionScore(0L)
+                    .teamworkScore(0L)
+                    .evaluationCount(0L)
                     .build();
-        }
+    }
+  }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @Builder
+  public static class Response {
+
+    private String accountName;
+    private String email;
+    private boolean profileOpen;
+    private String message;
+
+    public static Response fromEntity(MemberEntity memberEntity, String message) {
+      return Response.builder()
+          .accountName(memberEntity.getAccountName())
+          .email(memberEntity.getEmail())
+          .profileOpen(memberEntity.isProfileOpen())
+          .message(message)
+          .build();
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    public static class Response {
-        private String accountName;
-        private String email;
-        private boolean profileOpen;
-        private String message;
-
-        public static Response fromEntity(MemberEntity memberEntity, String message) {
-            return Response.builder()
-                    .accountName(memberEntity.getAccountName())
-                    .email(memberEntity.getEmail())
-                    .profileOpen(memberEntity.isProfileOpen())
-                    .message(message)
-                    .build();
-        }
-
-    }
+  }
 
 }

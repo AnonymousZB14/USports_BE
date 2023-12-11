@@ -5,7 +5,6 @@ import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -22,11 +21,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -134,7 +131,7 @@ public class RecruitEntity {
     if(this.currentCount == this.recruitCount){
       this.recruitStatus = RecruitStatus.END;
     }else if((double)this.currentCount / this.recruitCount >= 0.7){
-      this.recruitStatus = RecruitStatus.ALMOST_FINISHED;
+      this.recruitStatus = RecruitStatus.ALMOST_END;
     }
   }
 
@@ -143,7 +140,8 @@ public class RecruitEntity {
       return;
     }
     this.currentCount = this.currentCount - 1;
-    if(this.recruitStatus == RecruitStatus.ALMOST_FINISHED && (double)this.currentCount / this.recruitCount <= 0.7){
+    if(this.recruitStatus == RecruitStatus.ALMOST_END
+        && (double)this.currentCount / this.recruitCount <= 0.7){
       this.recruitStatus = RecruitStatus.RECRUITING;
     }
   }
@@ -157,7 +155,7 @@ public class RecruitEntity {
   }
 
   public void statusToAlmostFinished(){
-    this.recruitStatus = RecruitStatus.ALMOST_FINISHED;
+    this.recruitStatus = RecruitStatus.ALMOST_END;
   }
 
 

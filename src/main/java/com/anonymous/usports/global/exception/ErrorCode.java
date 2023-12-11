@@ -36,8 +36,15 @@ public enum ErrorCode {
   APPLICANT_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "지원자 회원을 찾을 수 없습니다."),
   PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, "모집 글 참여 신청 건을 찾을 수 없습니다."),
   RECRUIT_ALREADY_END(HttpStatus.NOT_FOUND, "이미 마감 된 모집 글 입니다."),
+  RECRUIT_NOT_FINISHED(HttpStatus.NOT_FOUND, "아직 모임이 종료되지 않았습니다. 종료 후에 평가할 수 있습니다."),
 
+  //Evaluation 관련
+  EVALUATION_ALREADY_EXISTS(HttpStatus.NOT_FOUND, "이미 평가가 완료된 건 입니다."),
 
+  //Comment 관련
+  COMMENT_NOT_FOUND(HttpStatus.BAD_REQUEST,"댓글을 찾을 수 없습니다."),
+  CANNOT_EDIT_PARENT_COMMENT(HttpStatus.BAD_REQUEST,"원댓글은 수정할 수 없습니다."),
+  CANNOT_DELETE_PARENT_COMMENT(HttpStatus.BAD_REQUEST,"원댓글은 삭제할 수 없습니다."),
 
   //Record 관련
   IMAGE_SAVE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR,"이미지 저장 오류가 발생했습니다."),
@@ -47,10 +54,20 @@ public enum ErrorCode {
   INVALID_IMAGE_URL(HttpStatus.BAD_REQUEST,"이용할 수 없는 이미지 URL입니다."),
   UNABLE_TO_CONVERT_LIST_TO_STRING(HttpStatus.BAD_REQUEST,"이미지 리스트를 저장하는 과정에서 오류가 발생했습니다."),
   UNABLE_TO_CONVERT_STRING_TO_LIST(HttpStatus.BAD_REQUEST, "이미지 리스트를 불러오는 과정에서 오류가 발생했습니다."),
+  MINIMUM_IMAGE_RESTRICT(HttpStatus.BAD_REQUEST,"적어도 한 개 이상의 이미지가 게시글에 있어야 합니다."),
+  RECORD_UPDATE_ERROR(HttpStatus.BAD_REQUEST,"기록 수정 중 에러가 발생했습니다."),
+  RECORD_DELETE_ERROR(HttpStatus.BAD_REQUEST,"기록 삭제 중 에러가 발생했습니다."),
+  INVALID_IMAGE_EXTENSION(HttpStatus.BAD_REQUEST,"업로드 할 수 없는 확장자입니다."),
+  CANNOT_DELETE_RECORD_FOR_COMMENT(HttpStatus.BAD_REQUEST,"댓글이 있는 게시글은 삭제할 수 없습니다."),
 
   //Follow 관련
   FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND,"팔로우를 찾을 수 없습니다."),
   UNABLE_MANAGE_FOLLOW(HttpStatus.BAD_REQUEST, "이미 팔로우 상태입니다."),
+  SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신을 팔로우 할 수 없습니다."),
+
+
+  //기타
+  ADDRESS_API_ERROR(HttpStatus.BAD_REQUEST, "도로명 주소 입력값이 잘못되었습니다."),
 
   //BASIC
   NO_AUTHORITY_ERROR(HttpStatus.FORBIDDEN, "권한이 없습니다."),
