@@ -20,11 +20,9 @@ public class MailController {
     public String MailSend(
             @PathVariable("email") String email
     ){
-        int number = mailService.sendEmailAuthMail(email);
+        mailService.sendEmailAuthMail(email);;
 
-        String num = " " + number;
-
-        return num;
+        return "test sent";
     }
 
 }
