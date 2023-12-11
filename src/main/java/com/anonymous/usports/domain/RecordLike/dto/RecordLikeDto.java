@@ -19,11 +19,12 @@ public class RecordLikeDto {
   private Long recordId;
   private String message;
 
-  public static RecordLikeDto fromEntity(RecordLikeEntity recordLikeEntity) {
+  public static RecordLikeDto fromEntity(RecordLikeEntity recordLikeEntity, String message) {
     return RecordLikeDto.builder()
         .recordLikeId(recordLikeEntity.getRecordLikeId())
         .memberId(recordLikeEntity.getMember().getMemberId())
         .recordId(recordLikeEntity.getRecord().getRecordId())
+        .message(message)
         .build();
   }
 }

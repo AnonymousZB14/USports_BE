@@ -42,6 +42,6 @@ public class ResponseConstant {
   public static final String DELETE_COMMENT = "댓글을 삭제했습니다.";
 
   // 좋아요 관련
-  public static final String LIKE_RECORD = "좋아요를 눌렀습니다.";
+  public static final String LIKE_RECORD = "좋아요를 신청했습니다.";
   public static final String CANCEL_LIKE_RECORD = "좋아요를 취소했습니다.";
 }

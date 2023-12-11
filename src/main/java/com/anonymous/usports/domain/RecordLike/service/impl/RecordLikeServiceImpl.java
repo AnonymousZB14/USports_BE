@@ -42,29 +42,25 @@ public class RecordLikeServiceImpl implements RecordLikeService {
       throw new RecordException(ErrorCode.SELF_LIKE_NOT_ALLOWED);
     }
     RecordLikeEntity like = recordLikeRepository.findByRecordAndMember(record, loginMember);
-    if(like==null) {
-      like = RecordLikeEntity.builder()
+    if(like == null) {
+      record.setCountRecordLikes(record.getCountRecordLikes()+1);
+      recordRepository.save(record);
+      RecordLikeEntity likeEntity = RecordLikeEntity.builder()
           .record(record)
           .member(loginMember)
           .build();
-      record.setCountRecordLikes(record.getCountRecordLikes()+1);
-      recordRepository.save(record);
-      RecordLikeEntity recordLike = recordLikeRepository.save(like);
-      RecordLikeDto recordLikeDto = RecordLikeDto.fromEntity(recordLike);
-      recordLikeDto.setMessage(ResponseConstant.LIKE_RECORD);
-
-      return recordLikeDto;
+      RecordLikeEntity recordLike = recordLikeRepository.save(likeEntity);
+      return RecordLikeDto.fromEntity(recordLike, ResponseConstant.LIKE_RECORD);
     }
     record.setCountRecordLikes(record.getCountRecordLikes()-1);
     recordRepository.save(record);
-    RecordLikeDto recordLikeDto = RecordLikeDto.builder()
+    recordLikeRepository.delete(like);
+    return RecordLikeDto.builder()
         .recordLikeId(like.getRecordLikeId())
         .recordId(recordId)
         .memberId(loginMemberId)
         .message(ResponseConstant.CANCEL_LIKE_RECORD)
         .build();
-    recordLikeRepository.delete(like);
 
-    return recordLikeDto;
   }
 }
