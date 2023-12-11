@@ -4,6 +4,8 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class ChattingServiceImpl implements ChattingService{
+public class ChattingServiceImpl implements ChattingService {
 
   private final MemberRepository memberRepository;
   private final ChattingRepository chattingRepository;
@@ -25,5 +27,13 @@ public class ChattingServiceImpl implements ChattingService{
 
     log.info("saved : {}", saved);
     return ChattingDto.fromEntity(saved);
+  }
+
+  @Override
+  public List<ChattingDto> getAllChattingByChatRoom(Long chatRoomId) {
+    List<ChattingEntity> list = chattingRepository.findAllByChatRoomId(chatRoomId);
+    List<ChattingDto> result = list.stream().map(ChattingDto::fromEntity)
+        .collect(Collectors.toList());
+    return result;
   }
 }
