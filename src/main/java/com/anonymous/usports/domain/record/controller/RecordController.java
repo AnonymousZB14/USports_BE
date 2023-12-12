@@ -42,7 +42,7 @@ public class RecordController {
   @GetMapping("/home")
   public ResponseEntity<RecordListDto> getRecordList(
       @RequestParam(value = "type", defaultValue = "RECOMMENDATION") RecordType recordType,
-      @RequestParam("page") int page,
+      @RequestParam(value = "page",defaultValue = "1") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
     RecordListDto records = recordService.getRecordsPage(recordType, page,
         loginMember.getMemberId());

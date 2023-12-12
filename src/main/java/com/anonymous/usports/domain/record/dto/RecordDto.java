@@ -24,6 +24,8 @@ public class RecordDto {
 
   private String accountName;
 
+  private String name;
+
   private String recordContent;
 
   private LocalDateTime registeredAt;
@@ -31,6 +33,8 @@ public class RecordDto {
   private LocalDateTime updatedAt;
 
   private Long countComment;
+
+  private String profileImage;
 
   private List<String> imageAddressList;
 
@@ -41,6 +45,8 @@ public class RecordDto {
         .memberId(recordEntity.getMember().getMemberId())
         .sportsId(recordEntity.getSports().getSportsId())
         .accountName(recordEntity.getMember().getAccountName())
+        .name(recordEntity.getMember().getName())
+        .profileImage(recordEntity.getMember().getProfileImage())
         .recordContent(recordEntity.getRecordContent())
         .registeredAt(recordEntity.getRegisteredAt())
         .updatedAt(recordEntity.getUpdatedAt())
