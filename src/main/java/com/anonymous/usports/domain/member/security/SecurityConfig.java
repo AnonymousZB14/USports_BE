@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .cors().and()
                 .headers().frameOptions().disable().and()
                 .authorizeRequests()
-                .antMatchers("/member/**").permitAll()
+                .antMatchers("/**").permitAll()
                 .and().addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
