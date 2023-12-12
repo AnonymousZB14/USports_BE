@@ -10,6 +10,7 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -41,11 +42,11 @@ public class RecordEntity {
   @Column(name = "record_id", nullable = false)
   private Long recordId;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
   private MemberEntity member;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "sports_id", nullable = false)
   private SportsEntity sports;
 
@@ -63,6 +64,10 @@ public class RecordEntity {
   @Column(name = "count_comment", nullable = false)
   @ColumnDefault("0")
   private Long countComment;
+
+  @Column(name = "count_recordlikes", nullable = false)
+  @ColumnDefault("0")
+  private Long countRecordLikes;
 
   @Convert(converter = StringListConverter.class)
   @Column(name = "image_address", columnDefinition = "TEXT")

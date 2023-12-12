@@ -59,6 +59,7 @@ public enum ErrorCode {
   RECORD_DELETE_ERROR(HttpStatus.BAD_REQUEST,"기록 삭제 중 에러가 발생했습니다."),
   INVALID_IMAGE_EXTENSION(HttpStatus.BAD_REQUEST,"업로드 할 수 없는 확장자입니다."),
   CANNOT_DELETE_RECORD_FOR_COMMENT(HttpStatus.BAD_REQUEST,"댓글이 있는 게시글은 삭제할 수 없습니다."),
+  SELF_LIKE_NOT_ALLOWED(HttpStatus.BAD_REQUEST,"자신의 기록을 좋아요 할 수 없습니다."),
 
   //Follow 관련
   FOLLOW_NOT_FOUND(HttpStatus.NOT_FOUND,"팔로우를 찾을 수 없습니다."),
