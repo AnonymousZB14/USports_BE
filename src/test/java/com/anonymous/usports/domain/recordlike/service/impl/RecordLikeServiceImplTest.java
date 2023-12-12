@@ -1,4 +1,4 @@
-package com.anonymous.usports.domain.RecordLike.service.impl;
+package com.anonymous.usports.domain.recordlike.service.impl;
 
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType;
 import static org.junit.jupiter.api.Assertions.*;
@@ -6,9 +6,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.anonymous.usports.domain.RecordLike.dto.RecordLikeDto;
-import com.anonymous.usports.domain.RecordLike.entity.RecordLikeEntity;
-import com.anonymous.usports.domain.RecordLike.repository.RecordLikeRepository;
+import com.anonymous.usports.domain.recordlike.dto.RecordLikeDto;
+import com.anonymous.usports.domain.recordlike.entity.RecordLikeEntity;
+import com.anonymous.usports.domain.recordlike.repository.RecordLikeRepository;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
@@ -112,11 +112,11 @@ class RecordLikeServiceImplTest {
       when(recordRepository.findById(100L))
           .thenReturn(Optional.of(record));
       when(recordLikeRepository.findByRecordAndMember(record,member))
-          .thenReturn(null);
+          .thenReturn(Optional.empty());
       when(recordLikeRepository.save(new RecordLikeEntity()))
           .thenReturn(recordLike);
 
-      RecordLikeDto response = recordLikeService.switchLike(record.getRecordId(), member.getMemberId());
+      RecordLikeDto response = recordLikeService.switchLikeOrCancel(record.getRecordId(), member.getMemberId());
 
       verify(recordLikeRepository,times(1)).save(new RecordLikeEntity());
       verify(recordRepository,times(1)).save(record);
@@ -140,9 +140,9 @@ class RecordLikeServiceImplTest {
       when(recordRepository.findById(100L))
           .thenReturn(Optional.of(record));
       when(recordLikeRepository.findByRecordAndMember(record,member))
-          .thenReturn(recordLike);
+          .thenReturn(Optional.of(recordLike));
 
-      RecordLikeDto response = recordLikeService.switchLike(record.getRecordId(), member.getMemberId());
+      RecordLikeDto response = recordLikeService.switchLikeOrCancel(record.getRecordId(), member.getMemberId());
 
       verify(recordLikeRepository,times(1)).delete(recordLike);
       verify(recordRepository,times(1)).save(record);
@@ -158,14 +158,13 @@ class RecordLikeServiceImplTest {
       MemberEntity otherMember = createMember(2L);
       SportsEntity sports = createSports(10L,"축구");
       RecordEntity record = createRecord(100L,otherMember,sports);
-      RecordLikeEntity recordLike = createRecordLike(1000L,member,record);
 
       when(memberRepository.findById(1L))
           .thenReturn(Optional.empty());
 
       MemberException exception =
           catchThrowableOfType(()->
-              recordLikeService.switchLike(record.getRecordId(),member.getMemberId()),
+              recordLikeService.switchLikeOrCancel(record.getRecordId(),member.getMemberId()),
               MemberException.class);
       assertEquals(exception.getErrorCode(), ErrorCode.MEMBER_NOT_FOUND);
     }
@@ -184,7 +183,7 @@ class RecordLikeServiceImplTest {
 
       RecordException exception =
           catchThrowableOfType(()->
-                  recordLikeService.switchLike(record.getRecordId(),member.getMemberId()),
+                  recordLikeService.switchLikeOrCancel(record.getRecordId(),member.getMemberId()),
               RecordException.class);
       assertEquals(exception.getErrorCode(), ErrorCode.RECORD_NOT_FOUND);
     }
@@ -202,7 +201,7 @@ class RecordLikeServiceImplTest {
 
       RecordException exception =
           catchThrowableOfType(()->
-                  recordLikeService.switchLike(record.getRecordId(),member.getMemberId()),
+                  recordLikeService.switchLikeOrCancel(record.getRecordId(),member.getMemberId()),
               RecordException.class);
       assertEquals(exception.getErrorCode(), ErrorCode.SELF_LIKE_NOT_ALLOWED);
     }
