@@ -33,7 +33,7 @@ public class SecurityConfig {
 
          http
                 .authorizeRequests()
-                .antMatchers("/member/**").permitAll();
+                .antMatchers("/**").permitAll();
 
          http
                  .oauth2Login().loginPage("/login")
