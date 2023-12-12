@@ -19,7 +19,7 @@ public class MyPageController {
 
   @GetMapping("/mypage")
   public ResponseEntity<MyPageMainDto> myPage(@AuthenticationPrincipal MemberDto loginMember){
-    MyPageMainDto myPageMainData = myPageService.getMyPageMainData(loginMember.getMemberId());
+    MyPageMainDto myPageMainData = myPageService.getMyPageMainData(1L);
     return ResponseEntity.ok(myPageMainData);
   }
 }
