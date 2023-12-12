@@ -1,4 +1,4 @@
-package com.anonymous.usports.domain.chatting.entity;
+package com.anonymous.usports.domain.chat.chatting.entity;
 
 import java.time.LocalDateTime;
 import lombok.Getter;

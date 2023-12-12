@@ -1,6 +1,6 @@
-package com.anonymous.usports.domain.chatting.dto;
+package com.anonymous.usports.domain.chat.chatting.dto;
 
-import com.anonymous.usports.domain.chatting.entity.ChattingEntity;
+import com.anonymous.usports.domain.chat.chatting.entity.ChattingEntity;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
