@@ -15,7 +15,7 @@ import org.springframework.data.domain.Page;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RecruitSearchListDto {
+public class RecruitListDto {
 
   private int currentPage;//현재 페이지
   private int currentElements;//현재 페이지 데이터 개수
@@ -25,7 +25,7 @@ public class RecruitSearchListDto {
 
   List<RecruitDto> list;
 
-  public RecruitSearchListDto(Page<RecruitEntity> page) {
+  public RecruitListDto(Page<RecruitEntity> page) {
     this.currentPage = page.getNumber() + 1;
     this.currentElements = page.getNumberOfElements();
     this.pageSize = page.getSize();

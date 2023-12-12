@@ -5,17 +5,13 @@ import com.anonymous.usports.domain.recruit.dto.RecruitDeleteResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
-import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
-import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
 import com.anonymous.usports.global.type.Gender;
 import io.swagger.annotations.ApiOperation;
-import javax.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Criteria;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -95,7 +91,7 @@ public class RecruitController {
 
   @ApiOperation("운동 모집글 검색")
   @GetMapping("/recruits")
-  public ResponseEntity<RecruitSearchListDto> getRecruitList(
+  public ResponseEntity<RecruitListDto> getRecruitList(
       @RequestParam(required = false, defaultValue = "1") int page,
       @RequestParam(required = false) String search,
       @RequestParam(required = false) String region,
@@ -104,7 +100,7 @@ public class RecruitController {
       @RequestParam(required = false) boolean closeInclude
       ){
 
-    RecruitSearchListDto result =
+    RecruitListDto result =
         recruitService.getRecruitsByConditions(page, search, region, sports, gender, closeInclude);
 
     return ResponseEntity.ok(result);

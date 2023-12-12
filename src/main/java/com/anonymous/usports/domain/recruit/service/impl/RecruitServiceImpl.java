@@ -7,7 +7,7 @@ import com.anonymous.usports.domain.participant.repository.ParticipantRepository
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
-import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
@@ -146,7 +146,7 @@ public class RecruitServiceImpl implements RecruitService {
 
   @Override
   @Transactional
-  public RecruitSearchListDto getRecruitsByConditions(
+  public RecruitListDto getRecruitsByConditions(
       int page, String search, String region, String sports, Gender gender, boolean closeInclude) {
 
     if (!StringUtils.hasText(search)) {
@@ -172,7 +172,7 @@ public class RecruitServiceImpl implements RecruitService {
           search, region, sportsEntity, gender, pageRequest);
     }
 
-    return new RecruitSearchListDto(findPage);
+    return new RecruitListDto(findPage);
   }
 
   private void validateAuthority(MemberEntity member, Long memberId) {
