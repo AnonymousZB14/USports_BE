@@ -165,8 +165,6 @@ public class MyPageServiceImpl implements MyPageService {
 
       list.add(new MyPageParticipant(participant));
     }
-
-
     return list;
   }
 
