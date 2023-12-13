@@ -19,6 +19,12 @@ public class CommentDto {
 
   private Long memberId;
 
+  private String accountName;
+
+  private String name;
+
+  private String profileImage;
+
   private Long recordId;
 
   private String content;
@@ -33,6 +39,9 @@ public class CommentDto {
     return CommentDto.builder()
         .commentId(commentEntity.getCommentId())
         .memberId(commentEntity.getMember().getMemberId())
+        .accountName(commentEntity.getMember().getAccountName())
+        .name(commentEntity.getMember().getName())
+        .profileImage(commentEntity.getMember().getProfileImage())
         .recordId(commentEntity.getRecord().getRecordId())
         .content(commentEntity.getContent())
         .registerAt(commentEntity.getRegisteredAt())

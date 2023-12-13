@@ -31,6 +31,10 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
   List<ParticipantEntity> findAllByRecruitAndStatus(RecruitEntity recruit, ParticipantStatus status);
 
-  List<ParticipantEntity> findTop10ByMemberOrderByRegisteredAtDesc(MemberEntity member);
+  Page<ParticipantEntity> findByMemberAndStatusAndMeetingDateBefore(
+      MemberEntity member,
+      ParticipantStatus participantStatus,
+      LocalDateTime localDateTime,
+      Pageable pageable);
 
 }

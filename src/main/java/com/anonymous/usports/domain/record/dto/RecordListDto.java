@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 public class RecordListDto {
 
   private int currentPage;
+  private int currentElements;
   private int pageSize;
   private int totalPages;
   private int totalElements;
@@ -27,6 +28,7 @@ public class RecordListDto {
 
   public RecordListDto(Page<RecordEntity> recordEntityPage) {
     this.currentPage = recordEntityPage.getNumber() + 1;
+    this.currentElements = recordEntityPage.getNumberOfElements();
     this.pageSize = recordEntityPage.getSize();
     this.totalPages = recordEntityPage.getTotalPages();
     this.totalElements = (int) recordEntityPage.getTotalElements();

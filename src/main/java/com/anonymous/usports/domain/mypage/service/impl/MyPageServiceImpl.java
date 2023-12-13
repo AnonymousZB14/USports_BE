@@ -74,6 +74,7 @@ public class MyPageServiceImpl implements MyPageService {
         .build();
   }
 
+  @Override
   public MyPageMember getMyPageMember(MemberEntity member) {
     List<InterestedSportsEntity> interestedSportsEntityList =
         interestedSportsRepository.findAllByMemberEntity(member);
@@ -110,6 +111,7 @@ public class MyPageServiceImpl implements MyPageService {
   /**
    * 팝업으로 띄워줄 sportSkill
    */
+  @Override
   public List<SportsSkillDto> getSportsSkills(MemberEntity member) {
     return sportsSkillRepository.findAllByMember(member)
         .stream()
@@ -165,8 +167,6 @@ public class MyPageServiceImpl implements MyPageService {
 
       list.add(new MyPageParticipant(participant));
     }
-
-
     return list;
   }
 

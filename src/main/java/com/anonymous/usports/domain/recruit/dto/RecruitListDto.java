@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.recruit.dto;
 
+import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ import org.springframework.data.domain.Page;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RecruitSearchListDto {
+public class RecruitListDto {
 
   private int currentPage;//현재 페이지
   private int currentElements;//현재 페이지 데이터 개수
@@ -25,13 +26,22 @@ public class RecruitSearchListDto {
 
   List<RecruitDto> list;
 
-  public RecruitSearchListDto(Page<RecruitEntity> page) {
+  public RecruitListDto(Page<RecruitEntity> page) {
     this.currentPage = page.getNumber() + 1;
     this.currentElements = page.getNumberOfElements();
     this.pageSize = page.getSize();
     this.totalElement = (int)page.getTotalElements();
     this.totalPages = page.getTotalPages();
     this.list = page.getContent().stream().map(RecruitDto::fromEntity).collect(Collectors.toList());
+  }
+
+  public RecruitListDto(Page<ParticipantEntity> page, List<RecruitEntity> list) {
+    this.currentPage = page.getNumber() + 1;
+    this.currentElements = page.getNumberOfElements();
+    this.pageSize = page.getSize();
+    this.totalElement = (int)page.getTotalElements();
+    this.totalPages = page.getTotalPages();
+    this.list = list.stream().map(RecruitDto::fromEntity).collect(Collectors.toList());
   }
 
 

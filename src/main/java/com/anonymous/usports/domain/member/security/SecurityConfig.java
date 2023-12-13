@@ -33,7 +33,7 @@ public class SecurityConfig {
 
          http
                 .authorizeRequests()
-                .antMatchers("/member/**").permitAll();
+                .antMatchers("/**").permitAll();
 
          http
                  .oauth2Login().loginPage("/login")
@@ -56,7 +56,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManagerBean(
             AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }
-
+    } 
 
 }

@@ -1,8 +1,8 @@
-package com.anonymous.usports.domain.RecordLike.controller;
+package com.anonymous.usports.domain.recordlike.controller;
 
-import com.anonymous.usports.domain.RecordLike.dto.RecordLikeDto;
-import com.anonymous.usports.domain.RecordLike.service.RecordLikeService;
 import com.anonymous.usports.domain.member.dto.MemberDto;
+import com.anonymous.usports.domain.recordlike.dto.RecordLikeDto;
+import com.anonymous.usports.domain.recordlike.service.RecordLikeService;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +21,12 @@ public class RecordLikeController {
 
   @ApiOperation("좋아요 신청/취소")
   @PostMapping("/record/{recordId}/like")
-  public ResponseEntity<RecordLikeDto> switchLike(
+  public ResponseEntity<RecordLikeDto> switchLikeOrCancel(
       @PathVariable Long recordId,
       @AuthenticationPrincipal MemberDto loginMember
   ) {
-    RecordLikeDto response = recordLikeService.switchLike(recordId, loginMember.getMemberId());
+    RecordLikeDto response = recordLikeService.switchLikeOrCancel(recordId,
+        loginMember.getMemberId());
     return ResponseEntity.ok(response);
   }
 }
