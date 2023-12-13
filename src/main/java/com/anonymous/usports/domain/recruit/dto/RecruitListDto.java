@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.recruit.dto;
 
+import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,6 +33,15 @@ public class RecruitListDto {
     this.totalElement = (int)page.getTotalElements();
     this.totalPages = page.getTotalPages();
     this.list = page.getContent().stream().map(RecruitDto::fromEntity).collect(Collectors.toList());
+  }
+
+  public RecruitListDto(Page<ParticipantEntity> page, List<RecruitEntity> list) {
+    this.currentPage = page.getNumber() + 1;
+    this.currentElements = page.getNumberOfElements();
+    this.pageSize = page.getSize();
+    this.totalElement = (int)page.getTotalElements();
+    this.totalPages = page.getTotalPages();
+    this.list = list.stream().map(RecruitDto::fromEntity).collect(Collectors.toList());
   }
 
 

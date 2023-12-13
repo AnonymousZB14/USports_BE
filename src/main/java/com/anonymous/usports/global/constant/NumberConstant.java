@@ -5,4 +5,6 @@ public class NumberConstant {
 
   public static final int PAGE_SIZE_DEFAULT = 10;
 
+  public static final int PAGE_SIZE_PROFILE = 20;
+
 }
