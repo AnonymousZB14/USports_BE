@@ -14,13 +14,13 @@ import java.util.Optional;
 @Repository
 public interface ChatPartakeRepository extends JpaRepository<ChatPartakeEntity, Long> {
 
-    @Query("SELECT chat_partake.chatRoomEntity FROM chat_partake " +
-            "WHERE :memberOne = chat_partake.memberEntity " +
-            "and :memberTwo = chat_partake .memberEntity")
-    Optional<ChatRoomEntity> findChatRoomEntityByMember(
-            @Param("memberOne") MemberEntity memberOne,
-            @Param("memberTwo") MemberEntity memberTwo
-    );
+//    @Query("SELECT c FROM chat_partake c" +
+//            "WHERE c.member_one = :memberOne " +
+//            "and :memberTwo = chat_partake .memberEntity")
+//    Optional<ChatRoomEntity> findChatRoomEntityByMember(
+//            @Param("memberOne") MemberEntity memberOne,
+//            @Param("memberTwo") MemberEntity memberTwo
+//    );
 
     Optional<ChatPartakeEntity> findByChatRoomEntityAndMemberEntity(ChatRoomEntity chatRoom, MemberEntity member);
 

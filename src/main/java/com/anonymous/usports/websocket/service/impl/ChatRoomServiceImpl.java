@@ -72,15 +72,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return findChatRoomListByDto(memberDto);
     }
 
-    private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo){
-
-        // 2 유저가 들어가 있는 채팅방이 존재하는 것 (한번 더 생각해 보기)
-        Optional<ChatRoomEntity> chatRoom = chatPartakeRepository
-                .findChatRoomEntityByMember(memberOne, memberTwo);
-
-        // todo : throw를 하지 말고, 그 방으로 들어갈 수 있도록 하기
-        if (chatRoom.isPresent()) throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
-    }
+//    private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo){
+//
+//        // 2 유저가 들어가 있는 채팅방이 존재하는 것 (한번 더 생각해 보기)
+//        Optional<ChatRoomEntity> chatRoom = chatPartakeRepository
+//                .findChatRoomEntityByMember(memberOne, memberTwo);
+//
+//        // todo : throw를 하지 말고, 그 방으로 들어갈 수 있도록 하기
+//        if (chatRoom.isPresent()) throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
+//    }
 
     private void createNewDMWithMember(MemberEntity memberOne, MemberEntity memberTwo){
 
@@ -103,7 +103,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
         // 채팅방이 있는지 없는지 확인
-        chatRoomExist(memberOne, memberTwo);
+        //chatRoomExist(memberOne, memberTwo);
 
         // 없을 때 만든다
         createNewDMWithMember(memberOne, memberTwo);
