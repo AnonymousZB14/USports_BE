@@ -70,6 +70,7 @@ public class RecordEntity {
   private Long countRecordLikes;
 
   @Convert(converter = StringListConverter.class)
+  @Builder.Default
   @Column(name = "image_address", columnDefinition = "TEXT")
   private List<String> imageAddress = new ArrayList<>();
 

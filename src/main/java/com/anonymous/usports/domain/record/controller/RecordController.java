@@ -42,7 +42,7 @@ public class RecordController {
   @GetMapping("/home")
   public ResponseEntity<RecordListDto> getRecordList(
       @RequestParam(value = "type", defaultValue = "RECOMMENDATION") RecordType recordType,
-      @RequestParam("page") int page,
+      @RequestParam(value = "page",defaultValue = "1") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
     RecordListDto records = recordService.getRecordsPage(recordType, page,
         loginMember.getMemberId());
@@ -78,6 +78,23 @@ public class RecordController {
       @AuthenticationPrincipal MemberDto loginMember) {
     RecordDto updateRecord = recordService.updateRecord(recordId, request, loginMember.getMemberId());
     return ResponseEntity.ok(new RecordUpdate.Response(updateRecord));
+  }
+
+  @ApiOperation("기록 수정 페이지 불러오기")
+  @GetMapping("/record/{recordId}/manage")
+  public ResponseEntity<RecordDto> getRecordUpdatePage(@PathVariable Long recordId,
+      @AuthenticationPrincipal MemberDto loginMember) {
+    RecordDto recordDto = recordService.getRecordUpdatePage(recordId, loginMember.getMemberId());
+    return ResponseEntity.ok(recordDto);
+  }
+
+  @ApiOperation("기록 상세 페이지")
+  @GetMapping("/record/{recordId}")
+  public ResponseEntity<RecordDto> getRecordDetail(@PathVariable Long recordId,
+      @AuthenticationPrincipal MemberDto loginMember,
+      @RequestParam(value = "page",defaultValue = "1") int page) {
+    RecordDto recordDetail = recordService.getRecordDetail(recordId, loginMember.getMemberId(), page);
+    return ResponseEntity.ok(recordDetail);
   }
 
 }
