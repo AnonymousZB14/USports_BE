@@ -56,8 +56,6 @@ public class MemberControllerTest {
                     .name(name)
                     .email(email)
                     .password(password)
-                    .phoneNumber(phoneNumber)
-                    .birthDate(birthDate)
                     .gender(gender)
                     .profileOpen(profileOpen)
                     .build();
@@ -83,7 +81,7 @@ public class MemberControllerTest {
 
             MemberRegister.Request request = new MemberRegister.Request(
                     "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, "open"
+                      Gender.MALE, "open"
             );
 
             MemberRegister.Response response = new MemberRegister.Response(

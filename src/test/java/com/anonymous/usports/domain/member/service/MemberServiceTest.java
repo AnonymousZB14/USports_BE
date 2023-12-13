@@ -135,8 +135,6 @@ public class MemberServiceTest {
                     .name("Je Joon")
                     .email("joons@gmail.com")
                     .password(password)
-                    .phoneNumber("010-1234-1234")
-                    .birthDate(birthDate)
                     .gender(Gender.MALE)
                     .profileOpen("open")
                     .build();
@@ -165,8 +163,6 @@ public class MemberServiceTest {
                     .name("Je Joon")
                     .email("joons@gmail.com")
                     .password("Aabcd1234!")
-                    .phoneNumber("010-1234-1234")
-                    .birthDate(birthDate)
                     .gender(Gender.MALE)
                     .profileOpen("open")
                     .build();
@@ -203,8 +199,6 @@ public class MemberServiceTest {
                     .name("Je Joon")
                     .email("joons@gmail.com")
                     .password("Aabcd1234!")
-                    .phoneNumber("010-1234-1234")
-                    .birthDate(birthDate)
                     .gender(Gender.MALE)
                     .profileOpen("open")
                     .build();
