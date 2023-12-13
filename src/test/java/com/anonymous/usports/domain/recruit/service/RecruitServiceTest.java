@@ -63,8 +63,7 @@ class RecruitServiceTest {
   private SportsRepository sportsRepository;
   @Mock
   private RecruitRepository recruitRepository;
-  @Mock
-  private ParticipantRepository participantRepository;
+
 
   @InjectMocks
   private RecruitServiceImpl recruitService;
@@ -76,7 +75,7 @@ class RecruitServiceTest {
         .name("name" + id)
         .email("test@test.com")
         .password("password" + id)
-        .phoneNumber("010-1111-2222")
+        .phoneNumber("010-1111-2 222")
         .birthDate(LocalDate.now())
         .gender(Gender.MALE)
         .role(Role.USER)

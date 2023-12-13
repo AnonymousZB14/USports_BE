@@ -21,7 +21,7 @@ public class MyPageController {
   @ApiOperation("마이 페이지")
   @GetMapping("/mypage")
   public ResponseEntity<MyPageMainDto> myPage(@AuthenticationPrincipal MemberDto loginMember){
-    MyPageMainDto myPageMainData = myPageService.getMyPageMainData(1L);
+    MyPageMainDto myPageMainData = myPageService.getMyPageMainData(loginMember.getMemberId());
     return ResponseEntity.ok(myPageMainData);
   }
 }
