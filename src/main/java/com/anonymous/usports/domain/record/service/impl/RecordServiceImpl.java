@@ -7,6 +7,8 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.util.IOUtils;
+import com.anonymous.usports.domain.comment.entity.CommentEntity;
+import com.anonymous.usports.domain.comment.repository.CommentRepository;
 import com.anonymous.usports.domain.follow.entity.FollowEntity;
 import com.anonymous.usports.domain.follow.repository.FollowRepository;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
@@ -68,6 +70,7 @@ public class RecordServiceImpl implements RecordService {
   private final SportsRepository sportsRepository;
   private final InterestedSportsRepository interestedSportsRepository;
   private final FollowRepository followRepository;
+  private final CommentRepository commentRepository;
   private final AmazonS3 amazonS3;
   @Value("${cloud.aws.s3.bucketName}")
   private String bucketName;
@@ -78,7 +81,7 @@ public class RecordServiceImpl implements RecordService {
    * 기록 게시글 등록
    *
    * @param request       게시글 등록 Dto
-   * @param loginMemberId 로그인한 회원 Id
+   * @param loginMemberId 로그인 회원 Id
    * @param images        등록할 images
    * @return RecordDto 반환
    */
@@ -214,7 +217,7 @@ public class RecordServiceImpl implements RecordService {
    *
    * @param recordType    불러올 리스트 타입 (RECOMMENDATION or FOLLOW)
    * @param page          불러올 페이지 정보
-   * @param loginMemberId 로그인한 회원 Id
+   * @param loginMemberId 로그인 회원 Id
    * @return RecordListDto 형태로 반환
    */
   @Override
@@ -249,6 +252,21 @@ public class RecordServiceImpl implements RecordService {
 
     RecordListDto recordListDto = new RecordListDto(recordEntityPage);
     return recordListDto;
+  }
+
+  /**
+   * 기록 수정 페이지 불러오기
+   *
+   * @param recordId 수정할 기록 게시글 ID
+   * @param loginMemberId 로그인 회원 ID
+   * @return RecordDto로 반환
+   */
+  @Override
+  public RecordDto getRecordUpdatePage(Long recordId, Long loginMemberId) {
+    RecordEntity record = recordRepository.findById(recordId)
+        .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+    validateAuthority(record, loginMemberId);
+    return RecordDto.fromEntity(record);
   }
 
   /**
@@ -305,7 +323,7 @@ public class RecordServiceImpl implements RecordService {
    * 기록 게시글 삭제
    *
    * @param recordId      기록 게시글 번호
-   * @param loginMemberId 로그인한 회원 ID
+   * @param loginMemberId 로그인 회원 ID
    * @return RecordDto 형태로 반환
    */
   @Override
@@ -336,8 +354,24 @@ public class RecordServiceImpl implements RecordService {
   }
 
   /**
+   * 기록 상세 페이지 불러오기
+   *
+   * @param recordId 기록Id
+   * @param loginMemberId 로그인 회원 ID
+   * @return CommentEntity 리스트를 포함한 RecordDto 형태로 반환
+   */
+  @Override
+  public RecordDto getRecordDetail(Long recordId, Long loginMemberId, int page) {
+    RecordEntity record = recordRepository.findById(recordId)
+        .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.COMMENT_PAGE_SIZE_DEFAULT);
+    Page<CommentEntity> commentList = commentRepository.findAllCommentsByRecordId(recordId,pageRequest);
+    return RecordDto.fromEntityInclueComment(record,commentList);
+  }
+
+  /**
    * @param recordEntity  기록 엔티티
-   * @param loginMemberId 로그인한 회원 Id
+   * @param loginMemberId 로그인 회원 Id
    */
   private void validateAuthority(RecordEntity recordEntity, Long loginMemberId) {
     if (!Objects.equals(recordEntity.getMember().getMemberId(), loginMemberId)) {

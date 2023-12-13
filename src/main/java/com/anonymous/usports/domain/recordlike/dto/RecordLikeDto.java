@@ -1,6 +1,6 @@
-package com.anonymous.usports.domain.RecordLike.dto;
+package com.anonymous.usports.domain.recordlike.dto;
 
-import com.anonymous.usports.domain.RecordLike.entity.RecordLikeEntity;
+import com.anonymous.usports.domain.recordlike.entity.RecordLikeEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.anonymous.usports.domain.RecordLike.entity;
+package com.anonymous.usports.domain.recordlike.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
@@ -17,7 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity(name = "recordlike")
+@Entity(name = "record_like")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,7 +27,7 @@ public class RecordLikeEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "recordlike_id", nullable = false)
+  @Column(name = "record_like_id", nullable = false)
   private Long recordLikeId;
 
   @ManyToOne(fetch = FetchType.LAZY)
