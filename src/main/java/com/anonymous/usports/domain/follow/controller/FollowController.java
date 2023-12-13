@@ -36,7 +36,7 @@ public class FollowController {
   @GetMapping("/follow/{type}")
   public ResponseEntity<FollowListDto> getFollowList(
       @PathVariable FollowListType type,
-      @RequestParam("page") int page,
+      @RequestParam(value = "page", defaultValue = "1") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
     FollowListDto followList = followService.getFollowPage(type, page, loginMember.getMemberId());
     return ResponseEntity.ok(followList);
