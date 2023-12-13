@@ -5,28 +5,14 @@ import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
-import java.time.LocalDateTime;
-import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-
-import javax.persistence.EntityListeners;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -49,6 +35,9 @@ public class RecruitEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
   private MemberEntity member;
+
+  @Column(name="chatroom_id")
+  private Long chatRoomId;
 
   @Column(name = "title", nullable = false)
   private String title;

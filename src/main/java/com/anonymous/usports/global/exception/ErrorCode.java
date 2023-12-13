@@ -21,8 +21,8 @@ public enum ErrorCode {
   PHONE_NUMBER_UNMATCH(HttpStatus.BAD_REQUEST, "입력한 핸드폰 번호가 일치하지 않습니다"),
   NAME_UNMATCH(HttpStatus.BAD_REQUEST, "입력한 이름이 일치하지 않습니다"),
 
-
   // jwt 관련
+  JWT_TOKEN_ERROR(HttpStatus.UNAUTHORIZED,"JWT 토큰 에러입니다"),
   JWT_EXPIRED(HttpStatus.FORBIDDEN, "JWT가 만료되었습니다"),
   JWT_TOKEN_WRONG_TYPE(HttpStatus.FORBIDDEN,"JWT 토큰 형식에 문제가 생겼습니다"),
   JWT_TOKEN_MALFORMED(HttpStatus.FORBIDDEN, "토큰이 변조가 되었습니다"),
@@ -66,6 +66,12 @@ public enum ErrorCode {
   UNABLE_MANAGE_FOLLOW(HttpStatus.BAD_REQUEST, "이미 팔로우 상태입니다."),
   SELF_FOLLOW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "자기 자신을 팔로우 할 수 없습니다."),
 
+  // Chat 관련
+  CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "찾는 채팅창이 없습니다"),
+  CHAT_ALREADY_EXIST(HttpStatus.BAD_REQUEST, "채팅창이 이미 존재합니다"),
+  NOT_RECRUIT_HOST(HttpStatus.BAD_REQUEST, "운동 모임 작성자만 채팅방을 만들 수 있습니다"),
+  MEMBER_ALREADY_IN_CHAT_ROOM(HttpStatus.BAD_REQUEST, "이미 유저가 채팅방에 있습니다"),
+  USER_NOT_IN_THE_CHAT(HttpStatus.NOT_FOUND, "해당 유저는 채팅에 없습니다"),
 
   //기타
   ADDRESS_API_ERROR(HttpStatus.BAD_REQUEST, "도로명 주소 입력값이 잘못되었습니다."),
