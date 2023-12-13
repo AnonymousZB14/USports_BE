@@ -28,6 +28,12 @@ public class MyExceptionHandler {
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
   }
 
+  @ExceptionHandler(ChatException.class)
+  public ResponseEntity<ErrorResponse> handleChatException(ChatException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+    return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
+
   @ExceptionHandler(FollowException.class)
   public ResponseEntity<ErrorResponse> handleFollowException(FollowException e) {
     ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());

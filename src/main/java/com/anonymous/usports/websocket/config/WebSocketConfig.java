@@ -14,15 +14,18 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/ws")  // URL 또는 URI
+                .setAllowedOriginPatterns("*")
                 .withSockJS(); // 소켓을 지원하지 않는 브라우저라면, sockJS를 사용
     }
 
     // message 브로커를 활성화 시키는 설정
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/pub");
-
+        // 메세지 구독 url (topic을 구독)
         registry.enableSimpleBroker("/sub");
+
+        // 메세지 발행 url
+        registry.setApplicationDestinationPrefixes("/pub");
 
     }
 }

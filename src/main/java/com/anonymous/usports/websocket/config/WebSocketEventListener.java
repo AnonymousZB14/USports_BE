@@ -1,6 +1,6 @@
 package com.anonymous.usports.websocket.config;
 
-import com.anonymous.usports.websocket.dto.ChatMessage;
+import com.anonymous.usports.websocket.dto.ChatMessageDto;
 import com.anonymous.usports.websocket.type.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +30,12 @@ public class WebSocketEventListener {
 
         if (username != null) {
             log.info("User disconnected : {}", username);
-            ChatMessage chatMessage = ChatMessage.builder()
+            ChatMessageDto chatMessageDto = ChatMessageDto.builder()
                     .type(MessageType.LEAVE)
                     .sender(username)
                     .build();
 
-            messageTemplate.convertAndSend("/sub/public", chatMessage);
+            messageTemplate.convertAndSend("/sub/public", chatMessageDto);
 
         } else {
 

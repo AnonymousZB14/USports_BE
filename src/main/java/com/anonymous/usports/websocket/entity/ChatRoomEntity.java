@@ -1,9 +1,6 @@
 package com.anonymous.usports.websocket.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -13,6 +10,7 @@ import java.util.Objects;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ChatRoomEntity {
 
     @Id
@@ -21,7 +19,10 @@ public class ChatRoomEntity {
     private Long chatRoomId;
 
     @Column(name = "chatroom_name", length = 50, nullable = false)
-    private String chatroomName;
+    private String chatRoomName;
+
+    @Column(name = "user_count")
+    private Long userCount;
 
     @Override
     public boolean equals(Object o) {

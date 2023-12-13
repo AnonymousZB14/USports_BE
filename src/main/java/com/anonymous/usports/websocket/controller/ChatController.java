@@ -1,6 +1,6 @@
 package com.anonymous.usports.websocket.controller;
 
-import com.anonymous.usports.websocket.dto.ChatMessage;
+import com.anonymous.usports.websocket.dto.ChatMessageDto;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -16,12 +16,12 @@ public class ChatController {
      * /topic/public 을 통해서 채팅에 구독되어 있는 모든 사람들이 메세지를 접근할 수 있다
      * @PayLoad : payload라서 SendTo()에 적힌 곳으로 메세지 넘어간다
      */
-    @MessageMapping("/chat/send-message")
+    @MessageMapping("/chat/message")
     @SendTo("/sub/public")
-    public ChatMessage sendMessage(
-            @Payload ChatMessage chatMessage
+    public ChatMessageDto sendMessage(
+            @Payload ChatMessageDto chatMessageDto
     ) {
-         return chatMessage;
+         return chatMessageDto;
     }
 
     /**
@@ -29,12 +29,12 @@ public class ChatController {
      */
     @MessageMapping("/chat/add-user")
     @SendTo("/sub/public")
-    public ChatMessage addUser(
-        @Payload ChatMessage chatMessage,
+    public ChatMessageDto addUser(
+        @Payload ChatMessageDto chatMessageDto,
         SimpMessageHeaderAccessor headerAccessor
     ) {
         // Add username in WebSocket session
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        return chatMessage;
+        headerAccessor.getSessionAttributes().put("username", chatMessageDto.getSender());
+        return chatMessageDto;
     }
 }
