@@ -73,6 +73,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo){
+
+        // 2 유저가 들어가 있는 채팅방이 존재하는 것 (한번 더 생각해 보기)
         Optional<ChatRoomEntity> chatRoom = chatPartakeRepository
                 .findChatRoomEntityByMember(memberOne, memberTwo);
 
@@ -85,7 +87,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         StringBuilder chatName = new StringBuilder();
         chatName.append(memberOne.getAccountName()).append(" X ").append(memberTwo.getAccountName());
 
-        ChatRoomEntity chatRoom = chatRoomRepository.save(ChatRoomEntity.builder()
+        chatRoomRepository.save(ChatRoomEntity.builder()
                 .chatRoomName(chatName.toString())
                 .userCount(2L)
                 .build());

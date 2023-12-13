@@ -21,8 +21,8 @@ public enum ErrorCode {
   PHONE_NUMBER_UNMATCH(HttpStatus.BAD_REQUEST, "입력한 핸드폰 번호가 일치하지 않습니다"),
   NAME_UNMATCH(HttpStatus.BAD_REQUEST, "입력한 이름이 일치하지 않습니다"),
 
-
   // jwt 관련
+  JWT_TOKEN_ERROR(HttpStatus.UNAUTHORIZED,"JWT 토큰 에러입니다"),
   JWT_EXPIRED(HttpStatus.FORBIDDEN, "JWT가 만료되었습니다"),
   JWT_TOKEN_WRONG_TYPE(HttpStatus.FORBIDDEN,"JWT 토큰 형식에 문제가 생겼습니다"),
   JWT_TOKEN_MALFORMED(HttpStatus.FORBIDDEN, "토큰이 변조가 되었습니다"),

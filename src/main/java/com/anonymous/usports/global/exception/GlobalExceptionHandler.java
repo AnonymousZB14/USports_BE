@@ -1,6 +1,7 @@
 package com.anonymous.usports.global.exception;
 
 import com.anonymous.usports.global.EvaluationException;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,7 +9,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
-public class MyExceptionHandler {
+public class GlobalExceptionHandler {
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<ErrorResponse> handleException(Exception e) {
+    ErrorResponse errorResponse = new ErrorResponse(ErrorCode.INTERNAL_SERVER_ERROR, e.getMessage());
+    return new ResponseEntity<>(errorResponse, errorResponse.getErrorCode().getStatusCode());
+  }
 
   @ExceptionHandler(MyException.class)
   protected ResponseEntity<ErrorResponse> myException(MyException e) {
@@ -26,6 +33,12 @@ public class MyExceptionHandler {
   public ResponseEntity<ErrorResponse> handleMemberException(MemberException e) {
     ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
+
+  @ExceptionHandler(JwtException.class)
+  public ResponseEntity<ErrorResponse> handleJwtException(JwtException e) {
+    ErrorResponse errorResponse = new ErrorResponse(ErrorCode.JWT_TOKEN_ERROR, e.getMessage());
+    return new ResponseEntity<>(errorResponse, ErrorCode.JWT_TOKEN_ERROR.getStatusCode());
   }
 
   @ExceptionHandler(ChatException.class)
