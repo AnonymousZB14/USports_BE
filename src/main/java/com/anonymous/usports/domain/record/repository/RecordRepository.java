@@ -4,6 +4,8 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,4 +19,6 @@ public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
       @Param("sportsList") List<SportsEntity> sportsList);
 
   List<RecordEntity> findAllByMemberIn(List<MemberEntity> member);
+
+  Page<RecordEntity> findByMemberOrderByRegisteredAtDesc(MemberEntity member, Pageable pageable);
 }

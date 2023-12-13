@@ -7,4 +7,6 @@ public class NumberConstant {
 
   public static final int COMMENT_PAGE_SIZE_DEFAULT = 20;
 
+  public static final int PAGE_SIZE_PROFILE = 20;
+
 }

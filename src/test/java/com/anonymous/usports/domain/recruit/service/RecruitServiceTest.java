@@ -14,7 +14,7 @@ import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
-import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
@@ -50,13 +50,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @Slf4j
@@ -69,8 +63,7 @@ class RecruitServiceTest {
   private SportsRepository sportsRepository;
   @Mock
   private RecruitRepository recruitRepository;
-  @Mock
-  private ParticipantRepository participantRepository;
+
 
   @InjectMocks
   private RecruitServiceImpl recruitService;
@@ -82,7 +75,7 @@ class RecruitServiceTest {
         .name("name" + id)
         .email("test@test.com")
         .password("password" + id)
-        .phoneNumber("010-1111-2222")
+        .phoneNumber("010-1111-2 222")
         .birthDate(LocalDate.now())
         .gender(Gender.MALE)
         .role(Role.USER)
@@ -644,7 +637,7 @@ class RecruitServiceTest {
           PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT, Sort.by("registeredAt").descending())))
           .thenReturn(new PageImpl<>(recruitList));
       //when
-      RecruitSearchListDto result =
+      RecruitListDto result =
           recruitService.getRecruitsByConditions(
               page, search, region, footballString, gender, closeInclude);
 
