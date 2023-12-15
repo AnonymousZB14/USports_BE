@@ -30,6 +30,8 @@ public enum ErrorCode {
 
   //Sports 관련
   SPORTS_NOT_FOUND(HttpStatus.NOT_FOUND, "운동 종목을 찾을 수 없습니다."),
+  SPORTS_GRADE_INVALID(HttpStatus.NOT_FOUND, "Sports Grade 값이 잘못되었습니다."),
+
 
   //Recruit 관련
   RECRUIT_NOT_FOUND(HttpStatus.NOT_FOUND, "운동 모집 게시글을 찾을 수 없습니다."),
