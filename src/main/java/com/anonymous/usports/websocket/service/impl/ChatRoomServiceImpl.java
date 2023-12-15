@@ -26,8 +26,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,38 +71,63 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return findChatRoomListByDto(memberDto);
     }
 
-//    private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo){
-//
-//        // 2 유저가 들어가 있는 채팅방이 존재하는 것 (한번 더 생각해 보기)
-//        Optional<ChatRoomEntity> chatRoom = chatPartakeRepository
-//                .findChatRoomEntityByMember(memberOne, memberTwo);
-//
-//        // todo : throw를 하지 말고, 그 방으로 들어갈 수 있도록 하기
-//        if (chatRoom.isPresent()) throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
-//    }
+    private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo){
+
+        // 2 유저가 들어가 있는 채팅방이 존재하는 것 (한번 더 생각해 보기)
+        List<ChatPartakeEntity> existingChatRooms = chatPartakeRepository
+                .findAllByMemberEntityInAndRecruitIdIsNull(Arrays.asList(memberOne, memberTwo));
+
+        Set<ChatRoomEntity> chatRooms = new HashSet<>();
+
+        // todo : throw를 하지 말고, 그 방으로 들어갈 수 있도록 하기
+        for (ChatPartakeEntity chatPartake : existingChatRooms) {
+            if (!chatRooms.add(chatPartake.getChatRoomEntity())) {
+                throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
+            }
+        }
+    }
 
     private void createNewDMWithMember(MemberEntity memberOne, MemberEntity memberTwo){
 
         StringBuilder chatName = new StringBuilder();
         chatName.append(memberOne.getAccountName()).append(" X ").append(memberTwo.getAccountName());
 
-        chatRoomRepository.save(ChatRoomEntity.builder()
+        ChatRoomEntity newChatRoom = chatRoomRepository.save(ChatRoomEntity.builder()
                 .chatRoomName(chatName.toString())
                 .userCount(2L)
                 .build());
+
+        List<ChatPartakeEntity> chatPartakeList = new ArrayList<>();
+
+        chatPartakeList.add(ChatPartakeEntity.builder()
+                .recruitId(null)
+                .chatRoomEntity(newChatRoom)
+                .memberEntity(memberOne)
+                .build());
+
+        chatPartakeList.add(ChatPartakeEntity.builder()
+                .recruitId(null)
+                .chatRoomEntity(newChatRoom)
+                .memberEntity(memberTwo)
+                .build());
+
+        chatPartakeRepository.saveAll(chatPartakeList);
     }
 
     @Override
     @Transactional
     public CreateDMDto.Response createChatRoom(CreateDMDto.Request request, MemberDto memberDto) {
 
+        if (memberDto.getMemberId() == request.getMemberId())
+            throw new ChatException(ErrorCode.CANNOT_CREATE_CHAT_WITH_SAME_USER);
+
         MemberEntity memberOne = memberRepository.findById(memberDto.getMemberId())
                 .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
         MemberEntity memberTwo = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-        // 채팅방이 있는지 없는지 확인
-        //chatRoomExist(memberOne, memberTwo);
+//         채팅방이 있는지 없는지 확인
+        chatRoomExist(memberOne, memberTwo);
 
         // 없을 때 만든다
         createNewDMWithMember(memberOne, memberTwo);

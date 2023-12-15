@@ -4,8 +4,6 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.websocket.entity.ChatPartakeEntity;
 import com.anonymous.usports.websocket.entity.ChatRoomEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,13 +12,7 @@ import java.util.Optional;
 @Repository
 public interface ChatPartakeRepository extends JpaRepository<ChatPartakeEntity, Long> {
 
-//    @Query("SELECT c FROM chat_partake c" +
-//            "WHERE c.member_one = :memberOne " +
-//            "and :memberTwo = chat_partake .memberEntity")
-//    Optional<ChatRoomEntity> findChatRoomEntityByMember(
-//            @Param("memberOne") MemberEntity memberOne,
-//            @Param("memberTwo") MemberEntity memberTwo
-//    );
+    List<ChatPartakeEntity> findAllByMemberEntityInAndRecruitIdIsNull(List<MemberEntity> member);
 
     Optional<ChatPartakeEntity> findByChatRoomEntityAndMemberEntity(ChatRoomEntity chatRoom, MemberEntity member);
 

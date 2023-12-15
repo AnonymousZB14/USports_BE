@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+<th:block th:fragment="content">
+  <p>채팅방 이름</p>
+  <div class="container">
+    <div>
+      <ul th:each="room : ${list}">
+        <li><a th:href="@{/chat/room(roomId=${room.chatRoomId})}">[[${room.chatRoomName}]]</a></li>
+      </ul>
+    </div>
+  </div>
+</th:block>
+
+</body>
+
+</html>
+

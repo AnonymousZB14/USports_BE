@@ -7,6 +7,7 @@ import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateRecruitChat;
 import com.anonymous.usports.websocket.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor
+@Slf4j
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
@@ -24,15 +26,14 @@ public class ChatRoomController {
         @PathVariable Long chatRoomId,
         @AuthenticationPrincipal MemberDto memberDto
     ) {
-        return null;
+        return chatRoomService.enterChatRoom(chatRoomId, memberDto);
     }
-
 
     @GetMapping("/list")
     public List<ChatPartakeDto>  getChatRoomList(
             @AuthenticationPrincipal MemberDto memberDto
     ){
-        return null;
+        return chatRoomService.getChatRoomList(memberDto);
     }
 
     @PostMapping("/direct-message")
