@@ -12,6 +12,8 @@ import com.anonymous.usports.domain.participant.repository.ParticipantRepository
 import com.anonymous.usports.domain.participant.service.ParticipantService;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
+import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
+import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
@@ -21,7 +23,6 @@ import com.anonymous.usports.global.exception.ParticipantException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class ParticipantServiceImpl implements ParticipantService {
   private final MemberRepository memberRepository;
   private final RecruitRepository recruitRepository;
   private final ParticipantRepository participantRepository;
+  private final SportsSkillRepository sportsSkillRepository;
 
   @Override
   @Transactional
@@ -80,8 +82,19 @@ public class ParticipantServiceImpl implements ParticipantService {
           ResponseConstant.JOIN_RECRUIT_ALREADY_ACCEPTED);
     }
 
+    ParticipantEntity participant = new ParticipantEntity(memberEntity, recruitEntity);
+    Optional<SportsSkillEntity> optionalSportsSkill =
+        sportsSkillRepository.findByMemberAndSports(memberEntity, recruitEntity.getSports());
+
+    if (optionalSportsSkill.isPresent()) {
+      SportsSkillEntity sportsSkill = optionalSportsSkill.get();
+      participant.setSportsSkill(sportsSkill.getSportsScoreAsDouble());
+    } else {
+      participant.setSportsSkill(0.0);
+    }
+
     //신청 가능 -> 신청
-    participantRepository.save(new ParticipantEntity(memberEntity, recruitEntity));
+    participantRepository.save(participant);
 
     return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETE);
   }
