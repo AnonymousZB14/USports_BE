@@ -11,14 +11,14 @@ import lombok.*;
 public class ChatPartakeDto {
     private Long partakeId;
     private Long chatRoomId;
-    private Long memberId;
+    private String chatRoomName;
     private Long recruitId;
 
     public static ChatPartakeDto fromEntity(ChatPartakeEntity chatPartake) {
         return ChatPartakeDto.builder()
                 .partakeId(chatPartake.getPartakeId())
                 .chatRoomId(chatPartake.getChatRoomEntity().getChatRoomId())
-                .memberId(chatPartake.getMemberEntity().getMemberId())
+                .chatRoomName(chatPartake.getChatRoomEntity().getChatRoomName())
                 .recruitId(chatPartake.getRecruitId())
                 .build();
     }

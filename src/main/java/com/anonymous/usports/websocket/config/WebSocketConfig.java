@@ -13,7 +13,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
-                .addEndpoint("/ws")  // URL 또는 URI
+                .addEndpoint("/ws/chat")  // URL 또는 URI
                 .setAllowedOriginPatterns("*")
                 .withSockJS(); // 소켓을 지원하지 않는 브라우저라면, sockJS를 사용
     }

@@ -74,6 +74,7 @@ public enum ErrorCode {
   NOT_RECRUIT_HOST(HttpStatus.BAD_REQUEST, "운동 모임 작성자만 채팅방을 만들 수 있습니다"),
   MEMBER_ALREADY_IN_CHAT_ROOM(HttpStatus.BAD_REQUEST, "이미 유저가 채팅방에 있습니다"),
   USER_NOT_IN_THE_CHAT(HttpStatus.NOT_FOUND, "해당 유저는 채팅에 없습니다"),
+  CANNOT_CREATE_CHAT_WITH_SAME_USER(HttpStatus.BAD_REQUEST, "내 자신과는 chat을 만들 수 없습니다"),
 
   //기타
   ADDRESS_API_ERROR(HttpStatus.BAD_REQUEST, "도로명 주소 입력값이 잘못되었습니다."),
