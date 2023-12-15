@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.member.dto.*;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.notification.service.NotificationService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
+@Api(tags = "회원(Member)")
 @RestController
 @RequestMapping("/member")
 @RequiredArgsConstructor

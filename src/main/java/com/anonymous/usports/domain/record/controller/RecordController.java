@@ -9,6 +9,7 @@ import com.anonymous.usports.domain.record.dto.RecordRegister.Response;
 import com.anonymous.usports.domain.record.dto.RecordUpdate;
 import com.anonymous.usports.domain.record.service.RecordService;
 import com.anonymous.usports.global.type.RecordType;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Api(tags = "기록 글(Record)")
 @RestController
 @RequiredArgsConstructor
 public class RecordController {
