@@ -35,6 +35,17 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=rootpass
     networks:
       - backend
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq-stream
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "61613:61613"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "RabbitMQ-My-Cookies"
+      RABBITMQ_DEFAULT_USER: "rootuser"
+      RABBITMQ_DEFAULT_PASS: "rootpass"
 
 volumes:
   data: { }

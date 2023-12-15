@@ -20,25 +20,25 @@ public class WebSocketEventListener {
     /**
      * 채팅방에 있는 사람이, 채팅 방을 떠났다
      */
-    @EventListener
-    public void handleWebSocketDisconnectListener(
-            SessionDisconnectEvent event
-    ) {
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-
-        String username = (String) headerAccessor.getSessionAttributes().get("username");
-
-        if (username != null) {
-            log.info("User disconnected : {}", username);
-            ChatMessageDto chatMessageDto = ChatMessageDto.builder()
-                    .type(MessageType.LEAVE)
-                    .sender(username)
-                    .build();
-
-            messageTemplate.convertAndSend("/sub/public", chatMessageDto);
-
-        } else {
-
-        }
-    }
+//    @EventListener
+//    public void handleWebSocketDisconnectListener(
+//            SessionDisconnectEvent event
+//    ) {
+//        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+//
+//        String username = (String) headerAccessor.getSessionAttributes().get("username");
+//
+//        if (username != null) {
+//            log.info("User disconnected : {}", username);
+//            ChatMessageDto chatMessageDto = ChatMessageDto.builder()
+//                    .type(MessageType.LEAVE)
+//                    .sender(username)
+//                    .build();
+//
+//            messageTemplate.convertAndSend("/sub/public", chatMessageDto);
+//
+//        } else {
+//
+//        }
+//    }
 }

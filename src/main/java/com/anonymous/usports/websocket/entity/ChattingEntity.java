@@ -1,21 +1,21 @@
-package com.anonymous.usports.domain.chat.chatting.entity;
+package com.anonymous.usports.websocket.entity;
 
+import com.anonymous.usports.websocket.type.MessageType;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @ToString
 @Builder
 @Document(collection = "chatting")
@@ -36,4 +36,6 @@ public class ChattingEntity {
   private String content; //내용
 
   private LocalDateTime createdAt; //입력 시간
+
+  private MessageType type; //메시지 타입
 }

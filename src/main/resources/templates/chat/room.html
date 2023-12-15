@@ -33,61 +33,79 @@
 </th:block>
 
 <script th:inline="javascript">
-  $(document).ready(function(){
+  $(document).ready(function () {
 
     var roomName = [[${room.chatRoomName}]];
     var roomId = [[${room.chatRoomId}]];
     var username = [[${room.username}]];
     var timeNow = new Date();
+    let stomp = Stomp.over(new SockJS("/ws"));
+    stomp.heartbeat.outgoing = 10000;
+    stomp.heartbeat.incoming = 10000;
 
-    console.log(roomName + ", " + roomId + ", " + username);
-
-    var sockJs = new SockJS("/ws/chat");
-    //1. SockJS를 내부에 들고있는 stomp를 내어줌
-    var stomp = Stomp.over(sockJs);
-
-    //2. connection이 맺어지면 실행
-    stomp.connect({}, function (){
-      console.log("STOMP Connection")
-
-      //4. subscribe(path, callback)으로 메세지를 받을 수 있음
-      stomp.subscribe("/sub/chat/room/" + roomId, function (chat) {
-        var content = JSON.parse(chat.body);
-
-        var writer = content.sender;
-        var message = content.content;
-        var str = '';
-
-        if(writer === username){
-          str = "<div class='col-6'>";
-          str += "<div class='alert alert-secondary'>";
-          str += "<b>" + writer + " : " + message + "</b>";
-          str += "</div></div>";
-          $("#msgArea").append(str);
-        }  else{
-          str = "<div class='col-6'>";
-          str += "<div class='alert alert-warning'>";
-          str += "<b>" + writer + " : " + message + "</b>";
-          str += "</div></div>";
-          $("#msgArea").append(str);
-        }
-
-        $("#msgArea").append(str);
+    function connectToChat() {
+      stomp.connect({}, function () {
+        console.log("STOMP Connection");
+        subscribeToRoom();
+        sendEnterMessage();
+      }, function (error) {
+        console.log('Connection lost! Reconnection...')
+        reconnect();
       });
+    }
 
-      //3. send(path, header, message)로 메세지를 보낼 수 있음
-      stomp.send('/pub/chat/enter', {}, JSON.stringify({chatRoomId: roomId, sender: username, time: timeNow}))
-    });
+    function reconnect() {
+      stomp.disconnect(function (){
+        console.log('Disconnected! Reconnecting...');
+        stomp=Stomp.over(new SockJS("/ws"));
+        stomp.heartbeat.outgoing = 10000;
+        stomp.heartbeat.incoming = 10000;
+        connectToChat();
+      });
+    }
 
-    $("#button-send").on("click", function(e){
+    function subscribeToRoom() {
+      stomp.subscribe("/exchange/chat.exchange/room." + roomId, function (chat) {
+        var content = JSON.parse(chat.body);
+        showMessage(content.sender, content.content);
+      });
+    }
+
+    function sendEnterMessage() {
+      stomp.send('/pub/chat.enter.'+roomId, {}, JSON.stringify({ chatRoomId: roomId, sender: username, time: timeNow }));
+    }
+
+    function sendMessage() {
       var msg = document.getElementById("msg");
-
       console.log(username + ":" + msg.value);
-      stomp.send('/pub/chat/sendMessage', {}, JSON.stringify({chatRoomId: roomId, content: msg.value, sender: username}));
+      stomp.send('/pub/chat.message.'+roomId, {}, JSON.stringify({ chatRoomId: roomId, content: msg.value, sender: username }));
       msg.value = '';
+    }
+
+    function showMessage(writer, message) {
+      var str = '';
+
+      if (writer === username) {
+        str = "<div class='col-6'>";
+        str += "<div class='alert alert-secondary'>";
+        str += "<b>" + writer + " : " + message + "</b>";
+        str += "</div></div>";
+      } else {
+        str = "<div class='col-6'>";
+        str += "<div class='alert alert-warning'>";
+        str += "<b>" + writer + " : " + message + "</b>";
+        str += "</div></div>";
+      }
+
+      $("#msgArea").append(str);
+    }
+
+    connectToChat();
+
+    $("#button-send").on("click", function (e) {
+      sendMessage();
     });
   });
 </script>
 </body>
 </html>
-
