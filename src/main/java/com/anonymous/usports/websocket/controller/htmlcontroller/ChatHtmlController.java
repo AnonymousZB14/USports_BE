@@ -6,6 +6,7 @@ import com.anonymous.usports.websocket.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -35,5 +36,19 @@ public class ChatHtmlController {
         return mv;
     }
 
+    //채팅방 조회
+    @GetMapping("/room")
+    public void getRoom(Long roomId, Model model){
 
+        log.info("# get Chat Room, roomID : " + roomId);
+        log.info("{}", roomId.getClass());
+
+        Long[] memberNum = new Long[]{4L, 5L, 6L, 7L, 8L, 9L};
+        log.info("{}", memberNum);
+
+        MemberDto memberDto = MemberDto.fromEntity(memberRepository.findById(memberNum[(int) Math.round(Math.random() * (memberNum.length - 1))])
+                .orElseThrow(() -> new RuntimeException("no member")));
+
+        model.addAttribute("room", chatRoomService.enterChatRoom(roomId, memberDto));
+    }
 }

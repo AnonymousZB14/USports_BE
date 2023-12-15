@@ -13,6 +13,7 @@ import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.ParticipantStatus;
+import com.anonymous.usports.websocket.dto.ChatEnterDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
@@ -41,7 +42,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     @Override
-    public String enterChatRoom(Long chatRoomId, MemberDto memberDto) {
+    public ChatEnterDto enterChatRoom(Long chatRoomId, MemberDto memberDto) {
+
+
         ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
                 .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
@@ -52,7 +55,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             throw new ChatException(ErrorCode.USER_NOT_IN_THE_CHAT);
         }
 
-        return ChatConstant.ENTERED_CHAT_ROOM;
+        return new ChatEnterDto(chatRoomId, chatRoom.getChatRoomName(), member.getAccountName());
     }
 
     private List<ChatPartakeDto> findChatRoomListByDto(MemberDto memberDto) {

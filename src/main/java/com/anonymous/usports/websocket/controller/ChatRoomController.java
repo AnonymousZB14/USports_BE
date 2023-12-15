@@ -21,13 +21,13 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
 
-    @GetMapping("/{chatRoomId}")
-    public String enterChatRoom(
-        @PathVariable Long chatRoomId,
-        @AuthenticationPrincipal MemberDto memberDto
-    ) {
-        return chatRoomService.enterChatRoom(chatRoomId, memberDto);
-    }
+//    @GetMapping("/{chatRoomId}")
+//    public String enterChatRoom(
+//        @PathVariable Long chatRoomId,
+//        @AuthenticationPrincipal MemberDto memberDto
+//    ) {
+//        return chatRoomService.enterChatRoom(chatRoomId, memberDto);
+//    }
 
     @GetMapping("/list")
     public List<ChatPartakeDto>  getChatRoomList(

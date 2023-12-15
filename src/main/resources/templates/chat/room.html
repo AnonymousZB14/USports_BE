@@ -2,6 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
@@ -13,7 +15,7 @@
 
   <div class="container">
     <div class="col-6">
-      <h1>[[${room.name}]]</h1>
+      <h1>[[${room.chatRoomName}]]</h1>
     </div>
     <div>
       <div id="msgArea" class="col"></div>
@@ -33,9 +35,10 @@
 <script th:inline="javascript">
   $(document).ready(function(){
 
-    var roomName = [[${room.name}]];
-    var roomId = [[${room.roomId}]];
-    var username = "이제준";
+    var roomName = [[${room.chatRoomName}]];
+    var roomId = [[${room.chatRoomId}]];
+    var username = [[${room.username}]];
+    var timeNow = new Date();
 
     console.log(roomName + ", " + roomId + ", " + username);
 
@@ -51,8 +54,8 @@
       stomp.subscribe("/sub/chat/room/" + roomId, function (chat) {
         var content = JSON.parse(chat.body);
 
-        var writer = content.writer;
-        var message = content.message;
+        var writer = content.sender;
+        var message = content.content;
         var str = '';
 
         if(writer === username){
@@ -61,21 +64,26 @@
           str += "<b>" + writer + " : " + message + "</b>";
           str += "</div></div>";
           $("#msgArea").append(str);
+        }  else{
+          str = "<div class='col-6'>";
+          str += "<div class='alert alert-warning'>";
+          str += "<b>" + writer + " : " + message + "</b>";
+          str += "</div></div>";
+          $("#msgArea").append(str);
         }
-
 
         $("#msgArea").append(str);
       });
 
       //3. send(path, header, message)로 메세지를 보낼 수 있음
-      stomp.send('/pub/chat/enter', {}, JSON.stringify({roomId: roomId, writer: username}))
+      stomp.send('/pub/chat/enter', {}, JSON.stringify({chatRoomId: roomId, sender: username, time: timeNow}))
     });
 
     $("#button-send").on("click", function(e){
       var msg = document.getElementById("msg");
 
       console.log(username + ":" + msg.value);
-      stomp.send('/pub/chat/message', {}, JSON.stringify({roomId: roomId, message: msg.value, writer: username}));
+      stomp.send('/pub/chat/sendMessage', {}, JSON.stringify({chatRoomId: roomId, content: msg.value, sender: username}));
       msg.value = '';
     });
   });
