@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
@@ -29,6 +30,7 @@ import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.exception.SportsException;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
 
@@ -63,6 +65,8 @@ class RecruitServiceTest {
   private SportsRepository sportsRepository;
   @Mock
   private RecruitRepository recruitRepository;
+  @Mock
+  private ParticipantRepository participantRepository;
 
 
   @InjectMocks
@@ -448,11 +452,14 @@ class RecruitServiceTest {
       RecruitEntity recruit = createRecruit(10L, member, sports);
       recruit.setRecruitStatus(RecruitStatus.RECRUITING);
 
+
       //given
       when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
+      when(participantRepository.findAllByRecruitAndStatus(recruit, ParticipantStatus.ING))
+          .thenReturn(new ArrayList<>());
 
       //when
       RecruitEndResponse response = recruitService.endRecruit(recruit.getRecruitId(),
