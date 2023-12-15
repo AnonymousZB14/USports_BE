@@ -10,6 +10,8 @@ import com.anonymous.usports.domain.record.dto.RecordUpdate;
 import com.anonymous.usports.domain.record.service.RecordService;
 import com.anonymous.usports.global.type.RecordType;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +55,7 @@ public class RecordController {
   @ApiOperation("기록 등록하기")
   @PostMapping("/record")
   public ResponseEntity<RecordRegister.Response> registerRecord(
+      @Parameter(schema = @Schema(type = "object"),required = true)
       @RequestPart("request") RecordRegister.Request request,
       @RequestPart("images") List<MultipartFile> images,
       @AuthenticationPrincipal MemberDto loginMember
