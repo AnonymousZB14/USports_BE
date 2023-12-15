@@ -18,7 +18,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -47,6 +46,9 @@ public class ParticipantEntity {
   @JoinColumn(name = "recruit_id", nullable = false)
   private RecruitEntity recruit;
 
+  @Column(name = "sports_skill", nullable = false)
+  private double sportsSkill;
+
   @CreatedDate
   @Column(name = "registered_at", nullable = false)
   private LocalDateTime registeredAt;
@@ -64,6 +66,7 @@ public class ParticipantEntity {
   @Column(name = "meeting_date")
   private LocalDateTime meetingDate;
 
+
   public ParticipantEntity(MemberEntity member, RecruitEntity recruit) {
     this.member = member;
     this.recruit = recruit;
@@ -71,7 +74,7 @@ public class ParticipantEntity {
     this.meetingDate = recruit.getMeetingDate();
   }
 
-  public void setStatus(ParticipantStatus status){
+  public void setStatus(ParticipantStatus status) {
     this.confirmedAt = LocalDateTime.now();
     this.status = status;
   }

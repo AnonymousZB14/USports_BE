@@ -23,6 +23,8 @@ import com.anonymous.usports.domain.participant.service.impl.ParticipantServiceI
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
+import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
+import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
@@ -63,6 +65,8 @@ class ParticipantServiceTest {
   private RecruitRepository recruitRepository;
   @Mock
   private ParticipantRepository participantRepository;
+  @Mock
+  private SportsSkillRepository sportsSkillRepository;
 
   @InjectMocks
   private ParticipantServiceImpl participantService;
@@ -197,8 +201,40 @@ class ParticipantServiceTest {
   class JoinRecruit {
 
     @Test
-    @DisplayName("정상 - 신청 성공")
-    void joinRecruit_JOIN_RECRUIT_COMPLETED() {
+    @DisplayName("정상 - 신청 성공 - SportsSkill 존재")
+    void joinRecruit_JOIN_RECRUIT_COMPLETED_SPORTS_SKILL_IS_EXISTS() {
+      MemberEntity member = createMember(1L);
+      RecruitEntity recruit = createRecruit(10L, member);
+      SportsSkillEntity sportsSkill = new SportsSkillEntity(member, recruit.getSports(), 5);
+      //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
+      when(recruitRepository.findById(10L))
+          .thenReturn(Optional.of(recruit));
+      when(participantRepository.findByMemberAndRecruitAndStatus(member, recruit,
+          ParticipantStatus.ING))
+          .thenReturn(Optional.empty());
+      when(participantRepository.findByMemberAndRecruitAndStatus(member, recruit,
+          ParticipantStatus.ACCEPTED))
+          .thenReturn(Optional.empty());
+      when(sportsSkillRepository.findByMemberAndSports(member, recruit.getSports()))
+          .thenReturn(Optional.of(sportsSkill));
+      //when
+      ParticipateResponse response =
+          participantService.joinRecruit(member.getMemberId(), recruit.getRecruitId());
+
+      //then
+      verify(participantRepository, times(1)).save(new ParticipantEntity(member, recruit));
+
+      assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
+      assertThat(response.getMemberId()).isEqualTo(member.getMemberId());
+      assertThat(response.getMessage()).isEqualTo(ResponseConstant.JOIN_RECRUIT_COMPLETE);
+
+    }
+
+    @Test
+    @DisplayName("정상 - 신청 성공, SportsSkill ROOKIE")
+    void joinRecruit_JOIN_RECRUIT_COMPLETED_SPORTS_SKILL_IS_ROOKIE() {
       MemberEntity member = createMember(1L);
       RecruitEntity recruit = createRecruit(10L, member);
 
@@ -212,6 +248,8 @@ class ParticipantServiceTest {
           .thenReturn(Optional.empty());
       when(participantRepository.findByMemberAndRecruitAndStatus(member, recruit,
           ParticipantStatus.ACCEPTED))
+          .thenReturn(Optional.empty());
+      when(sportsSkillRepository.findByMemberAndSports(member, recruit.getSports()))
           .thenReturn(Optional.empty());
 
       //when

@@ -20,6 +20,7 @@ public class MemberLogin {
     @NoArgsConstructor
     @Builder
     public static class Response {
+        private MemberDto member;
         private TokenDto tokenDto;
     }
 }
