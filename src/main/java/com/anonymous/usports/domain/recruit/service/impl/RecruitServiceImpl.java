@@ -60,6 +60,11 @@ public class RecruitServiceImpl implements RecruitService {
     RecruitEntity saved =
         recruitRepository.save(Request.toEntity(request, memberEntity, sportsEntity));
 
+    //모집 생성할 때, host participant 추가
+    ParticipantEntity participantEntity = new ParticipantEntity(memberEntity, saved);
+    participantEntity.setStatus(ParticipantStatus.ACCEPTED);
+    participantRepository.save(participantEntity);
+
     return RecruitDto.fromEntity(saved);
   }
 

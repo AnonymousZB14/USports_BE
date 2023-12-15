@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.recruit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -145,6 +146,9 @@ class RecruitServiceTest {
       MemberEntity member = createMember(1L);
       RecruitEntity recruit = createRecruit(10L, member, sports);
 
+      ParticipantEntity participantEntity = new ParticipantEntity(member, recruit);
+      participantEntity.setStatus(ParticipantStatus.ACCEPTED);
+
       //given
       RecruitRegister.Request request = createRegisterRequest(recruit);
       when(memberRepository.findById(1L))
@@ -159,6 +163,7 @@ class RecruitServiceTest {
       RecruitDto result = recruitService.registerRecruit(request, member.getMemberId());
 
       //then
+      verify(participantRepository, times(1)).save(participantEntity);
       assertThat(result.getSportsId()).isEqualTo(sports.getSportsId());
       assertThat(result.getMemberId()).isEqualTo(member.getMemberId());
       assertThat(result.getRecruitStatus()).isEqualTo(RecruitStatus.RECRUITING);
