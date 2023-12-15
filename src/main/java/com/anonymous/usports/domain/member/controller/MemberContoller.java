@@ -52,7 +52,6 @@ public class MemberContoller {
         notificationService.checkUnreadNotificationAndSetSession(memberDto.getMemberId(), httpServletRequest);
 
         return ResponseEntity.ok(MemberLogin.Response.builder()
-                .member(memberDto)
                         .tokenDto(tokenProvider.saveTokenInRedis(memberDto.getEmail()))
                 .build());
     }

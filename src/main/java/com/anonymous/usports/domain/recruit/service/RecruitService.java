@@ -5,7 +5,6 @@ import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
-import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.global.type.Gender;
 
@@ -19,7 +18,7 @@ public interface RecruitService {
   /**
    * Recruit 조회
    */
-  RecruitResponse getRecruit(Long recruitId);
+  RecruitDto getRecruit(Long recruitId);
 
   /**
    * Recruit 수정

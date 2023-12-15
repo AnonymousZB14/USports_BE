@@ -37,4 +37,5 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
       LocalDateTime localDateTime,
       Pageable pageable);
 
+  boolean existsByStatusAndMemberAndRecruit(ParticipantStatus status, MemberEntity member, RecruitEntity recruit);
 }

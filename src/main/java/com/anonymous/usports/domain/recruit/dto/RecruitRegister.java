@@ -55,7 +55,6 @@ public class RecruitRegister {
           .lnt(request.getLnt())
           .cost(request.getCost())
           .gender(request.getGender())
-          .currentCount(1)
           .recruitCount(request.getRecruitCount())
           .meetingDate(request.getMeetingDate())
           .recruitStatus(RecruitStatus.RECRUITING)

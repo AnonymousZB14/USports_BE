@@ -76,7 +76,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo){
 
-        // 2 유저가 들어가 있는 채팅방이 존재하는 것 (한번 더 생각해 보기)
         List<ChatPartakeEntity> existingChatRooms = chatPartakeRepository
                 .findAllByMemberEntityInAndRecruitIdIsNull(Arrays.asList(memberOne, memberTwo));
 
@@ -129,7 +128,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         MemberEntity memberTwo = memberRepository.findById(request.getMemberId())
                 .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-//         채팅방이 있는지 없는지 확인
+        //채팅방이 있는지 없는지 확인
         chatRoomExist(memberOne, memberTwo);
 
         // 없을 때 만든다
@@ -208,6 +207,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         ChatRoomEntity chatRoom = chatRoomRepository.findById(recruit.getChatRoomId())
                 .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+        // 이미 채팅에 들어와 있으면 저장 안 해도 됨
+        if (chatPartakeRepository.existsByRecruitIdAndChatRoomEntityAndMemberEntity(
+                recruitId, chatRoom, member
+        )) {
+            throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
+        }
+
+        // 모집에 등록이 되어 있고, 승락이 되어 있는 상태
+        if (!participantRepository.existsByStatusAndMemberAndRecruit(
+                ParticipantStatus.ACCEPTED, member, recruit
+        )) {
+            throw new RecruitException(ErrorCode.CHAT_INVITE_UNAUTHORIZED);
+        }
 
         chatPartakeRepository.save(ChatPartakeEntity.builder()
                         .memberEntity(member)

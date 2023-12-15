@@ -26,7 +26,7 @@ public class ChatHtmlController {
 
         log.info("All Chat Rooms");
 
-        MemberDto memberDto = MemberDto.fromEntity(memberRepository.findById(4L)
+        MemberDto memberDto = MemberDto.fromEntity(memberRepository.findById(5L)
                 .orElseThrow(() -> new RuntimeException("no member")));
 
         ModelAndView mv = new ModelAndView("chat/rooms");
