@@ -15,10 +15,13 @@ import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.constant.ChatConstant;
 import com.anonymous.usports.global.exception.ChatException;
 import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
+import com.anonymous.usports.websocket.dto.httpbody.CreateRecruitChat;
 import com.anonymous.usports.websocket.entity.ChatPartakeEntity;
 import com.anonymous.usports.websocket.entity.ChatRoomEntity;
 import com.anonymous.usports.websocket.repository.ChatPartakeRepository;
@@ -30,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -76,9 +80,10 @@ public class ChatRoomServiceImplTest {
                 .build();
     }
 
-    private RecruitEntity createRecruit(Long id, MemberEntity member) {
+    private RecruitEntity createRecruit(Long id, MemberEntity member, Long chatRoomId) {
         return RecruitEntity.builder()
                 .recruitId(id)
+                .chatRoomId(chatRoomId)
                 .sports(new SportsEntity(1000L, "sportsName"))
                 .member(member)
                 .title("title" + id)
@@ -97,12 +102,13 @@ public class ChatRoomServiceImplTest {
                 .build();
     }
 
-    private ParticipantEntity createParticipant(Long id, MemberEntity member, RecruitEntity recruit) {
+    private ParticipantEntity createParticipant(Long id, MemberEntity member, RecruitEntity recruit, ParticipantStatus status) {
         return ParticipantEntity.builder()
                 .participantId(id)
                 .member(member)
                 .recruit(recruit)
                 .registeredAt(LocalDateTime.now())
+                .status(status)
                 .build();
     }
 
@@ -250,6 +256,141 @@ public class ChatRoomServiceImplTest {
     @DisplayName("운동 모집 채팅")
     class recruitChat{
 
+        @Test
+        @DisplayName("성공 - 운동 모임 그룹 챗 생성")
+        void successRecruitChat() {
+        //given
+            MemberEntity memberHost = createMember(1L);
+            MemberEntity memberGuest = createMember(11L);
+            MemberEntity memberGuest2 = createMember(111L);
+
+            RecruitEntity recruit = createRecruit(27L, memberHost, null);
+
+            List<ParticipantEntity> participants = new ArrayList<>();
+
+            participants.add(createParticipant(2L, memberHost, recruit, ParticipantStatus.ACCEPTED));
+            participants.add(createParticipant(22L, memberGuest, recruit, ParticipantStatus.ACCEPTED));
+            participants.add(createParticipant(222L, memberGuest2, recruit, ParticipantStatus.ACCEPTED));
+
+            ChatRoomEntity chatRoom = ChatRoomEntity.builder()
+                .chatRoomId(3L)
+                .chatRoomName(recruit.getTitle())
+                .userCount((long) participants.size())
+                .build();
+
+            List<ChatPartakeEntity> chatPartakeList = new ArrayList<>();
+
+            chatPartakeList.add(createChatPartake(5L, chatRoom, memberHost, 27L));
+            chatPartakeList.add(createChatPartake(5L, chatRoom, memberGuest, 27L));
+            chatPartakeList.add(createChatPartake(5L, chatRoom, memberGuest2, 27L));
+
+            RecruitEntity recruitWithChat = createRecruit(27L, memberHost, chatRoom.getChatRoomId());
+
+        //when
+            when(recruitRepository.findById(27L))
+                .thenReturn(Optional.ofNullable(recruit));
+
+            when(memberRepository.findById(1L))
+                .thenReturn(Optional.ofNullable(memberHost));
+
+            when(participantRepository.findAllByRecruitAndStatus(recruit, ParticipantStatus.ACCEPTED))
+                .thenReturn(participants);
+
+            when(chatRoomRepository.save(ChatRoomEntity.builder()
+                    .chatRoomName(recruit.getTitle())
+                    .userCount((long) participants.size())
+                .build()))
+                .thenReturn(chatRoom);
+
+            when(chatPartakeRepository.saveAll(participants.stream().map(participant ->
+                ChatPartakeEntity.builder()
+                    .chatRoomEntity(chatRoom)
+                    .memberEntity(participant.getMember())
+                    .recruitId(27L)
+                    .build()).collect(Collectors.toList())))
+                .thenReturn(chatPartakeList);
+
+            when(recruitRepository.save(recruit)).thenReturn(recruitWithChat);
+
+            CreateRecruitChat.Response response = chatRoomService.createRecruitChat(
+                new CreateRecruitChat.Request(27L), MemberDto.fromEntity(memberHost)
+            );
+
+            //then
+            assertThat(response.getMessage()).isEqualTo(ChatConstant.CHAT_ROOM_CREATED);
+        }
+
+        @Test
+        @DisplayName("실패 - 운동 모집의 작성자가 아님")
+        void failRecruitChatNotHost() {
+            //given
+            MemberEntity memberHost = createMember(1L);
+            MemberEntity memberGuest = createMember(11L);
+            MemberEntity memberGuest2 = createMember(111L);
+
+            RecruitEntity recruit = createRecruit(27L, memberHost, null);
+
+            List<ParticipantEntity> participants = new ArrayList<>();
+
+            participants.add(createParticipant(2L, memberHost, recruit, ParticipantStatus.ACCEPTED));
+            participants.add(createParticipant(22L, memberGuest, recruit, ParticipantStatus.ACCEPTED));
+            participants.add(createParticipant(222L, memberGuest2, recruit, ParticipantStatus.ACCEPTED));
+
+            //when
+            when(recruitRepository.findById(27L))
+                .thenReturn(Optional.ofNullable(recruit));
+
+            when(memberRepository.findById(11L))
+                .thenReturn(Optional.ofNullable(memberGuest));
+
+            ChatException exception = catchThrowableOfType(() ->
+                chatRoomService.createRecruitChat(
+                new CreateRecruitChat.Request(27L), MemberDto.fromEntity(memberGuest)
+            ), ChatException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_RECRUIT_HOST);
+        }
+
+        @Test
+        @DisplayName("실패 - 이미 모임 채팅방이 있음")
+        void failRecruitChatAlreadyExist() {
+            //given
+            MemberEntity memberHost = createMember(1L);
+
+            RecruitEntity recruit = createRecruit(27L, memberHost, 3L);
+
+            //when
+            when(recruitRepository.findById(27L))
+                .thenReturn(Optional.ofNullable(recruit));
+
+            ChatException exception = catchThrowableOfType(() ->
+                chatRoomService.createRecruitChat(
+                    new CreateRecruitChat.Request(27L), MemberDto.fromEntity(memberHost)
+                ), ChatException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ALREADY_EXIST);
+        }
+
+        @Test
+        @DisplayName("실패 - 모임방을 찾을 수 없습니다")
+        void failRecruitChatRecruitNotFound() {
+            //given
+            MemberEntity memberHost = createMember(1L);
+
+            //when
+            when(recruitRepository.findById(27L))
+                .thenReturn(Optional.empty());
+
+            RecruitException exception = catchThrowableOfType(() ->
+                chatRoomService.createRecruitChat(
+                    new CreateRecruitChat.Request(27L), MemberDto.fromEntity(memberHost)
+                ), RecruitException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
+        }
     }
     @Nested
     @DisplayName("운동 모집 채팅 초대")

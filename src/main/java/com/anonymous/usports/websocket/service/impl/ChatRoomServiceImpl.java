@@ -151,6 +151,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         RecruitEntity recruit = recruitRepository.findById(recruitId)
                 .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
 
+        if (recruit.getChatRoomId() != null) throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
+
         // 운동 모집 작성자인지 확인
         isRecruitHost(recruit, memberDto);
 
@@ -184,10 +186,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public CreateRecruitChat.Response createRecruitChat(CreateRecruitChat.Request request, MemberDto memberDto) {
 
-        // recruit id가 이미 존재하면, 채팅방을 따로 만들 필요가 없다
-        if (chatPartakeRepository.existsByRecruitId(request.getRecruitId()))
-            throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
-
+        // 채팅방이 없다는 것을 이미 검증 한 후
         createNewRecruitChatRoom(request.getRecruitId(), memberDto);
 
         return new CreateRecruitChat.Response(ChatConstant.CHAT_ROOM_CREATED);
