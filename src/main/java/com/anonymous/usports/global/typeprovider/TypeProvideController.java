@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Api("Type 제공 API")
+@Api(tags = "Type 제공 API")
 @RequiredArgsConstructor
 @RestController
 public class TypeProvideController {
