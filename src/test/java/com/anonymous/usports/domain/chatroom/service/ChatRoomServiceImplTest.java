@@ -226,6 +226,24 @@ public class ChatRoomServiceImplTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ALREADY_EXIST);
         }
+
+        @Test
+        @DisplayName("테스트 실패 - 로그인한 사람 자신을 DM에다 초대")
+        void failCreateDMChatMyself() {
+            //given
+            MemberEntity loggedInMember = createMember(55L);
+            MemberEntity otherMember = createMember(55L);
+
+            //when
+            ChatException exception =
+                catchThrowableOfType(() ->
+                    chatRoomService.createChatRoom(CreateDMDto.Request.builder()
+                            .memberId(otherMember.getMemberId()).build(),
+                        MemberDto.fromEntity(loggedInMember)), ChatException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CANNOT_CREATE_CHAT_WITH_SAME_USER);
+        }
     }
 
     @Nested
