@@ -5,7 +5,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
-import com.anonymous.usports.domain.profile.dto.ProfileMember;
+import com.anonymous.usports.domain.profile.dto.MemberProfile;
 import com.anonymous.usports.domain.profile.service.ProfileService;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
@@ -37,13 +37,13 @@ public class ProfileServiceImpl implements ProfileService {
   private final ParticipantRepository participantRepository;
 
   @Override
-  public ProfileMember profileMember(String accountName) {
+  public MemberProfile profileMember(String accountName) {
     MemberEntity member = memberRepository.findByAccountName(accountName)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    return ProfileMember.builder()
-        .memberProfile(myPageService.getMyPageMember(member))
-        .sportsSkills(myPageService.getSportsSkills(member))
+    return MemberProfile.builder()
+        .memberInfo(myPageService.getMyPageMember(member.getMemberId()))
+        .sportsSkills(myPageService.getSportsSkills(member.getMemberId()))
         .build();
   }
 

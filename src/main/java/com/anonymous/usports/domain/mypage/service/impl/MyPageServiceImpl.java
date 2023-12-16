@@ -6,7 +6,7 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.dto.MyPageMainDto;
-import com.anonymous.usports.domain.mypage.dto.MyPageMember;
+import com.anonymous.usports.domain.mypage.dto.MemberInfo;
 import com.anonymous.usports.domain.mypage.dto.MyPageParticipant;
 import com.anonymous.usports.domain.mypage.dto.MyPageRecruit;
 import com.anonymous.usports.domain.mypage.dto.RecruitAndParticipants;
@@ -46,27 +46,24 @@ public class MyPageServiceImpl implements MyPageService {
   @Override
   @Transactional
   public MyPageMainDto getMyPageMainData(Long memberId) {
-    MemberEntity member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
-
     //회원 정보
-    MyPageMember myPageMember = this.getMyPageMember(member);
+    MemberInfo memberInfo = this.getMyPageMember(memberId);
 
     //팝업으로 띄워줄 sportSkill
-    List<SportsSkillDto> sportsSkills = this.getSportsSkills(member);
+    List<SportsSkillDto> sportsSkills = this.getSportsSkills(memberId);
 
     //평가하기 : 평가를 하기 위한 내가 참여했던 Recruit와 참여자 리스트
-    List<RecruitAndParticipants> recruitAndParticipants = this.getRecruitAndParticipants(member);
+    List<RecruitAndParticipants> recruitAndParticipants = this.getListToEvaluate(memberId);
 
     //내 신청 현황 : 내가 신청한 참여신청(Participant) 리스트
-    List<MyPageParticipant> participantList = this.getParticipantList(member);
+    List<MyPageParticipant> participantList = this.getMyParticipateList(memberId);
 
     //내 모집 관리 : 내가 만든 모집 관리
-    List<MyPageRecruit> myRecruitList = this.getMyRecruitList(member);
+    List<MyPageRecruit> myRecruitList = this.getMyRecruitList(memberId);
 
 
     return MyPageMainDto.builder()
-        .memberProfile(myPageMember)
+        .memberProfile(memberInfo)
         .sportsSkills(sportsSkills)
         .recruitAndParticipants(recruitAndParticipants)
         .participateList(participantList)
@@ -75,7 +72,10 @@ public class MyPageServiceImpl implements MyPageService {
   }
 
   @Override
-  public MyPageMember getMyPageMember(MemberEntity member) {
+  public MemberInfo getMyPageMember(Long memberId) {
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
     List<InterestedSportsEntity> interestedSportsEntityList =
         interestedSportsRepository.findAllByMemberEntity(member);
     int listSize = interestedSportsEntityList.size();
@@ -84,7 +84,7 @@ public class MyPageServiceImpl implements MyPageService {
 
     if (listSize == 0) {
       interestSportsList.add("none");
-      return new MyPageMember(member, interestSportsList, 0);
+      return new MemberInfo(member, interestSportsList, 0);
     }
 
     int plusAlpha = 0;
@@ -105,14 +105,17 @@ public class MyPageServiceImpl implements MyPageService {
       }
     }
 
-    return new MyPageMember(member, interestSportsList, plusAlpha);
+    return new MemberInfo(member, interestSportsList, plusAlpha);
   }
 
   /**
    * 팝업으로 띄워줄 sportSkill
    */
   @Override
-  public List<SportsSkillDto> getSportsSkills(MemberEntity member) {
+  public List<SportsSkillDto> getSportsSkills(Long memberId) {
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
     return sportsSkillRepository.findAllByMember(member)
         .stream()
         .map(SportsSkillDto::new)
@@ -122,7 +125,11 @@ public class MyPageServiceImpl implements MyPageService {
   /**
    * 평가하기 : 평가를 하기 위한 내가 참여했던 Recruit와 참여자 리스트
    */
-  public List<RecruitAndParticipants> getRecruitAndParticipants(MemberEntity member) {
+  @Override
+  public List<RecruitAndParticipants> getListToEvaluate(Long memberId) {
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
     //끝난지 48시간 이내의 참여 신청 건
     List<ParticipantEntity> thisMemberParticipateList = participantRepository
         .findAllByMemberAndMeetingDateIsAfter(member, LocalDateTime.now().minusDays(2L));
@@ -159,7 +166,11 @@ public class MyPageServiceImpl implements MyPageService {
   /**
    * 내 신청 현황 : 내가 신청한 참여신청(Participant) 리스트
    */
-  public List<MyPageParticipant> getParticipantList(MemberEntity member) {
+  @Override
+  public List<MyPageParticipant> getMyParticipateList(Long memberId) {
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
     List<MyPageParticipant> list = new ArrayList<>();
 
     for (ParticipantEntity participant :
@@ -173,7 +184,11 @@ public class MyPageServiceImpl implements MyPageService {
   /**
    * 내 모집 관리 : 내가 만든 모집 관리
    */
-  public List<MyPageRecruit> getMyRecruitList(MemberEntity member) {
+  @Override
+  public List<MyPageRecruit> getMyRecruitList(Long memberId) {
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
     List<RecruitEntity> findList =
         recruitRepository.findAllByMemberAndMeetingDateIsAfter(member, LocalDateTime.now().minusHours(6));
     List<MyPageRecruit> list = new ArrayList<>();
@@ -182,6 +197,8 @@ public class MyPageServiceImpl implements MyPageService {
     }
     return list;
   }
+
+
 
 
 }

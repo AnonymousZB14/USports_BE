@@ -1,6 +1,6 @@
 package com.anonymous.usports.domain.profile.controller;
 
-import com.anonymous.usports.domain.profile.dto.ProfileMember;
+import com.anonymous.usports.domain.profile.dto.MemberProfile;
 import com.anonymous.usports.domain.profile.service.ProfileService;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
@@ -24,12 +24,12 @@ public class ProfileController {
 
   @ApiOperation("프로필 - 회원 정보")
   @GetMapping("/profile/{accountName}")
-  public ResponseEntity<ProfileMember> profileRecruits(
+  public ResponseEntity<MemberProfile> profileRecruits(
       @PathVariable String accountName) {
 
-    ProfileMember profileMember = profileService.profileMember(accountName);
+    MemberProfile memberProfile = profileService.profileMember(accountName);
 
-    return ResponseEntity.ok(profileMember);
+    return ResponseEntity.ok(memberProfile);
   }
 
   @ApiOperation("프로필 - 기록 글")
