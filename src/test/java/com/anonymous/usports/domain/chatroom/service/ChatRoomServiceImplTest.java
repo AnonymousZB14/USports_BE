@@ -23,6 +23,8 @@ import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
+import com.anonymous.usports.websocket.dto.ChatEnterDto;
+import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateRecruitChat;
@@ -782,18 +784,115 @@ public class ChatRoomServiceImplTest {
     class enterChat{
 
         @Test
-        void success() {
-        //given
-        //when
-        //then
+        @DisplayName("채팅방 들어가기 성공")
+        void successEnterChat() {
+            //given
+            ChatRoomEntity chatRoom = createChatRoom(11L,  6L);
+            MemberEntity member = createMember(1L);
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.ofNullable(chatRoom));
+            when(memberRepository.findById(1L)).thenReturn(Optional.ofNullable(member));
+            when(chatPartakeRepository.existsByChatRoomEntityAndMemberEntity(chatRoom, member))
+                .thenReturn(true);
+
+            ChatEnterDto chatEnter = chatRoomService.enterChatRoom(11L, MemberDto.fromEntity(member));
+
+            //then
+            assertThat(chatEnter.getChatRoomId()).isEqualTo(chatRoom.getChatRoomId());
+            assertThat(chatEnter.getChatRoomName()).isEqualTo(chatRoom.getChatRoomName());
+            assertThat(chatEnter.getUsername()).isEqualTo(member.getAccountName());
         }
 
+        @Test
+        @DisplayName("채팅방 들어가기 실패 - 채팅방이 등록이 안 되어 있는 사람")
+        void failEnterChatUserNotInChat() {
+            //given
+            ChatRoomEntity chatRoom = createChatRoom(11L,  6L);
+            MemberEntity member = createMember(1L);
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.ofNullable(chatRoom));
+            when(memberRepository.findById(1L)).thenReturn(Optional.ofNullable(member));
+            when(chatPartakeRepository.existsByChatRoomEntityAndMemberEntity(chatRoom, member))
+                .thenReturn(false);
+
+            ChatException exception =
+                catchThrowableOfType(() ->
+                        chatRoomService.enterChatRoom(11L, MemberDto.fromEntity(member)),
+                    ChatException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_IN_THE_CHAT);
+        }
+        @Test
+        @DisplayName("채팅방 들어가기 실패 - 로그인된 사람의 정보가 없음")
+        void failEnterChatMemberNotFound() {
+            //given
+            ChatRoomEntity chatRoom = createChatRoom(11L,  6L);
+            MemberEntity member = createMember(1L);
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.ofNullable(chatRoom));
+            when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+
+            MemberException exception =
+                catchThrowableOfType(() ->
+                        chatRoomService.enterChatRoom(11L, MemberDto.fromEntity(member)),
+                    MemberException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("채팅방 들어가기 실패 - 요청한 채팅방 정보가 없음")
+        void failEnterChatRoomNotFound() {
+            //given
+            MemberEntity member = createMember(1L);
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.empty());
+
+            ChatException exception =
+                catchThrowableOfType(() ->
+                        chatRoomService.enterChatRoom(11L, MemberDto.fromEntity(member)),
+                    ChatException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
     }
 
     @Nested
     @DisplayName("채팅방 목록 보기")
     class getChatRoomList{
 
+        @Test
+        @DisplayName("채팅방 목록 찾기 성공")
+        void successGetChatRoomList() {
+            //given
+            MemberEntity member = createMember(1L);
+            List<ChatPartakeEntity> chatPartakeList = new ArrayList<>();
+
+            chatPartakeList.add(createChatPartake(11L,createChatRoom(3L, 2L), member,2L));
+            chatPartakeList.add(createChatPartake(111L,createChatRoom(33L, 1L), member,22L));
+            chatPartakeList.add(createChatPartake(1111L,createChatRoom(333L, 3L), member,222L));
+            chatPartakeList.add(createChatPartake(11111L,createChatRoom(3333L, 11L), member,2222L));
+
+            //when
+            when(memberRepository.findById(1L)).thenReturn(Optional.ofNullable(member));
+            when(chatPartakeRepository.findAllByMemberEntity(member)).thenReturn(chatPartakeList);
+
+            List<ChatPartakeDto> chatPartakes = chatRoomService.getChatRoomList(MemberDto.fromEntity(member));
+
+            //then
+            assertThat(chatPartakes.size()).isEqualTo(4);
+            assertThat(chatPartakes.get(0).getChatRoomId()).isEqualTo(3L);
+            assertThat(chatPartakes.get(1).getChatRoomId()).isEqualTo(33L);
+            assertThat(chatPartakes.get(2).getChatRoomId()).isEqualTo(333L);
+            assertThat(chatPartakes.get(3).getChatRoomId()).isEqualTo(3333L);
+        }
     }
 
 }
