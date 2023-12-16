@@ -10,6 +10,7 @@ import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
 import com.anonymous.usports.global.type.Gender;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
+@Api(tags = "모집 글(Recruit)")
 @Slf4j
 @RequiredArgsConstructor
 @RestController

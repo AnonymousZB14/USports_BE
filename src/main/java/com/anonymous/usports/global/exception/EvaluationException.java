@@ -1,6 +1,5 @@
-package com.anonymous.usports.global;
+package com.anonymous.usports.global.exception;
 
-import com.anonymous.usports.global.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class EvaluationException extends RuntimeException{
+public class EvaluationException extends RuntimeException {
+
   private ErrorCode errorCode;
   private String errorMessage;
 

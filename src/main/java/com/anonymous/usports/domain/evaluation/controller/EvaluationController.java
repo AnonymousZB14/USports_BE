@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.evaluation.dto.EvaluationRegister;
 import com.anonymous.usports.domain.evaluation.dto.EvaluationRegister.Response;
 import com.anonymous.usports.domain.evaluation.service.EvaluationService;
 import com.anonymous.usports.domain.member.dto.MemberDto;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api(tags = "평가(Evaluation)")
 @Slf4j
 @RequiredArgsConstructor
 @RestController

@@ -5,8 +5,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
-import com.anonymous.usports.domain.profile.dto.ProfileRecords;
-import com.anonymous.usports.domain.profile.dto.ProfileRecruits;
+import com.anonymous.usports.domain.profile.dto.MemberProfile;
 import com.anonymous.usports.domain.profile.service.ProfileService;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
@@ -38,7 +37,18 @@ public class ProfileServiceImpl implements ProfileService {
   private final ParticipantRepository participantRepository;
 
   @Override
-  public ProfileRecords profileRecords(String accountName, Integer page) {
+  public MemberProfile profileMember(String accountName) {
+    MemberEntity member = memberRepository.findByAccountName(accountName)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    return MemberProfile.builder()
+        .memberInfo(myPageService.getMyPageMember(member.getMemberId()))
+        .sportsSkills(myPageService.getSportsSkills(member.getMemberId()))
+        .build();
+  }
+
+  @Override
+  public RecordListDto profileRecords(String accountName, Integer page) {
     MemberEntity member = memberRepository.findByAccountName(accountName)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
@@ -46,15 +56,11 @@ public class ProfileServiceImpl implements ProfileService {
         .findByMemberOrderByRegisteredAtDesc(
             member, PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_PROFILE));
 
-    return ProfileRecords.builder()
-        .memberProfile(myPageService.getMyPageMember(member))
-        .sportsSkills(myPageService.getSportsSkills(member))
-        .recordList(new RecordListDto(recordEntityPage))
-        .build();
+    return new RecordListDto(recordEntityPage);
   }
 
   @Override
-  public ProfileRecruits profileRecruits(String accountName, Integer page) {
+  public RecruitListDto profileRecruits(String accountName, Integer page) {
     MemberEntity member = memberRepository.findByAccountName(accountName)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
     Page<ParticipantEntity> participantEntityPage =
@@ -70,10 +76,6 @@ public class ProfileServiceImpl implements ProfileService {
             .map(ParticipantEntity::getRecruit)
             .collect(Collectors.toList());
 
-    return ProfileRecruits.builder()
-        .myPageMember(myPageService.getMyPageMember(member))
-        .sportsSkills(myPageService.getSportsSkills(member))
-        .recruitList(new RecruitListDto(participantEntityPage, recruitEntityList))
-        .build();
+    return new RecruitListDto(participantEntityPage, recruitEntityList);
   }
 }

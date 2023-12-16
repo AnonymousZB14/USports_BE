@@ -14,7 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class MyPageMember {
+public class MemberInfo {
 
   private String profileImage;
 
@@ -30,7 +30,7 @@ public class MyPageMember {
   private Double mannerScore;
 
 
-  public MyPageMember(MemberEntity memberEntity, List<String> interestSportsList, int plusAlpha){
+  public MemberInfo(MemberEntity memberEntity, List<String> interestSportsList, int plusAlpha){
     this.profileImage = memberEntity.getProfileImage();
     this.memberId = memberEntity.getMemberId();
     this.name = memberEntity.getName();

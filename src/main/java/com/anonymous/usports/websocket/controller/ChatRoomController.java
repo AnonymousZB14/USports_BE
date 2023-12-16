@@ -6,6 +6,7 @@ import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateRecruitChat;
 import com.anonymous.usports.websocket.service.ChatRoomService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+@Api(tags = "채팅방(ChatRoom)")
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor
