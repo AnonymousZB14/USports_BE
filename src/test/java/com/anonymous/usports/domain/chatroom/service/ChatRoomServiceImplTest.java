@@ -2,6 +2,8 @@ package com.anonymous.usports.domain.chatroom.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
@@ -15,11 +17,13 @@ import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.constant.ChatConstant;
 import com.anonymous.usports.global.exception.ChatException;
 import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
+import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateRecruitChat;
 import com.anonymous.usports.websocket.entity.ChatPartakeEntity;
@@ -393,20 +397,396 @@ public class ChatRoomServiceImplTest {
         }
     }
     @Nested
-    @DisplayName("운동 모집 채팅 초대")
+    @DisplayName("운동 모임 채팅 초대")
     class recruitChatInvite{
 
+        @Test
+        @DisplayName("운동 모임 채팅 초대")
+        void successRecruitChatInvited() {
+            //given
+            MemberEntity memberHost = createMember(33L);
+            MemberEntity memberGuest = createMember(3L);
+
+            ChatInviteDto.Request request = new ChatInviteDto.Request(1L, 2L, 3L);
+
+            RecruitEntity recruit = createRecruit(2L, memberHost, 1L);
+
+            ChatRoomEntity chatRoom = createChatRoom(1L, 5L);
+
+            ChatPartakeEntity chatPartake = createChatPartake(100L, chatRoom, memberGuest, 2L);
+
+            ChatRoomEntity chatRoomAfterInvite = createChatRoom(1L,6L);
+
+            //when
+            when(recruitRepository.findById(2L)).thenReturn(Optional.of(recruit));
+
+            when(memberRepository.findById(33L)).thenReturn(Optional.of(memberHost));
+
+            when(memberRepository.findById(3L)).thenReturn(Optional.of(memberGuest));
+
+            when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(chatRoom));
+
+            when(chatPartakeRepository.existsByRecruitIdAndChatRoomEntityAndMemberEntity(
+                2L, chatRoom, memberGuest
+            )).thenReturn(false);
+
+            when(participantRepository.existsByStatusAndMemberAndRecruit(
+                ParticipantStatus.ACCEPTED, memberGuest, recruit
+            )).thenReturn(true);
+
+            when(chatPartakeRepository.save(ChatPartakeEntity.builder()
+                    .memberEntity(memberGuest)
+                    .chatRoomEntity(chatRoom)
+                    .recruitId(2L)
+                .build())).thenReturn(chatPartake);
+
+            when(chatRoomRepository.save(chatRoom))
+                .thenReturn(chatRoomAfterInvite);
+
+
+            ChatInviteDto.Response response =
+            chatRoomService.inviteMemberToRecruitChat(request,MemberDto.fromEntity(memberHost));
+
+            //then
+
+            assertThat(response.getMessage()).isEqualTo(ChatConstant.CHAT_INVITE);
+        }
+
+        @Test
+        @DisplayName("실패 운동 모임 채팅 초대 - 모집 등록이 안 됨")
+        void failRecruitChatInvitedNotRegistered() {
+            //given
+            MemberEntity memberHost = createMember(33L);
+            MemberEntity memberGuest = createMember(3L);
+
+            ChatInviteDto.Request request = new ChatInviteDto.Request(1L, 2L, 3L);
+
+            RecruitEntity recruit = createRecruit(2L, memberHost, 1L);
+
+            ChatRoomEntity chatRoom = createChatRoom(1L, 5L);
+
+            //when
+            when(recruitRepository.findById(2L)).thenReturn(Optional.of(recruit));
+
+            when(memberRepository.findById(33L)).thenReturn(Optional.of(memberHost));
+
+            when(memberRepository.findById(3L)).thenReturn(Optional.of(memberGuest));
+
+            when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(chatRoom));
+
+            when(chatPartakeRepository.existsByRecruitIdAndChatRoomEntityAndMemberEntity(
+                2L, chatRoom, memberGuest
+            )).thenReturn(false);
+
+            when(participantRepository.existsByStatusAndMemberAndRecruit(
+                ParticipantStatus.ACCEPTED, memberGuest, recruit
+            )).thenReturn(false);
+
+            RecruitException exception = catchThrowableOfType(() ->
+                chatRoomService.inviteMemberToRecruitChat(request,MemberDto.fromEntity(memberHost)),
+                RecruitException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_INVITE_UNAUTHORIZED);
+        }
+
+        @Test
+        @DisplayName("실패 운동 모임 채팅 초대 - 이미 채팅방에 있음")
+        void failRecruitChatInvitedChatAlreadyExist() {
+            //given
+            MemberEntity memberHost = createMember(33L);
+            MemberEntity memberGuest = createMember(3L);
+
+            ChatInviteDto.Request request = new ChatInviteDto.Request(1L, 2L, 3L);
+
+            RecruitEntity recruit = createRecruit(2L, memberHost, 1L);
+
+            ChatRoomEntity chatRoom = createChatRoom(1L, 5L);
+
+            //when
+            when(recruitRepository.findById(2L)).thenReturn(Optional.of(recruit));
+
+            when(memberRepository.findById(33L)).thenReturn(Optional.of(memberHost));
+
+            when(memberRepository.findById(3L)).thenReturn(Optional.of(memberGuest));
+
+            when(chatRoomRepository.findById(1L)).thenReturn(Optional.of(chatRoom));
+
+            when(chatPartakeRepository.existsByRecruitIdAndChatRoomEntityAndMemberEntity(
+                2L, chatRoom, memberGuest
+            )).thenReturn(true);
+
+            ChatException exception = catchThrowableOfType(() ->
+                    chatRoomService.inviteMemberToRecruitChat(request,MemberDto.fromEntity(memberHost)),
+                ChatException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ALREADY_EXIST);
+        }
+
+        @Test
+        @DisplayName("실패 운동 모임 채팅 초대 - 채팅방이 없음")
+        void failRecruitChatInvitedChatNotExist() {
+            //given
+            MemberEntity memberHost = createMember(33L);
+            MemberEntity memberGuest = createMember(3L);
+
+            ChatInviteDto.Request request = new ChatInviteDto.Request(1L, 2L, 3L);
+
+            RecruitEntity recruit = createRecruit(2L, memberHost, 1L);
+
+            //when
+            when(recruitRepository.findById(2L)).thenReturn(Optional.of(recruit));
+
+            when(memberRepository.findById(33L)).thenReturn(Optional.of(memberHost));
+
+            when(memberRepository.findById(3L)).thenReturn(Optional.of(memberGuest));
+
+            when(chatRoomRepository.findById(1L)).thenReturn(Optional.empty());
+
+            ChatException exception = catchThrowableOfType(() ->
+                    chatRoomService.inviteMemberToRecruitChat(request,MemberDto.fromEntity(memberHost)),
+                ChatException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("실패 운동 모임 채팅 초대 - 초대할 맴버 정보가 없음")
+        void failRecruitChatInvitedMemberNotFound() {
+            //given
+            MemberEntity memberHost = createMember(33L);
+            MemberEntity memberGuest = createMember(3L);
+
+            ChatInviteDto.Request request = new ChatInviteDto.Request(1L, 2L, 3L);
+
+            RecruitEntity recruit = createRecruit(2L, memberHost, 1L);
+
+            //when
+            when(recruitRepository.findById(2L)).thenReturn(Optional.of(recruit));
+
+            when(memberRepository.findById(33L)).thenReturn(Optional.of(memberHost));
+
+            when(memberRepository.findById(3L)).thenReturn(Optional.empty());
+
+            MemberException exception = catchThrowableOfType(() ->
+                    chatRoomService.inviteMemberToRecruitChat(request,MemberDto.fromEntity(memberHost)),
+                MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("실패 운동 모임 채팅 초대 - 모임 작성자만 초대할 수 있음")
+        void failRecruitChatInvitedNotRecruitHost() {
+            //given
+            MemberEntity memberHost = createMember(33L);
+            MemberEntity memberGuest = createMember(3L);
+
+            ChatInviteDto.Request request = new ChatInviteDto.Request(1L, 2L, 3L);
+
+            RecruitEntity recruit = createRecruit(2L, memberHost, 1L);
+
+            //when
+            when(recruitRepository.findById(2L)).thenReturn(Optional.of(recruit));
+
+            when(memberRepository.findById(3L)).thenReturn(Optional.of(memberGuest));
+
+            ChatException exception = catchThrowableOfType(() ->
+                    chatRoomService.inviteMemberToRecruitChat(request,MemberDto.fromEntity(memberGuest)),
+                ChatException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_RECRUIT_HOST);
+        }
+
+        @Test
+        @DisplayName("실패 운동 모임 채팅 초대 - 로그인한 사람의 정보를 찾을 수 없음")
+        void failRecruitChatInvitedLoggedInMemberNotFound() {
+            //given
+            MemberEntity memberGuest = createMember(33L);
+
+            ChatInviteDto.Request request = new ChatInviteDto.Request(1L, 2L, 3L);
+
+            RecruitEntity recruit = createRecruit(2L, memberGuest, 1L);
+
+            //when
+            when(recruitRepository.findById(2L)).thenReturn(Optional.of(recruit));
+
+            when(memberRepository.findById(33L)).thenReturn(Optional.empty());
+
+            MemberException exception = catchThrowableOfType(() ->
+                    chatRoomService.inviteMemberToRecruitChat(request,MemberDto.fromEntity(memberGuest)),
+                MemberException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("실패 운동 모임 채팅 초대 - 요청한 운동 모임을 찾을 수 없음")
+        void failRecruitChatInvitedRecruitNotFound() {
+            //given
+            MemberEntity memberHost = createMember(33L);
+
+            ChatInviteDto.Request request = new ChatInviteDto.Request(1L, 2L, 3L);
+
+            RecruitEntity recruit = createRecruit(2L, memberHost, 1L);
+
+            //when
+            when(recruitRepository.findById(2L)).thenReturn(Optional.empty());
+
+            RecruitException exception = catchThrowableOfType(() ->
+                    chatRoomService.inviteMemberToRecruitChat(request,MemberDto.fromEntity(memberHost)),
+                RecruitException.class
+            );
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
+        }
     }
 
     @Nested
     @DisplayName("채팅방 나가기")
     class exitChat{
 
+        @Test
+        @DisplayName("채팅방 나가기 성공 - 나가고 채팅방 삭제 (아무도 없을 떄)")
+        void successExitChatAndDeleteChat() {
+            //given
+            MemberEntity member = createMember(1L);
+
+            ChatRoomEntity chatRoom = createChatRoom(11L, 1L);
+
+            ChatPartakeEntity chatPartake = createChatPartake(111L, chatRoom, member, 2L);
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.of(chatRoom));
+
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+            when(chatPartakeRepository.findByChatRoomEntityAndMemberEntity(chatRoom, member))
+                .thenReturn(Optional.of(chatPartake));
+
+            String response = chatRoomService.exitChat(11L, MemberDto.fromEntity(member));
+
+            //then
+            verify(chatPartakeRepository, times(1)).delete(chatPartake);
+
+            assertThat(response).isEqualTo(ChatConstant.EXIT_AND_DELETE_CHAT);
+        }
+
+        @Test
+        @DisplayName("채팅방 나가기 성공 - 채팅방 나가기")
+        void successExitChat() {
+            //given
+            MemberEntity member = createMember(1L);
+
+            ChatRoomEntity chatRoom = createChatRoom(11L, 6L);
+
+            ChatPartakeEntity chatPartake = createChatPartake(111L, chatRoom, member, 2L);
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.of(chatRoom));
+
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+            when(chatPartakeRepository.findByChatRoomEntityAndMemberEntity(chatRoom, member))
+                .thenReturn(Optional.of(chatPartake));
+
+            String response = chatRoomService.exitChat(11L, MemberDto.fromEntity(member));
+
+            //then
+            verify(chatPartakeRepository, times(1)).delete(chatPartake);
+
+            assertThat(response).isEqualTo(ChatConstant.EXIT_CHAT);
+        }
+
+        @Test
+        @DisplayName("채팅방 나가기 실패 - 유저가 채팅방에 없음")
+        void failExitChatUserNotInChat() {
+            //given
+            MemberEntity member = createMember(1L);
+
+            ChatRoomEntity chatRoom = createChatRoom(11L, 6L);
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.of(chatRoom));
+
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+            when(chatPartakeRepository.findByChatRoomEntityAndMemberEntity(chatRoom, member))
+                .thenReturn(Optional.empty());
+
+            ChatException exception =
+                catchThrowableOfType(() ->
+                chatRoomService.exitChat(11L, MemberDto.fromEntity(member)),
+                ChatException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_IN_THE_CHAT);
+        }
+
+        @Test
+        @DisplayName("채팅방 나가기 실패 - 유저를 찾을 수 없음")
+        void failExitChatMemberNotFound() {
+            //given
+            MemberEntity member = createMember(1L);
+
+            ChatRoomEntity chatRoom = createChatRoom(11L, 6L);
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.of(chatRoom));
+
+            when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+
+            MemberException exception =
+                catchThrowableOfType(() ->
+                        chatRoomService.exitChat(11L, MemberDto.fromEntity(member)),
+                    MemberException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("채팅방 나가기 실패 - 채팅방을 찾을 수 없음")
+        void failExitChatChatNotFound() {
+            //given
+            MemberEntity member = createMember(1L);
+
+
+            //when
+            when(chatRoomRepository.findById(11L)).thenReturn(Optional.empty());
+
+            ChatException exception =
+                catchThrowableOfType(() ->
+                        chatRoomService.exitChat(11L, MemberDto.fromEntity(member)),
+                    ChatException.class);
+
+            //then
+            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ROOM_NOT_FOUND);
+        }
     }
 
     @Nested
     @DisplayName("채팅방 들어가기")
     class enterChat{
+
+        @Test
+        void success() {
+        //given
+        //when
+        //then
+        }
 
     }
 

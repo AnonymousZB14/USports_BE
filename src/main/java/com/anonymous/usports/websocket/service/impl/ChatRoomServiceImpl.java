@@ -142,7 +142,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         MemberEntity member = memberRepository.findById(memberDto.getMemberId())
                 .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (recruit.getMember() != member)
+        if (!Objects.equals(recruit.getMember().getMemberId(), member.getMemberId()))
             throw new ChatException(ErrorCode.NOT_RECRUIT_HOST);
     }
 
