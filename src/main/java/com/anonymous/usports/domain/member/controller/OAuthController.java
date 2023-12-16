@@ -1,6 +1,7 @@
 package com.anonymous.usports.domain.member.controller;
 
 import com.anonymous.usports.domain.member.service.impl.CustomOAuth2MemberService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -8,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+@Api(tags = "OAuth2")
 @Controller
 @RequestMapping("/login")
 @RequiredArgsConstructor

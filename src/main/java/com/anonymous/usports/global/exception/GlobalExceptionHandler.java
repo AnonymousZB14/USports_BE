@@ -1,6 +1,5 @@
 package com.anonymous.usports.global.exception;
 
-import com.anonymous.usports.global.EvaluationException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

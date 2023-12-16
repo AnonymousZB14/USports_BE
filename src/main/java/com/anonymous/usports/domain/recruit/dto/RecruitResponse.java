@@ -21,7 +21,7 @@ import lombok.Setter;
 public class RecruitResponse {
   private Long recruitId;
 
-  private Long sportsId;
+  private String sportsName;
 
   private Long memberId;
 
@@ -66,7 +66,7 @@ public class RecruitResponse {
   public static RecruitResponse fromEntity(RecruitEntity recruit){
     return RecruitResponse.builder()
         .recruitId(recruit.getRecruitId())
-        .sportsId(recruit.getSports().getSportsId())
+        .sportsName(recruit.getSports().getSportsName())
         .memberId(recruit.getMember().getMemberId())
         .memberAccountName(recruit.getMember().getAccountName())
         .title(recruit.getTitle())

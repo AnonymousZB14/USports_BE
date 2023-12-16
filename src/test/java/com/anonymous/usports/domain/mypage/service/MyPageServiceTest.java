@@ -6,9 +6,8 @@ import static org.mockito.BDDMockito.when;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
-import com.anonymous.usports.domain.mypage.dto.MyPageMember;
-import com.anonymous.usports.domain.mypage.dto.MyPageParticipant;
-import com.anonymous.usports.domain.mypage.dto.MyPageRecruit;
+import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.mypage.dto.MemberInfo;
 import com.anonymous.usports.domain.mypage.service.impl.MyPageServiceImpl;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
@@ -27,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -45,9 +45,7 @@ class MyPageServiceTest {
   @Mock
   private SportsSkillRepository sportsSkillRepository;
   @Mock
-  private RecruitRepository recruitRepository;
-  @Mock
-  private ParticipantRepository participantRepository;
+  private MemberRepository memberRepository;
 
 
   @InjectMocks
@@ -108,7 +106,7 @@ class MyPageServiceTest {
 
   @Nested
   @DisplayName("MyPage member 데이터")
-  class GetMyPageMember {
+  class GetMemberInfo {
 
     private InterestedSportsEntity createInterestSports(Long id, MemberEntity member,
         SportsEntity sports) {
@@ -129,15 +127,17 @@ class MyPageServiceTest {
             createInterestSports(10L + i, member, createSports(100L + i)));
       }
       //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
       when(interestedSportsRepository.findAllByMemberEntity(member))
           .thenReturn(interestedSportsEntityList);
 
       //when
-      MyPageMember myPageMember = myPageService.getMyPageMember(member);
+      MemberInfo memberInfo = myPageService.getMyPageMember(member.getMemberId());
 
       //then
-      assertThat(myPageMember.getInterestSportsList().size()).isEqualTo(3);
-      assertThat(myPageMember.getPlusAlpha()).isEqualTo(2);
+      assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(3);
+      assertThat(memberInfo.getPlusAlpha()).isEqualTo(2);
     }
 
     @Test
@@ -150,15 +150,17 @@ class MyPageServiceTest {
             createInterestSports(10L + i, member, createSports(100L + i)));
       }
       //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
       when(interestedSportsRepository.findAllByMemberEntity(member))
           .thenReturn(interestedSportsEntityList);
 
       //when
-      MyPageMember myPageMember = myPageService.getMyPageMember(member);
+      MemberInfo memberInfo = myPageService.getMyPageMember(member.getMemberId());
 
       //then
-      assertThat(myPageMember.getInterestSportsList().size()).isEqualTo(3);
-      assertThat(myPageMember.getPlusAlpha()).isEqualTo(0);
+      assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(3);
+      assertThat(memberInfo.getPlusAlpha()).isEqualTo(0);
     }
 
     @Test
@@ -171,15 +173,17 @@ class MyPageServiceTest {
             createInterestSports(10L + i, member, createSports(100L + i)));
       }
       //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
       when(interestedSportsRepository.findAllByMemberEntity(member))
           .thenReturn(interestedSportsEntityList);
 
       //when
-      MyPageMember myPageMember = myPageService.getMyPageMember(member);
+      MemberInfo memberInfo = myPageService.getMyPageMember(member.getMemberId());
 
       //then
-      assertThat(myPageMember.getInterestSportsList().size()).isEqualTo(1);
-      assertThat(myPageMember.getPlusAlpha()).isEqualTo(0);
+      assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(1);
+      assertThat(memberInfo.getPlusAlpha()).isEqualTo(0);
     }
 
     @Test
@@ -189,15 +193,17 @@ class MyPageServiceTest {
       List<InterestedSportsEntity> interestedSportsEntityList = new ArrayList<>();
 
       //given
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
       when(interestedSportsRepository.findAllByMemberEntity(member))
           .thenReturn(interestedSportsEntityList);
 
       //when
-      MyPageMember myPageMember = myPageService.getMyPageMember(member);
+      MemberInfo memberInfo = myPageService.getMyPageMember(member.getMemberId());
 
       //then
-      assertThat(myPageMember.getInterestSportsList().get(0)).isEqualTo("none");
-      assertThat(myPageMember.getPlusAlpha()).isEqualTo(0);
+      assertThat(memberInfo.getInterestSportsList().get(0)).isEqualTo("none");
+      assertThat(memberInfo.getPlusAlpha()).isEqualTo(0);
     }
   }
 
@@ -220,11 +226,13 @@ class MyPageServiceTest {
       list.add(createSportsSkill(100L + i, member, createSports(10L + i)));
     }
     //given
+    when(memberRepository.findById(1L))
+        .thenReturn(Optional.of(member));
     when(sportsSkillRepository.findAllByMember(member))
         .thenReturn(list);
 
     //when
-    List<SportsSkillDto> sportsSkillDtoList = myPageService.getSportsSkills(member);
+    List<SportsSkillDto> sportsSkillDtoList = myPageService.getSportsSkills(member.getMemberId());
 
     //then
     for (SportsSkillDto sportsSkill : sportsSkillDtoList) {

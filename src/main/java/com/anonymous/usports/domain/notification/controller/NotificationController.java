@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.notification.controller;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.notification.dto.NotificationDto;
 import com.anonymous.usports.domain.notification.service.NotificationService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-
+@Api(tags = "알림(Notification)")
 @RequiredArgsConstructor
 @RestController
 public class NotificationController {
