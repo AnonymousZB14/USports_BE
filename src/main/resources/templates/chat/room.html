@@ -39,7 +39,7 @@
     var roomId = [[${room.chatRoomId}]];
     var username = [[${room.username}]];
     var timeNow = new Date();
-    let stomp = Stomp.over(new SockJS("/ws"));
+    let stomp = Stomp.over(new SockJS("/ws/chat"));
     stomp.heartbeat.outgoing = 10000;
     stomp.heartbeat.incoming = 10000;
 
@@ -57,7 +57,7 @@
     function reconnect() {
       stomp.disconnect(function (){
         console.log('Disconnected! Reconnecting...');
-        stomp=Stomp.over(new SockJS("/ws"));
+        stomp=Stomp.over(new SockJS("/ws/chat"));
         stomp.heartbeat.outgoing = 10000;
         stomp.heartbeat.incoming = 10000;
         connectToChat();
@@ -72,13 +72,13 @@
     }
 
     function sendEnterMessage() {
-      stomp.send('/pub/chat.enter.'+roomId, {}, JSON.stringify({ chatRoomId: roomId, sender: username, time: timeNow }));
+      stomp.send('/pub/chat/enter/'+roomId, {}, JSON.stringify({ chatRoomId: roomId, sender: username, time: timeNow }));
     }
 
     function sendMessage() {
       var msg = document.getElementById("msg");
       console.log(username + ":" + msg.value);
-      stomp.send('/pub/chat.message.'+roomId, {}, JSON.stringify({ chatRoomId: roomId, content: msg.value, sender: username }));
+      stomp.send('/pub/chat/message/'+roomId, {}, JSON.stringify({ chatRoomId: roomId, content: msg.value, sender: username }));
       msg.value = '';
     }
 

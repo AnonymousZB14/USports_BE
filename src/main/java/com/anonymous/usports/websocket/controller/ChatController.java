@@ -25,7 +25,7 @@ public class ChatController {
 
   // /pub/chat.message.{roomId}로 요청하면 브로커를 통해 처리
   // /exchange/chat.exchange/room.{roomId}를 구동한 클라이언트에 메시지가 전송된다.
-  @MessageMapping("chat.enter.{chatRoomId}")
+  @MessageMapping("chat/enter/{chatRoomId}")
   public void enterUser(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
 
     //TODO 채팅방에 유저 추가하는 메서드 동작
@@ -35,7 +35,7 @@ public class ChatController {
     rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chat);
   }
 
-  @MessageMapping("chat.message.{chatRoomId}")
+  @MessageMapping("chat/message/{chatRoomId}")
   public void sendMessage(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
     log.info("CHAT ()", chat);
     chat.setTime(LocalDateTime.now());

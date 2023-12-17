@@ -28,7 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             .setSystemPasscode("rootpass")
             .setSystemHeartbeatSendInterval(10000)
             .setSystemHeartbeatReceiveInterval(10000);
-        config.setPathMatcher(new AntPathMatcher("."));
+//        config.setPathMatcher(new AntPathMatcher("."));
         // 메세지 발행 url
         config.setApplicationDestinationPrefixes("/pub"); //메시지 보낼(publish) 경로를 설정
         //config.setUserDestinationPrefix("/users") //특정 사용자에게 메시지 전송 시 사용할 주소
@@ -36,7 +36,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws") // URL 또는 URI
+        registry.addEndpoint("/ws/chat") // URL 또는 URI
             .setAllowedOriginPatterns("*")
             .withSockJS(); // 소켓을 지원하지 않는 브라우저라면, sockJS를 사용
     }
