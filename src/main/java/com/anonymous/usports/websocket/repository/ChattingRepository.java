@@ -1,6 +1,6 @@
-package com.anonymous.usports.domain.chat.chatting.repository;
+package com.anonymous.usports.websocket.repository;
 
-import com.anonymous.usports.domain.chat.chatting.entity.ChattingEntity;
+import com.anonymous.usports.websocket.entity.ChattingEntity;
 import java.util.List;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

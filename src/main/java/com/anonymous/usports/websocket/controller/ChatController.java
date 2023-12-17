@@ -1,44 +1,54 @@
 package com.anonymous.usports.websocket.controller;
 
+import com.anonymous.usports.global.constant.ChatConstant;
 import com.anonymous.usports.websocket.dto.ChatMessageDto;
+import com.anonymous.usports.websocket.entity.ChattingEntity;
+import com.anonymous.usports.websocket.repository.ChattingRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class ChatController {
 
-    private final SimpMessageSendingOperations template;
+  private final RabbitTemplate rabbitTemplate;
+  private final ChattingRepository chattingRepository;
 
-    /**
-     * 메세지를 보낼 때
-     *
-     * @SendTo() : which topic or queue you want to send the message (Message Broker)
-     * /topic/public 을 통해서 채팅에 구독되어 있는 모든 사람들이 메세지를 접근할 수 있다
-     * @PayLoad : payload라서 SendTo()에 적힌 곳으로 메세지 넘어간다
-     */
-    @MessageMapping("/chat/sendMessage")
-    public void sendMessage(
-            ChatMessageDto chat
-    ) {
-        log.info("Chat {}", chat);
-        chat.setContent(chat.getContent());
-        template.convertAndSend("/sub/chat/room/" + chat.getChatRoomId(), chat);
-    }
 
-    /**
-     * 유저와 웹 소켓이 연결될 때에 생성되는 메세지다
-     */
-    @MessageMapping("/chat/enter")
-    public void addUser(
-            ChatMessageDto chat
-    ) {
-        log.info("{} 입장", chat.getSender());
-        chat.setContent(chat.getSender() + "님이 입장하셨습니다");
-        template.convertAndSend("/sub/chat/room/" + chat.getChatRoomId(), chat);
-    }
+  // /pub/chat.message.{roomId}로 요청하면 브로커를 통해 처리
+  // /exchange/chat.exchange/room.{roomId}를 구동한 클라이언트에 메시지가 전송된다.
+  @MessageMapping("chat/enter/{chatRoomId}")
+  public void enterUser(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
+
+    //TODO 채팅방에 유저 추가하는 메서드 동작
+
+    chat.setTime(LocalDateTime.now());
+    chat.setContent(chat.getSenderName() + "님이 입장하셨습니다.");
+    rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chat);
+  }
+
+  @MessageMapping("chat/message/{chatRoomId}")
+  public void sendMessage(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
+    log.info("CHAT ()", chat);
+    chat.setTime(LocalDateTime.now());
+    chat.setContent(chat.getContent()); //TODO 이게 왜 필요한거지?
+    rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chat);
+  }
+
+  // 기본적으로 chat.queue가 exchange에 바인딩 되어있기 때문에 모든 메시지 처리
+  @RabbitListener(queues = ChatConstant.CHAT_QUEUE_NAME)
+  public void receive(ChatMessageDto chatDto) {
+    log.info("received: " + chatDto.getContent());
+    ChattingEntity chatting = ChatMessageDto.toEntity(chatDto);
+    chattingRepository.save(chatting);
+  }
+
 }
