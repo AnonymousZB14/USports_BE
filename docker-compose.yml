@@ -35,6 +35,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=rootpass
     networks:
       - backend
+    restart: always
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: rabbitmq-stream
@@ -46,6 +47,9 @@ services:
       RABBITMQ_ERLANG_COOKIE: "RabbitMQ-My-Cookies"
       RABBITMQ_DEFAULT_USER: "rootuser"
       RABBITMQ_DEFAULT_PASS: "rootpass"
+    restart: always
+    command: >
+      sh -c 'rabbitmq-plugins enable --offline rabbitmq_stomp rabbitmq_web_stomp && rabbitmq-server'
 
 volumes:
   data: { }
