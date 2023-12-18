@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.member.dto;
 
+import java.util.List;
 import lombok.*;
 
 public class MemberLogin {
@@ -22,5 +23,6 @@ public class MemberLogin {
     public static class Response {
         private TokenDto tokenDto;
         private MemberDto member;
+        private List<String> interestSportsList;
     }
 }
