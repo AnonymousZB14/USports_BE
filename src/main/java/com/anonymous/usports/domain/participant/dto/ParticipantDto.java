@@ -2,7 +2,6 @@ package com.anonymous.usports.domain.participant.dto;
 
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.global.type.ParticipantStatus;
-import com.anonymous.usports.global.type.SportsGrade;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,8 +22,6 @@ public class ParticipantDto {
 
   private Long recruitId;
 
-  private String sportsSkill;
-
   private LocalDateTime registeredAt;
 
   private LocalDateTime confirmedAt; //모집 확인 받은 시간
@@ -40,7 +37,6 @@ public class ParticipantDto {
         .participantId(participant.getParticipantId())
         .memberId(participant.getMember().getMemberId())
         .recruitId(participant.getRecruit().getRecruitId())
-        .sportsSkill(SportsGrade.doubleToGrade(participant.getSportsSkill()).getDescription())
         .registeredAt(participant.getRegisteredAt())
         .confirmedAt(participant.getConfirmedAt())
         .status(participant.getStatus())

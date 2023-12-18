@@ -17,7 +17,6 @@ import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
 import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
-import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
@@ -233,7 +232,7 @@ class RecruitServiceTest {
           .thenReturn(Optional.of(recruit));
 
       //when
-      RecruitResponse result = recruitService.getRecruit(10L);
+      RecruitDto result = recruitService.getRecruit(10L);
 
       //then
       assertThat(result.getRecruitId()).isEqualTo(recruit.getRecruitId());

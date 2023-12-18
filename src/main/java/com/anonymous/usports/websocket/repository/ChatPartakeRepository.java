@@ -22,6 +22,6 @@ public interface ChatPartakeRepository extends JpaRepository<ChatPartakeEntity, 
 
     boolean existsByChatRoomEntityAndMemberEntity(ChatRoomEntity chatRoom, MemberEntity member);
 
-    boolean existsByRecruitIdAndMemberEntity(Long recruitId, MemberEntity member);
+    boolean existsByRecruitIdAndChatRoomEntityAndMemberEntity(Long recruitId, ChatRoomEntity chatRoom, MemberEntity member);
 
 }

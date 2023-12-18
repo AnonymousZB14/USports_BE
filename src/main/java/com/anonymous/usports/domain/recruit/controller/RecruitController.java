@@ -6,7 +6,6 @@ import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
-import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
 import com.anonymous.usports.global.type.Gender;
@@ -53,8 +52,8 @@ public class RecruitController {
 
   @ApiOperation("운동 모집 게시글 한 건 조회하기")
   @GetMapping("/recruit/{recruitId}")
-  public ResponseEntity<RecruitResponse> getRecruit(@PathVariable Long recruitId) {
-    RecruitResponse result = recruitService.getRecruit(recruitId);
+  public ResponseEntity<RecruitDto> getRecruit(@PathVariable Long recruitId) {
+    RecruitDto result = recruitService.getRecruit(recruitId);
     return ResponseEntity.ok(result);
   }
 

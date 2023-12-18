@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum RecruitStatus {
 
-  RECRUITING("모집중"),
+  RECRUITING("모집 중"),
   ALMOST_END("마감 임박"),
   END("마감");
 

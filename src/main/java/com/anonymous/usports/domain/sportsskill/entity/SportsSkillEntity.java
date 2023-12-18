@@ -57,10 +57,6 @@ public class SportsSkillEntity {
     this.evaluateCount += 1;
   }
 
-  public double getSportsScoreAsDouble(){
-    return (double) this.sportsScore / this.evaluateCount;
-  }
-
   @Override
   public boolean equals(Object object) {
     if (this == object) {

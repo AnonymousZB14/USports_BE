@@ -32,13 +32,13 @@ public enum ErrorCode {
   SPORTS_NOT_FOUND(HttpStatus.NOT_FOUND, "운동 종목을 찾을 수 없습니다."),
   SPORTS_GRADE_INVALID(HttpStatus.NOT_FOUND, "Sports Grade 값이 잘못되었습니다."),
 
-
   //Recruit 관련
   RECRUIT_NOT_FOUND(HttpStatus.NOT_FOUND, "운동 모집 게시글을 찾을 수 없습니다."),
   APPLICANT_MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "지원자 회원을 찾을 수 없습니다."),
   PARTICIPANT_NOT_FOUND(HttpStatus.NOT_FOUND, "모집 글 참여 신청 건을 찾을 수 없습니다."),
   RECRUIT_ALREADY_END(HttpStatus.NOT_FOUND, "이미 마감 된 모집 글 입니다."),
   RECRUIT_NOT_FINISHED(HttpStatus.NOT_FOUND, "아직 모임이 종료되지 않았습니다. 종료 후에 평가할 수 있습니다."),
+  CHAT_INVITE_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "모임 채팅방에 초대가 될 수 없습니다. 해당 모임에 등록하고, 승인이 되어 있는 상태여야 합니다."),
 
   //Evaluation 관련
   EVALUATION_ALREADY_EXISTS(HttpStatus.NOT_FOUND, "이미 평가가 완료된 건 입니다."),

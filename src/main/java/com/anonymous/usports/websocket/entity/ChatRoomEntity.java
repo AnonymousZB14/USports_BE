@@ -28,8 +28,8 @@ public class ChatRoomEntity {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ChatRoomEntity that = (ChatRoomEntity) o;
-        return Objects.equals(chatRoomId, that.chatRoomId);
+        ChatRoomEntity chatRoom = (ChatRoomEntity) o;
+        return Objects.equals(chatRoomId, chatRoom.chatRoomId);
     }
 
     @Override
