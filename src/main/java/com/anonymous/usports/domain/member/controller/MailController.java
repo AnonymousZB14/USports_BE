@@ -1,9 +1,11 @@
 package com.anonymous.usports.domain.member.controller;
 
 import com.anonymous.usports.domain.member.service.MailService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+@Api(tags = "메일(Mail)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/member")

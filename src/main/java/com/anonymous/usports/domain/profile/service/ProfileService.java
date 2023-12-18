@@ -1,12 +1,15 @@
 package com.anonymous.usports.domain.profile.service;
 
 
-import com.anonymous.usports.domain.profile.dto.ProfileRecords;
-import com.anonymous.usports.domain.profile.dto.ProfileRecruits;
+import com.anonymous.usports.domain.profile.dto.MemberProfile;
+import com.anonymous.usports.domain.record.dto.RecordListDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 
 public interface ProfileService {
 
-  ProfileRecords profileRecords(String accountName, Integer page);
+  MemberProfile profileMember(String accountName);
 
-  ProfileRecruits profileRecruits(String accountName, Integer page);
+  RecordListDto profileRecords(String accountName, Integer page);
+
+  RecruitListDto profileRecruits(String accountName, Integer page);
 }

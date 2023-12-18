@@ -21,5 +21,6 @@ public class MemberLogin {
     @Builder
     public static class Response {
         private TokenDto tokenDto;
+        private MemberDto member;
     }
 }
