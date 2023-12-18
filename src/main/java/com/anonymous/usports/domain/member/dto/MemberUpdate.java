@@ -42,8 +42,6 @@ public class MemberUpdate {
         @NotBlank(message="공개 비공개 여부를 입력해주세요, open 또는 close을 입력해주세요")
         private String profileOpen;
 
-        private String profileContent;
-
         private String profileImage;
 
         @NotBlank(message="자주 활동하는 '시'를 꼭 입력해주세요")

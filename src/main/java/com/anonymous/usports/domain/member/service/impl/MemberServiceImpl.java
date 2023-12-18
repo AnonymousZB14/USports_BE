@@ -1,6 +1,13 @@
 package com.anonymous.usports.domain.member.service.impl;
 
-import com.anonymous.usports.domain.member.dto.*;
+import com.anonymous.usports.domain.member.dto.MailResponse;
+import com.anonymous.usports.domain.member.dto.MemberDto;
+import com.anonymous.usports.domain.member.dto.MemberLogin;
+import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberUpdate;
+import com.anonymous.usports.domain.member.dto.MemberWithdraw;
+import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
+import com.anonymous.usports.domain.member.dto.PasswordUpdate;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
@@ -18,6 +25,9 @@ import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,11 +36,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -103,7 +108,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     private MemberEntity passwordCheckAndGetMember(MemberDto memberDto, Long memberId, String password) {
 
-        if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
+        if (!Role.ADMIN.equals(memberDto.getRole()) && !memberId.equals(memberDto.getMemberId())) {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
         }
 
@@ -148,26 +153,22 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     // 관심 운동이 있을 경우, 수정을 했을 상황을 대비해, 이미 저장되어 있는 데이터는 다 삭제하고 다시 저장하기
     private List<InterestedSportsEntity> saveInterestedSports(List<Long> allSelectedSports, MemberEntity memberEntity){
 
-        List<InterestedSportsEntity> list = new ArrayList<>();
-
-        list.addAll(allSelectedSports.stream()
-                .map(id -> InterestedSportsEntity.builder()
-                        .sports(sportsRepository.findById(id)
-                                .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND)))
-                        .memberEntity(memberEntity)
-                        .build())
-                .collect(Collectors.toList()));
-
         interestedSportsRepository.deleteAllByMemberEntity(memberEntity);
 
-        return list;
+        return allSelectedSports.stream()
+                    .map(id -> InterestedSportsEntity.builder()
+                        .sports(sportsRepository.findById(id)
+                            .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND)))
+                        .memberEntity(memberEntity)
+                        .build())
+                    .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId) {
 
-        if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
+        if (!Role.ADMIN.equals(memberDto.getRole()) && !memberId.equals(memberDto.getMemberId())) {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
         }
 
@@ -175,7 +176,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         // 하는 김에 MemberEntity 가지고 오기
         MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
 
-        if (memberDto.getRole() == Role.UNAUTH && memberDto.getEmailAuthAt() == null) {
+        if (Role.UNAUTH.equals(memberDto.getRole()) && memberDto.getEmailAuthAt() == null) {
             int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(memberDto.getEmail());
 
             if (redisEmailAuthNumber != request.getEmailAuthNumber()) {
@@ -209,8 +210,6 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
         return response;
     }
-
-
 
     @Override
     public PasswordUpdate.Response updatePassword(PasswordUpdate.Request request, Long id, MemberDto memberDto) {
@@ -255,7 +254,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     @Override
     public MailResponse resendEmailAuth(MemberDto memberDto, Long memberId) {
 
-        if (memberDto.getMemberId() != memberId)
+        if (!memberId.equals(memberDto.getMemberId()))
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
 
         if (!memberRepository.existsById(memberId))
