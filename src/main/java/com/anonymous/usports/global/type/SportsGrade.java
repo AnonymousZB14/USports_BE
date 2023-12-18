@@ -86,7 +86,7 @@ public enum SportsGrade {
     throw new SportsException(ErrorCode.SPORTS_GRADE_INVALID);
   }
 
-  public static int stringToInt(String grade){
+  public static int stringToInt(String grade) {
     return Stream.of(SportsGrade.values())
         .filter(sg -> sg.getDescription().equals(grade))
         .map(sg -> sg.getScore())
