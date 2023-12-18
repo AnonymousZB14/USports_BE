@@ -1,6 +1,19 @@
 package com.anonymous.usports.domain.member.service;
 
-import com.anonymous.usports.domain.member.dto.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.anonymous.usports.domain.member.dto.MailResponse;
+import com.anonymous.usports.domain.member.dto.MemberDto;
+import com.anonymous.usports.domain.member.dto.MemberLogin;
+import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberUpdate;
+import com.anonymous.usports.domain.member.dto.MemberWithdraw;
+import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
+import com.anonymous.usports.domain.member.dto.PasswordUpdate;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
@@ -20,6 +33,13 @@ import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -30,18 +50,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -113,7 +121,6 @@ public class MemberServiceTest {
                 .sports(sports)
                 .build();
     }
-
 
     @Nested
     @DisplayName("첫 회원가입")
@@ -672,7 +679,6 @@ public class MemberServiceTest {
                     .phoneNumber(phoneNumber)
                     .birthDate(birthDate)
                     .gender(Gender.FEMALE)
-                    .profileContent("content")
                     .profileImage("picture")
                     .activeRegion(activeRegion)
                     .profileOpen("close")
