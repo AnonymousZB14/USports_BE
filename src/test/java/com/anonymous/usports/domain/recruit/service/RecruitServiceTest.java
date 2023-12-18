@@ -79,7 +79,7 @@ class RecruitServiceTest {
         .name("name" + id)
         .email("test@test.com")
         .password("password" + id)
-        .phoneNumber("010-1111-2 222")
+        .phoneNumber("010-1111-2222")
         .birthDate(LocalDate.now())
         .gender(Gender.MALE)
         .role(Role.USER)
@@ -122,7 +122,7 @@ class RecruitServiceTest {
 
     private RecruitRegister.Request createRegisterRequest(RecruitEntity recruit) {
       return RecruitRegister.Request.builder()
-          .sportsName(recruit.getSports().getSportsName())
+          .sportsId(recruit.getSports().getSportsId())
           .title(recruit.getTitle())
           .content(recruit.getContent())
           .placeName(recruit.getPlaceName())
@@ -156,7 +156,7 @@ class RecruitServiceTest {
       RecruitRegister.Request request = createRegisterRequest(recruit);
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
-      when(sportsRepository.findBySportsName(sports.getSportsName()))
+      when(sportsRepository.findById(sports.getSportsId()))
           .thenReturn(Optional.of(sports));
       when(addressConverter.roadNameAddressToLocationInfo(request.getAddress()))
           .thenReturn(addressDto);
@@ -205,11 +205,11 @@ class RecruitServiceTest {
 
       //given
       RecruitRegister.Request request = createRegisterRequest(recruit);
-      request.setSportsName(sports.getSportsName());
+      request.setSportsId(sports.getSportsId());
 
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
-      when(sportsRepository.findBySportsName(sports.getSportsName()))
+      when(sportsRepository.findById(sports.getSportsId()))
           .thenReturn(Optional.empty());
 
       //when

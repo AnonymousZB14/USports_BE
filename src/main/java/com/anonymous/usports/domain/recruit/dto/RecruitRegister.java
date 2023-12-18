@@ -24,7 +24,7 @@ public class RecruitRegister {
   @NoArgsConstructor
   @Builder
   public static class Request {
-    private String sportsName;
+    private Long sportsId;
     private String title;
     private String content;
 

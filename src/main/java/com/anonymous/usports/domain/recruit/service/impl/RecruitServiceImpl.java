@@ -56,7 +56,7 @@ public class RecruitServiceImpl implements RecruitService {
     MemberEntity memberEntity = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    SportsEntity sportsEntity = sportsRepository.findBySportsName(request.getSportsName())
+    SportsEntity sportsEntity = sportsRepository.findById(request.getSportsId())
         .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
 
     AddressDto addressDto = addressConverter.roadNameAddressToLocationInfo(request.getAddress());
