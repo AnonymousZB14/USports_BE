@@ -8,10 +8,9 @@ import com.anonymous.usports.domain.recruit.api.component.AddressConverter;
 import com.anonymous.usports.domain.recruit.api.dto.AddressDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
-import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
 import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
 import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
-import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
@@ -90,25 +89,6 @@ public class RecruitServiceImpl implements RecruitService {
         SportsGrade.doubleToGrade(sportSkillTotal / participants.size()).getDescription());
 
     return response;
-  }
-
-  @Override
-  @Transactional
-  public RecruitDto updateRecruit(RecruitUpdate.Request request, Long recruitId, Long memberId) {
-    RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
-        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
-    MemberEntity memberEntity = recruitEntity.getMember(); //작성자
-
-    this.validateAuthority(memberEntity, memberId);
-
-    SportsEntity sportsEntity = sportsRepository.findById(request.getSportsId())
-        .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
-
-    recruitEntity.updateRecruit(request, sportsEntity);
-
-    RecruitEntity saved = recruitRepository.save(recruitEntity);
-
-    return RecruitDto.fromEntity(saved);
   }
 
   @Override

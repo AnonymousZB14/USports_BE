@@ -3,7 +3,6 @@ package com.anonymous.usports.domain.recruit.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.when;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,11 +15,10 @@ import com.anonymous.usports.domain.recruit.api.component.AddressConverter;
 import com.anonymous.usports.domain.recruit.api.dto.AddressDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
+import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
-import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
-import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.recruit.service.impl.RecruitServiceImpl;
@@ -37,14 +35,12 @@ import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
-
 import com.anonymous.usports.global.type.SportsGrade;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,9 +52,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -271,124 +264,6 @@ class RecruitServiceTest {
     }
   }
 
-  @Nested
-  @DisplayName("Recruit 수정")
-  class UpdateRecruit {
-
-    private RecruitUpdate.Request createUpdateRequest(RecruitEntity recruit) {
-      String UPDATE = "update";
-      return RecruitUpdate.Request.builder()
-          .sportsId(recruit.getSports().getSportsId())
-          .title(recruit.getTitle() + UPDATE)
-          .content(recruit.getContent() + UPDATE)
-          .placeName(recruit.getPlaceName() + UPDATE)
-          .lat("11")
-          .lnt("22")
-          .cost(recruit.getCost() + 10)
-          .recruitCount(recruit.getRecruitCount() + 1)
-          .meetingDate(recruit.getMeetingDate())
-          .gender(Gender.BOTH)
-          .gradeFrom(recruit.getGradeFrom() + 1)
-          .gradeTo(recruit.getGradeTo() - 1)
-          .build();
-    }
-
-    @Test
-    @DisplayName("성공")
-    void updateRecruit() {
-      SportsEntity sports = createSports(1000L);
-      MemberEntity member = createMember(1L);
-      RecruitEntity recruit = createRecruit(10L, member, sports);
-      RecruitUpdate.Request request = createUpdateRequest(recruit);
-
-      //given
-      when(recruitRepository.findById(10L))
-          .thenReturn(Optional.of(recruit));
-      when(sportsRepository.findById(1000L))
-          .thenReturn(Optional.of(sports));
-      when(recruitRepository.save(recruit))
-          .thenReturn(recruit);
-
-      //when
-      RecruitDto result = recruitService.updateRecruit(request, recruit.getRecruitId(),
-          member.getMemberId());
-
-      //then
-      assertThat(result.getRecruitId()).isEqualTo(recruit.getRecruitId());
-      assertThat(result.getTitle()).isEqualTo(request.getTitle());
-      assertThat(result.getContent()).isEqualTo(request.getContent());
-      assertThat(result.getPlaceName()).isEqualTo(request.getPlaceName());
-      assertThat(result.getGender()).isEqualTo(request.getGender());
-    }
-
-    @Test
-    @DisplayName("실패 - RECRUIT_NOT_FOUND")
-    void updateRecruit_RECRUIT_NOT_FOUND() {
-      SportsEntity sports = createSports(1000L);
-      MemberEntity member = createMember(1L);
-      RecruitEntity recruit = createRecruit(10L, member, sports);
-      RecruitUpdate.Request request = createUpdateRequest(recruit);
-
-      //given
-      when(recruitRepository.findById(11L))
-          .thenReturn(Optional.empty());
-
-      //when
-      //then
-      RecruitException exception =
-          catchThrowableOfType(() ->
-              recruitService.updateRecruit(request, 11L,
-                  member.getMemberId()), RecruitException.class);
-
-      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("실패 - NO_AUTHORITY_ERROR")
-    void updateRecruit_NO_AUTHORITY_ERROR() {
-      SportsEntity sports = createSports(1000L);
-      MemberEntity member = createMember(1L);
-      RecruitEntity recruit = createRecruit(10L, member, sports);
-      RecruitUpdate.Request request = createUpdateRequest(recruit);
-
-      //given
-      when(recruitRepository.findById(10L))
-          .thenReturn(Optional.of(recruit));
-
-      //when
-      //then
-      MyException exception =
-          catchThrowableOfType(() ->
-              recruitService.updateRecruit(request, 10L,
-                  2L), MyException.class);
-
-      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NO_AUTHORITY_ERROR);
-    }
-
-    @Test
-    @DisplayName("실패 - SPORTS_NOT_FOUND")
-    void updateRecruit_SPORTS_NOT_FOUND() {
-      SportsEntity sports = createSports(1000L);
-      MemberEntity member = createMember(1L);
-      RecruitEntity recruit = createRecruit(10L, member, sports);
-      RecruitUpdate.Request request = createUpdateRequest(recruit);
-
-      //given
-      when(recruitRepository.findById(10L))
-          .thenReturn(Optional.of(recruit));
-      when(sportsRepository.findById(1000L))
-          .thenReturn(Optional.empty());
-
-      //when
-      //then
-      SportsException exception =
-          catchThrowableOfType(() ->
-              recruitService.updateRecruit(request, 10L,
-                  member.getMemberId()), SportsException.class);
-
-      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SPORTS_NOT_FOUND);
-    }
-  }
 
   @Nested
   @DisplayName("Recruit 삭제")

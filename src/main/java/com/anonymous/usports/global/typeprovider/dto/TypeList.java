@@ -18,5 +18,4 @@ public class TypeList {
   private List<String> genderList; //성별
   private List<String> regionList; //지역
   private List<String> sportsLevelList; //운동 실력 지표
-
 }
