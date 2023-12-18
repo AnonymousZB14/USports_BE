@@ -39,6 +39,9 @@ public class ParticipantEntity {
   @Column(name = "participant_id", nullable = false)
   private Long participantId;
 
+  @Column(name = "sports_skill", nullable = false)
+  private double sportsSkill;
+
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
   private MemberEntity member;
