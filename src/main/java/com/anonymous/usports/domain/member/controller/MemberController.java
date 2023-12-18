@@ -15,7 +15,6 @@ import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.notification.service.NotificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -36,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/member")
 @RequiredArgsConstructor
-public class MemberContoller {
+public class MemberController {
 
   private final MemberService memberService;
   private final TokenProvider tokenProvider;
