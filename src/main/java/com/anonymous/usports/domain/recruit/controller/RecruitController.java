@@ -7,7 +7,6 @@ import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
-import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
 import com.anonymous.usports.global.type.Gender;
 import io.swagger.annotations.Api;
@@ -63,15 +62,6 @@ public class RecruitController {
   public ResponseEntity<?> updateRecruitPage(@PathVariable Long recruitId) {
     //TODO
     return ResponseEntity.ok(null);
-  }
-
-  @ApiOperation("운동 모집 게시글 수정")
-  @PutMapping("/recruit/{recruitId}")
-  public ResponseEntity<RecruitUpdate.Response> updateRecruit(@PathVariable Long recruitId,
-      @RequestBody RecruitUpdate.Request request,
-      @AuthenticationPrincipal MemberDto loginMember) {
-    RecruitDto result = recruitService.updateRecruit(request, recruitId, loginMember.getMemberId());
-    return ResponseEntity.ok(new RecruitUpdate.Response(result));
   }
 
   @ApiOperation("운동 모집 게시글 삭제")
