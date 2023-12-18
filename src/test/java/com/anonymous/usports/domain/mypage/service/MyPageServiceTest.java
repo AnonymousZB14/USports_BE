@@ -10,9 +10,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.dto.MemberInfo;
 import com.anonymous.usports.domain.mypage.service.impl.MyPageServiceImpl;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
-import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
-import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sportsskill.dto.SportsSkillDto;
 import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
@@ -133,7 +131,7 @@ class MyPageServiceTest {
           .thenReturn(interestedSportsEntityList);
 
       //when
-      MemberInfo memberInfo = myPageService.getMyPageMember(member.getMemberId());
+      MemberInfo memberInfo = myPageService.getMemberInfo(member.getMemberId());
 
       //then
       assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(3);
@@ -156,7 +154,7 @@ class MyPageServiceTest {
           .thenReturn(interestedSportsEntityList);
 
       //when
-      MemberInfo memberInfo = myPageService.getMyPageMember(member.getMemberId());
+      MemberInfo memberInfo = myPageService.getMemberInfo(member.getMemberId());
 
       //then
       assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(3);
@@ -179,7 +177,7 @@ class MyPageServiceTest {
           .thenReturn(interestedSportsEntityList);
 
       //when
-      MemberInfo memberInfo = myPageService.getMyPageMember(member.getMemberId());
+      MemberInfo memberInfo = myPageService.getMemberInfo(member.getMemberId());
 
       //then
       assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(1);
@@ -199,7 +197,7 @@ class MyPageServiceTest {
           .thenReturn(interestedSportsEntityList);
 
       //when
-      MemberInfo memberInfo = myPageService.getMyPageMember(member.getMemberId());
+      MemberInfo memberInfo = myPageService.getMemberInfo(member.getMemberId());
 
       //then
       assertThat(memberInfo.getInterestSportsList().get(0)).isEqualTo("none");

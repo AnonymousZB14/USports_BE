@@ -42,7 +42,7 @@ public class ProfileServiceImpl implements ProfileService {
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     return MemberProfile.builder()
-        .memberInfo(myPageService.getMyPageMember(member.getMemberId()))
+        .memberInfo(myPageService.getMemberInfo(member.getMemberId()))
         .sportsSkills(myPageService.getSportsSkills(member.getMemberId()))
         .build();
   }
