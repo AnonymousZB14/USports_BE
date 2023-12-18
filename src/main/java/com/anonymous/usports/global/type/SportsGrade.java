@@ -2,6 +2,8 @@ package com.anonymous.usports.global.type;
 
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.SportsException;
+import com.anonymous.usports.global.exception.TypeException;
+import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -82,5 +84,13 @@ public enum SportsGrade {
     }
     log.error("Sports Grade Invalid");
     throw new SportsException(ErrorCode.SPORTS_GRADE_INVALID);
+  }
+
+  public static int stringToInt(String grade){
+    return Stream.of(SportsGrade.values())
+        .filter(sg -> sg.getDescription().equals(grade))
+        .map(sg -> sg.getScore())
+        .findFirst()
+        .orElseThrow(() -> new TypeException(ErrorCode.TYPE_INVALID_ERROR));
   }
 }

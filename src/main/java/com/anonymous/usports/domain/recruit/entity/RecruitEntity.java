@@ -57,6 +57,9 @@ public class RecruitEntity {
   @Column(name = "street_number_addr")
   private String streetNumberAddr; // 지번 주소
 
+  @Column(name = "post_code")
+  private String postCode;
+
   @Column(name = "lat", nullable = false)
   private String lat;
 

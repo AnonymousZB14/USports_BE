@@ -76,5 +76,10 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
   }
 
+  @ExceptionHandler(TypeException.class)
+  public ResponseEntity<ErrorResponse> handleTypeException(TypeException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+    return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
 
 }

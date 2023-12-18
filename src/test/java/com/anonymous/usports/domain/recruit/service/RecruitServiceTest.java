@@ -12,6 +12,8 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
+import com.anonymous.usports.domain.recruit.api.component.AddressConverter;
+import com.anonymous.usports.domain.recruit.api.dto.AddressDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
@@ -36,6 +38,7 @@ import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
 
+import com.anonymous.usports.global.type.SportsGrade;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -69,6 +72,8 @@ class RecruitServiceTest {
   private RecruitRepository recruitRepository;
   @Mock
   private ParticipantRepository participantRepository;
+  @Mock
+  private AddressConverter addressConverter;
 
 
   @InjectMocks
@@ -124,18 +129,16 @@ class RecruitServiceTest {
 
     private RecruitRegister.Request createRegisterRequest(RecruitEntity recruit) {
       return RecruitRegister.Request.builder()
-          .sportsId(recruit.getSports().getSportsId())
+          .sportsName(recruit.getSports().getSportsName())
           .title(recruit.getTitle())
           .content(recruit.getContent())
           .placeName(recruit.getPlaceName())
-          .lat(recruit.getLat())
-          .lnt(recruit.getLnt())
           .cost(recruit.getCost())
           .recruitCount(recruit.getRecruitCount())
           .meetingDate(recruit.getMeetingDate())
-          .gender(recruit.getGender())
-          .gradeFrom(recruit.getGradeFrom())
-          .gradeTo(recruit.getGradeTo())
+          .gender(recruit.getGender().getDescription())
+          .gradeFrom(SportsGrade.intToGrade(recruit.getGradeFrom()).getDescription())
+          .gradeTo(SportsGrade.intToGrade(recruit.getGradeTo()).getDescription())
           .build();
     }
 
@@ -149,14 +152,23 @@ class RecruitServiceTest {
       ParticipantEntity participantEntity = new ParticipantEntity(member, recruit);
       participantEntity.setStatus(ParticipantStatus.ACCEPTED);
 
+      AddressDto addressDto = AddressDto.builder()
+          .roadNumberAddress("서울 강동구 명일동 257")
+          .roadNameAddress("서울 강동구 상암로 251")
+          .lat("37.5485938073474")
+          .lnt("127.150688253162")
+          .build();
+
       //given
       RecruitRegister.Request request = createRegisterRequest(recruit);
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
-      when(sportsRepository.findById(1000L))
+      when(sportsRepository.findBySportsName(sports.getSportsName()))
           .thenReturn(Optional.of(sports));
+      when(addressConverter.roadNameAddressToLocationInfo(request.getAddress()))
+          .thenReturn(addressDto);
 
-      when(recruitRepository.save(Request.toEntity(request, member, sports)))
+      when(recruitRepository.save(Request.toEntity(request, member, sports, addressDto)))
           .thenReturn(recruit);
 
       //when
@@ -200,11 +212,11 @@ class RecruitServiceTest {
 
       //given
       RecruitRegister.Request request = createRegisterRequest(recruit);
-      request.setSportsId(1001L);
+      request.setSportsName(sports.getSportsName());
 
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
-      when(sportsRepository.findById(1001L))
+      when(sportsRepository.findBySportsName(sports.getSportsName()))
           .thenReturn(Optional.empty());
 
       //when

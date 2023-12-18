@@ -4,6 +4,8 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
+import com.anonymous.usports.domain.recruit.api.component.AddressConverter;
+import com.anonymous.usports.domain.recruit.api.dto.AddressDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
@@ -47,6 +49,7 @@ public class RecruitServiceImpl implements RecruitService {
   private final SportsRepository sportsRepository;
   private final RecruitRepository recruitRepository;
   private final ParticipantRepository participantRepository;
+  private final AddressConverter addressConverter;
 
   @Override
   @Transactional
@@ -54,11 +57,13 @@ public class RecruitServiceImpl implements RecruitService {
     MemberEntity memberEntity = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    SportsEntity sportsEntity = sportsRepository.findById(request.getSportsId())
+    SportsEntity sportsEntity = sportsRepository.findBySportsName(request.getSportsName())
         .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
 
+    AddressDto addressDto = addressConverter.roadNameAddressToLocationInfo(request.getAddress());
+
     RecruitEntity saved =
-        recruitRepository.save(Request.toEntity(request, memberEntity, sportsEntity));
+        recruitRepository.save(Request.toEntity(request, memberEntity, sportsEntity, addressDto));
 
     //모집 생성할 때, host participant 추가
     ParticipantEntity participantEntity = new ParticipantEntity(memberEntity, saved);
