@@ -39,6 +39,7 @@
     var roomId = [[${room.chatRoomId}]];
     var username = [[${room.username}]];
     var timeNow = new Date();
+    var firstEnter = true;
     let stomp = Stomp.over(new SockJS("/ws/chat"));
     stomp.heartbeat.outgoing = 10000;
     stomp.heartbeat.incoming = 10000;
@@ -47,7 +48,10 @@
       stomp.connect({}, function () {
         console.log("STOMP Connection");
         subscribeToRoom();
-        sendEnterMessage();
+        if(firstEnter == true) {
+          sendEnterMessage();
+          firstEnter = false;
+        }
       }, function (error) {
         console.log('Connection lost! Reconnection...')
         reconnect();
