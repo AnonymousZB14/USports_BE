@@ -12,10 +12,11 @@ import com.anonymous.usports.domain.member.dto.TokenDto;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.CookieService;
 import com.anonymous.usports.domain.member.service.MemberService;
+import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.notification.service.NotificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.servlet.http.Cookie;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -42,6 +43,7 @@ public class MemberContoller {
   private final TokenProvider tokenProvider;
   private final NotificationService notificationService;
   private final CookieService cookieService;
+  private final MyPageService myPageService;
 
   /**
    * 회원 가입 http://localhost:8080/member/register
@@ -73,9 +75,13 @@ public class MemberContoller {
     TokenDto tokenDto = tokenProvider.saveTokenInRedis(memberDto.getEmail());
     cookieService.setCookieForLogin(httpServletResponse, tokenDto.getAccessToken());
 
+    List<String> interestSportsList =
+        myPageService.getInterestSportsList(memberDto.getMemberId());
+
     return ResponseEntity.ok(MemberLogin.Response.builder()
         .member(memberDto)
         .tokenDto(tokenDto)
+        .interestSportsList(interestSportsList)
         .build());
   }
 

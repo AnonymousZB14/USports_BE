@@ -38,7 +38,7 @@ public class MyPageController {
       @AuthenticationPrincipal MemberDto loginMember) {
 
     MemberProfile memberProfile = MemberProfile.builder()
-        .memberInfo(myPageService.getMyPageMember(loginMember.getMemberId()))
+        .memberInfo(myPageService.getMemberInfo(loginMember.getMemberId()))
         .sportsSkills(myPageService.getSportsSkills(loginMember.getMemberId()))
         .build();
 

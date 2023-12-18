@@ -12,7 +12,9 @@ public interface MyPageService {
 
   MyPageMainDto getMyPageMainData(Long memberId);
 
-  MemberInfo getMyPageMember(Long memberId);
+  MemberInfo getMemberInfo(Long memberId);
+
+  List<String> getInterestSportsList(Long memberId);
 
   List<SportsSkillDto> getSportsSkills(Long memberId);
 
