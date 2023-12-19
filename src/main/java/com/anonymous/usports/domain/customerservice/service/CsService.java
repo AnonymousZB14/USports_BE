@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.customerservice.service;
 
 import com.anonymous.usports.domain.customerservice.dto.ChangeStatusDto;
 import com.anonymous.usports.domain.customerservice.dto.CsDto;
+import com.anonymous.usports.domain.customerservice.dto.CsListDto;
 import com.anonymous.usports.domain.customerservice.dto.DeleteCS;
 import com.anonymous.usports.domain.customerservice.dto.RegisterCS;
 import com.anonymous.usports.domain.customerservice.dto.UpdateCS;
@@ -16,6 +17,10 @@ public interface CsService {
   UpdateCS.Response updateCs(UpdateCS.Request request, Long csId, MemberDto memberDto);
 
   CsDto getDetailCs(Long csId);
+
+  CsListDto getCsList(MemberDto member, int page);
+
+  CsListDto getCsListAdmin(MemberDto member, String email, int statusNum, int page);
 
   ChangeStatusDto.Response changeCsStatus(ChangeStatusDto.Request request, Long csId, MemberDto memberDto);
 

@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.customerservice.service.impl;
 
 import com.anonymous.usports.domain.customerservice.dto.ChangeStatusDto;
 import com.anonymous.usports.domain.customerservice.dto.CsDto;
+import com.anonymous.usports.domain.customerservice.dto.CsListDto;
 import com.anonymous.usports.domain.customerservice.dto.DeleteCS;
 import com.anonymous.usports.domain.customerservice.dto.RegisterCS;
 import com.anonymous.usports.domain.customerservice.dto.UpdateCS;
@@ -17,7 +18,11 @@ import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.type.CsStatus;
 import com.anonymous.usports.global.type.Role;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -90,6 +95,66 @@ public class CsServiceImpl implements CsService {
   public CsDto getDetailCs(Long csId) {
     return CsDto.fromEntity(csRepository.findById(csId)
         .orElseThrow(() -> new CsException(ErrorCode.NO_CS_FOUND)));
+  }
+
+  @Override
+  public CsListDto getCsList(MemberDto memberDto, int page) {
+
+    MemberEntity member = memberRepository.findById(memberDto.getMemberId())
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    Page<CsEntity> csListPage = csRepository.findAllByMemberEntityOrderByUpdatedAtDesc(
+        member, PageRequest.of(page - 1, CsConstant.maxElements));
+
+    if (page < 1 && page > csListPage.getTotalPages())
+      throw new CsException(ErrorCode.PAGE_NOT_FOUND);
+
+    List<CsDto> csList = csListPage.getContent().stream()
+        .map(CsDto::fromEntity).collect(Collectors.toList());
+
+    return CsListDto.builder()
+        .allElementsCount(csListPage.getNumberOfElements())
+        .elementsInPage(csList.size())
+        .csList(csList)
+        .pageNum(page)
+        .totalPageNum(csListPage.getTotalPages())
+        .build();
+  }
+
+  @Override
+  public CsListDto getCsListAdmin(MemberDto member, String email, int statusNum, int page) {
+
+    if (!Role.ADMIN.equals(member.getRole()))
+      throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
+
+    MemberEntity memberEntity = memberRepository.findById(member.getMemberId())
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    CsStatus csStatus;
+
+    if (statusNum == 1) {
+      csStatus = CsStatus.Registered;
+    } else if (statusNum == 2) {
+      csStatus = CsStatus.ING;
+    } else if (statusNum == 3) {
+      csStatus = CsStatus.Finished;
+    } else {
+      csStatus = null;
+    }
+
+    Page<CsEntity> csPage = csRepository.findALlByConditionsFromAdmin(
+        memberEntity, csStatus, PageRequest.of(page, CsConstant.maxElements));
+
+    List<CsDto> csList = csPage.getContent().stream()
+        .map(CsDto::fromEntity).collect(Collectors.toList());
+
+    return CsListDto.builder()
+        .totalPageNum(csPage.getTotalPages())
+        .pageNum(page)
+        .elementsInPage(csList.size())
+        .allElementsCount(csPage.getNumberOfElements())
+        .csList(csList)
+        .build();
   }
 
   @Override
