@@ -1,7 +1,9 @@
 package com.anonymous.usports.domain.customerservice.controller;
 
+import com.anonymous.usports.domain.customerservice.dto.CsDto;
 import com.anonymous.usports.domain.customerservice.dto.DeleteCS;
 import com.anonymous.usports.domain.customerservice.dto.RegisterCS;
+import com.anonymous.usports.domain.customerservice.dto.UpdateCS;
 import com.anonymous.usports.domain.customerservice.service.CsService;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import io.swagger.annotations.Api;
@@ -11,8 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,9 +43,29 @@ public class CsController {
   @ApiOperation(value = "신고 삭제하기", notes = "해당 글을 쓴 글쓴이가 자신의 신고글을 지울 수 있다. Admin은 모든 신고글을 지울 수 있다")
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
   public DeleteCS.Response deleteCS(
-    @PathVariable Long csId,
+    @PathVariable("cs_id") Long csId,
     @AuthenticationPrincipal MemberDto memberDto
   ) {
     return csService.deleteCs(csId, memberDto);
+  }
+
+  @PutMapping("/update/{cs_id}")
+  @ApiOperation(value = "신고 수정하기", notes = "해당 글을 쓴 글쓴이가 자신의 신고글을 지울 수 있다.")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+  public UpdateCS.Response updateCs(
+      @PathVariable("cs_id") Long csId,
+      @RequestBody @Valid UpdateCS.Request request,
+      @AuthenticationPrincipal MemberDto memberDto
+  ) {
+    return csService.updateCs(request,csId,memberDto);
+  }
+
+  @GetMapping("/{cs_id}")
+  @ApiOperation(value = "신고글 보기", notes = "신고글의 자세한 내용을 볼 수 있다")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+  public CsDto getCsDetail(
+      @PathVariable("cs_id") Long csId
+  ) {
+    return null;
   }
 }

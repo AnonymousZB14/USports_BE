@@ -81,6 +81,7 @@ public enum ErrorCode {
 
   // cs 관련
   NO_CS_FOUND(HttpStatus.BAD_REQUEST, "신고글이 존재하지 않습니다"),
+  CS_NOT_WRITTEN_BY_CURRENT_USER(HttpStatus.UNAUTHORIZED, "해당 신고글은, 현재 로그인한 유저가 작성한 글이 아닙니다"),
 
   //기타
   ADDRESS_API_ERROR(HttpStatus.BAD_REQUEST, "도로명 주소 입력값이 잘못되었습니다."),

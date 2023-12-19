@@ -1,8 +1,10 @@
 package com.anonymous.usports.domain.customerservice.entity;
 
+import com.anonymous.usports.domain.customerservice.dto.UpdateCS;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.CsStatus;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -55,4 +57,26 @@ public class CsEntity {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
+  public void updateCs(UpdateCS.Request request, CsStatus csStatus) {
+    this.title = request.getTitle();
+    this.content = request.getContent();
+    this.csStatus = csStatus;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    CsEntity csEntity = (CsEntity) o;
+    return Objects.equals(csId, csEntity.csId);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(csId);
+  }
 }

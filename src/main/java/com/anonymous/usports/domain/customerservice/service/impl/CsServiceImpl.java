@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.customerservice.service.impl;
 
 import com.anonymous.usports.domain.customerservice.dto.DeleteCS;
 import com.anonymous.usports.domain.customerservice.dto.RegisterCS;
+import com.anonymous.usports.domain.customerservice.dto.UpdateCS;
 import com.anonymous.usports.domain.customerservice.entity.CsEntity;
 import com.anonymous.usports.domain.customerservice.repository.CsRepository;
 import com.anonymous.usports.domain.customerservice.service.CsService;
@@ -16,6 +17,7 @@ import com.anonymous.usports.global.type.CsStatus;
 import com.anonymous.usports.global.type.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -63,5 +65,22 @@ public class CsServiceImpl implements CsService {
   @Override
   public DeleteCS.Response deleteCs(Long csId, MemberDto memberDto) {
     return deleteCSById(csId, memberDto);
+  }
+
+  @Override
+  @Transactional
+  public UpdateCS.Response updateCs(UpdateCS.Request request, Long csId, MemberDto memberDto) {
+
+    CsEntity cs = csRepository.findById(csId)
+        .orElseThrow(() -> new CsException(ErrorCode.NO_CS_FOUND));
+
+    if (!memberDto.getMemberId().equals(cs.getMemberEntity().getMemberId()))
+      throw new CsException(ErrorCode.CS_NOT_WRITTEN_BY_CURRENT_USER);
+
+    CsStatus curStatus = cs.getCsStatus();
+
+    cs.updateCs(request, curStatus);
+
+    return new UpdateCS.Response(request.getTitle(), request.getContent(), CsConstant.SUCCESSFULLY_UPDATED);
   }
 }
