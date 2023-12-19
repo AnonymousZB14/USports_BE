@@ -1,5 +1,7 @@
 package com.anonymous.usports.domain.customerservice.service.impl;
 
+import com.anonymous.usports.domain.customerservice.dto.ChangeStatusDto;
+import com.anonymous.usports.domain.customerservice.dto.CsDto;
 import com.anonymous.usports.domain.customerservice.dto.DeleteCS;
 import com.anonymous.usports.domain.customerservice.dto.RegisterCS;
 import com.anonymous.usports.domain.customerservice.dto.UpdateCS;
@@ -82,5 +84,44 @@ public class CsServiceImpl implements CsService {
     cs.updateCs(request, curStatus);
 
     return new UpdateCS.Response(request.getTitle(), request.getContent(), CsConstant.SUCCESSFULLY_UPDATED);
+  }
+
+  @Override
+  public CsDto getDetailCs(Long csId) {
+    return CsDto.fromEntity(csRepository.findById(csId)
+        .orElseThrow(() -> new CsException(ErrorCode.NO_CS_FOUND)));
+  }
+
+  @Override
+  @Transactional
+  public ChangeStatusDto.Response changeCsStatus(ChangeStatusDto.Request request, Long csId, MemberDto memberDto) {
+
+    // 어드민만 변경할 수 있는 내용
+    if (!Role.ADMIN.equals(memberDto.getRole()))
+      throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
+
+    CsEntity cs = csRepository.findById(csId)
+        .orElseThrow(() -> new CsException(ErrorCode.NO_CS_FOUND));
+
+    String csStatus;
+
+    if (request.getStatusNum() == 1) {
+      cs.updateStatus(CsStatus.Registered);
+      csStatus = CsStatus.Registered.getDescription();
+
+    } else if (request.getStatusNum() == 2) {
+      cs.updateStatus(CsStatus.ING);
+      csStatus = CsStatus.ING.getDescription();
+
+    } else if (request.getStatusNum() == 3) {
+      cs.updateStatus(CsStatus.Finished);
+      csStatus = CsStatus.Finished.getDescription();
+
+    } else {
+      throw new CsException(ErrorCode.INPUT_VALUE_NOT_EXIST_FOR_CS_STATUS);
+    }
+
+    return new ChangeStatusDto.Response(CsConstant.CS_STATUS_SUCCESSFULLY_CHANGED,
+        csStatus);
   }
 }

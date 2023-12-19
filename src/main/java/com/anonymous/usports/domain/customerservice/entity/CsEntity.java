@@ -63,6 +63,10 @@ public class CsEntity {
     this.csStatus = csStatus;
   }
 
+  public void updateStatus(CsStatus csStatus){
+    this.csStatus = csStatus;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

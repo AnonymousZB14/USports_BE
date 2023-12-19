@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.customerservice.controller;
 
+import com.anonymous.usports.domain.customerservice.dto.ChangeStatusDto;
 import com.anonymous.usports.domain.customerservice.dto.CsDto;
 import com.anonymous.usports.domain.customerservice.dto.DeleteCS;
 import com.anonymous.usports.domain.customerservice.dto.RegisterCS;
@@ -66,6 +67,21 @@ public class CsController {
   public CsDto getCsDetail(
       @PathVariable("cs_id") Long csId
   ) {
+    return csService.getDetailCs(csId);
+  }
+
+  /**
+   * ========== admin 영역 ===========
+   */
+  @PutMapping("/admin/{cs_id}")
+  @ApiOperation(value = "신고글 상태 바꾸기", notes = "신고글에 대해 진행 상태를 어드민이 바꾸는 것")
+  @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+  public ChangeStatusDto.Response changeCsStatus(
+      @PathVariable("cs_id") Long csId,
+      @RequestBody ChangeStatusDto.Request request,
+      @AuthenticationPrincipal MemberDto memberDto
+  ) {
     return null;
   }
+
 }
