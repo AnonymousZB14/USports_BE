@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,19 +33,19 @@ public class PenaltyScheduler {
     int size = NumberConstant.PAGE_SIZE_SCHEDULING; // 100
     while (size == NumberConstant.PAGE_SIZE_SCHEDULING) {
       size = imposePenalty(page++);
-      log.info("size : {}", size);
+      log.info("imposed size : {}", size);
     }
   }
 
   private int imposePenalty(int page) {
     LocalDate today = LocalDate.now(); //오늘
-    LocalDateTime yesterdayEnd = LocalDateTime.of(today.minusDays(3L), LocalTime.MAX);//3일전 끝
-    LocalDateTime yesterdayStart = yesterdayEnd.minusDays(1L);//3일전 시작
+    LocalDateTime endDateTime = LocalDateTime.of(today.minusDays(3L), LocalTime.MAX);//3일전 끝
+    LocalDateTime startDateTime = endDateTime.minusDays(1L);//3일전 시작
 
     Page<ParticipantEntity> findAll =
         participantRepository.findAllByEvaluationAtIsNullAndMeetingDateBetweenOrderByMeetingDate(
-        yesterdayStart,
-            yesterdayEnd,
+            startDateTime,
+            endDateTime,
             PageRequest.of(page, NumberConstant.PAGE_SIZE_SCHEDULING));
 
     for (ParticipantEntity participantEntity : findAll.getContent()) {
