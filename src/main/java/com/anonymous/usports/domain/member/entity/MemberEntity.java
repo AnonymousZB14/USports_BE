@@ -138,18 +138,28 @@ public class MemberEntity {
     this.kindnessScore += mannerDto.getKindness();
     this.passionScore += mannerDto.getPassion();
     this.teamworkScore += mannerDto.getTeamwork();
-    Long currentCount = this.evaluationCount;
-
-    int total = mannerDto.getKindness() + mannerDto.getPassion() + mannerDto.getTeamwork();
-
-    this.mannerScore =
-        ((this.mannerScore * currentCount) + (double) total / 3) / (currentCount + 1);
-
     this.evaluationCount += 1;
+
+    Long total = this.kindnessScore / 3 + this.passionScore / 3 + this.teamworkScore / 3;
+
+    double score = (total  - penaltyCount*3)/evaluationCount;
+
+    if(score < 0){
+      this.mannerScore = 0.0;
+    }else{
+      this.mannerScore = score;
+    }
   }
 
   public void addPenaltyCount(){
     this.penaltyCount += 1;
+    Long total = this.kindnessScore / 3 + this.passionScore / 3 + this.teamworkScore / 3;
+    double score = (total  - penaltyCount*3)/evaluationCount;
+    if(score < 0){
+      this.mannerScore = 0.0;
+    }else{
+      this.mannerScore = score;
+    }
   }
 
   @Override
