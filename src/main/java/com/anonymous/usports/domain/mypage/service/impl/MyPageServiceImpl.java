@@ -16,7 +16,7 @@ import com.anonymous.usports.domain.participant.repository.ParticipantRepository
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
-import com.anonymous.usports.domain.sports.entity.SportsEntity;
+import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.domain.sportsskill.dto.SportsSkillDto;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,40 +76,24 @@ public class MyPageServiceImpl implements MyPageService {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    List<InterestedSportsEntity> interestedSportsEntityList =
-        interestedSportsRepository.findAllByMemberEntity(member);
-    int listSize = interestedSportsEntityList.size();
+    List<SportsDto> interestedSportsList = this.getInterestedSportsList(memberId);
 
-    List<String> interestSportsList = this.getInterestSportsList(memberId);
+    Collections.shuffle(interestedSportsList);
 
-    if (listSize <= 3) {
-      return new MemberInfo(member, interestSportsList, 0);
-    }
-
-    Collections.shuffle(interestSportsList);
-    return new MemberInfo(member, interestSportsList.subList(0, 3), listSize - 3);
+    return new MemberInfo(member, interestedSportsList);
   }
 
   @Override
-  public List<String> getInterestSportsList(Long memberId) {
+  public List<SportsDto> getInterestedSportsList(Long memberId) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     List<InterestedSportsEntity> interestedSportsEntityList =
         interestedSportsRepository.findAllByMemberEntity(member);
 
-    int listSize = interestedSportsEntityList.size();
-
-    List<String> interestSportsList = new ArrayList<>();
-
-    if (listSize == 0) {
-      interestSportsList.add("none");
-      return interestSportsList;
-    }
-
     return interestedSportsEntityList.stream()
         .map(InterestedSportsEntity::getSports)
-        .map(SportsEntity::getSportsName)
+        .map(SportsDto::new)
         .collect(Collectors.toList());
   }
 

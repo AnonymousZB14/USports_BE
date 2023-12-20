@@ -2,13 +2,17 @@ package com.anonymous.usports.domain.member.controller;
 
 import com.anonymous.usports.domain.member.dto.MemberRegister;
 import com.anonymous.usports.domain.member.security.TokenProvider;
+import com.anonymous.usports.domain.member.service.CookieService;
 import com.anonymous.usports.domain.member.service.MemberService;
+import com.anonymous.usports.domain.mypage.service.MyPageService;
+import com.anonymous.usports.domain.notification.service.NotificationService;
 import com.anonymous.usports.global.constant.MailConstant;
 import com.anonymous.usports.global.type.Gender;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -27,11 +31,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(MemberContoller.class)
+@WebMvcTest(MemberController.class)
 public class MemberControllerTest {
 
     @MockBean
     private MemberService memberService;
+    @MockBean
+    private NotificationService notificationService;
+    @MockBean
+    private CookieService cookieService;
+    @MockBean
+    private MyPageService myPageService;
 
     @MockBean
     private TokenProvider tokenProvider;

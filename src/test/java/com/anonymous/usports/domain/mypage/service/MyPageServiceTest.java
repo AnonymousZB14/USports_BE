@@ -117,7 +117,7 @@ class MyPageServiceTest {
 
     @Test
     @DisplayName("성공 : 관심운동 5개")
-    void getMyPageMember_5() {
+    void getMyPageMember() {
       MemberEntity member = createMember(1L);
       List<InterestedSportsEntity> interestedSportsEntityList = new ArrayList<>();
       for (int i = 0; i < 5; i++) {
@@ -134,75 +134,9 @@ class MyPageServiceTest {
       MemberInfo memberInfo = myPageService.getMemberInfo(member.getMemberId());
 
       //then
-      assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(3);
-      assertThat(memberInfo.getPlusAlpha()).isEqualTo(2);
+      assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(5);
     }
 
-    @Test
-    @DisplayName("성공 : 관심운동 3개")
-    void getMyPageMember_3() {
-      MemberEntity member = createMember(1L);
-      List<InterestedSportsEntity> interestedSportsEntityList = new ArrayList<>();
-      for (int i = 0; i < 3; i++) {
-        interestedSportsEntityList.add(
-            createInterestSports(10L + i, member, createSports(100L + i)));
-      }
-      //given
-      when(memberRepository.findById(1L))
-          .thenReturn(Optional.of(member));
-      when(interestedSportsRepository.findAllByMemberEntity(member))
-          .thenReturn(interestedSportsEntityList);
-
-      //when
-      MemberInfo memberInfo = myPageService.getMemberInfo(member.getMemberId());
-
-      //then
-      assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(3);
-      assertThat(memberInfo.getPlusAlpha()).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("성공 : 관심운동 1개")
-    void getMyPageMember() {
-      MemberEntity member = createMember(1L);
-      List<InterestedSportsEntity> interestedSportsEntityList = new ArrayList<>();
-      for (int i = 0; i < 1; i++) {
-        interestedSportsEntityList.add(
-            createInterestSports(10L + i, member, createSports(100L + i)));
-      }
-      //given
-      when(memberRepository.findById(1L))
-          .thenReturn(Optional.of(member));
-      when(interestedSportsRepository.findAllByMemberEntity(member))
-          .thenReturn(interestedSportsEntityList);
-
-      //when
-      MemberInfo memberInfo = myPageService.getMemberInfo(member.getMemberId());
-
-      //then
-      assertThat(memberInfo.getInterestSportsList().size()).isEqualTo(1);
-      assertThat(memberInfo.getPlusAlpha()).isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("성공 : 관심운동 0개")
-    void getMyPageMember_0() {
-      MemberEntity member = createMember(1L);
-      List<InterestedSportsEntity> interestedSportsEntityList = new ArrayList<>();
-
-      //given
-      when(memberRepository.findById(1L))
-          .thenReturn(Optional.of(member));
-      when(interestedSportsRepository.findAllByMemberEntity(member))
-          .thenReturn(interestedSportsEntityList);
-
-      //when
-      MemberInfo memberInfo = myPageService.getMemberInfo(member.getMemberId());
-
-      //then
-      assertThat(memberInfo.getInterestSportsList().get(0)).isEqualTo("none");
-      assertThat(memberInfo.getPlusAlpha()).isEqualTo(0);
-    }
   }
 
   private SportsSkillEntity createSportsSkill(Long id, MemberEntity member, SportsEntity sports) {
