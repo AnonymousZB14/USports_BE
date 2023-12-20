@@ -673,7 +673,6 @@ public class MemberServiceTest {
                     .birthDate(birthDate)
                     .gender(Gender.FEMALE)
                     .profileContent("content")
-                    .profileImage("picture")
                     .activeRegion(activeRegion)
                     .profileOpen("close")
                     .interestedSports(sports)

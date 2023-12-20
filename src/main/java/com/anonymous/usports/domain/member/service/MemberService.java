@@ -31,7 +31,12 @@ public interface MemberService {
     /**
      * 회원 수정
      */
-    MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId, MultipartFile profileImage);
+    MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId);
+
+    /**
+     * 프로필 이미지 변경 / 삭제
+     */
+    MemberUpdate.Response updateMemberProfileImage(MultipartFile profileImage, MemberDto memberDto, Long memberId);
 
     /**
      * 회원 비밀번호 수정
@@ -47,5 +52,6 @@ public interface MemberService {
      * 회원 이메일 인증 번호 재전송
      */
     MailResponse resendEmailAuth(MemberDto memberDto, Long memberId);
+
 
 }

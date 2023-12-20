@@ -16,7 +16,6 @@ import com.anonymous.usports.domain.member.service.MailService;
 import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.MailConstant;
-import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
@@ -31,11 +30,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Member;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,11 +49,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -188,7 +187,8 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     @Override
     @Transactional
-    public MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId, MultipartFile profileImage) {
+    public MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto,
+        Long memberId) {
 
         if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
             throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
@@ -216,16 +216,6 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         // 맴버 entity 수정
         memberEntity.updateMember(request);
 
-        if(profileImage!=null){
-            String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
-
-            if(memberEntity.getProfileImage()!=null){
-                deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
-            }
-
-            memberEntity.updateMemberProfileImage(profileImageAddress); //DB에 새로운 프로필 이미지 업데이트
-        }
-
         // 관심 운동 저장
         interestedSportsRepository.saveAll(saveInterestedSports(
                 request.getInterestedSports(),
@@ -237,16 +227,39 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
                 .map(s -> s.getSports().getSportsName())
                 .collect(Collectors.toList());
 
-
-
         MemberUpdate.Response response = MemberUpdate.Response.fromEntity(memberEntity);
         response.setInterestedSports(sportsList);
 
         return response;
     }
 
-    private String saveImage(MultipartFile profileImage) {
+    // 프로필 이미지만 등록 / 변경 / 삭제
+    @Override
+    @Transactional
+    public MemberUpdate.Response updateMemberProfileImage(MultipartFile profileImage, MemberDto memberDto,
+        Long memberId) {
+        if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
+            throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
+        }
+        MemberEntity memberEntity = memberRepository.findById(memberDto.getMemberId())
+            .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+        if(!profileImage.isEmpty()) { // 파일 업로드 있을 때 -> 프로필 이미지 등록 및 변경
+            String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
+            if(memberEntity.getProfileImage()!=null){
+                deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
+            }
+            memberEntity.updateMemberProfileImage(profileImageAddress); //DB에 새로운 프로필 이미지 업데이트
+        } else { //profileImage에 null 값 들어올 때 -> 프로필 이미지 제거
+            if(memberEntity.getProfileImage()!=null){
+                deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
+                memberEntity.updateMemberProfileImage(null);
+            }
+        }
+        MemberUpdate.Response response = MemberUpdate.Response.fromEntity(memberEntity);
+        return response;
+    }
 
+    private String saveImage(MultipartFile profileImage) {
         isValidImageExtension(profileImage.getOriginalFilename());
       try {
         String storedImagePath = uploadImageToS3(profileImage);
@@ -276,7 +289,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             ).withCannedAcl(CannedAccessControlList.PublicRead));
 
         } catch (Exception e) {
-            throw new RecordException(ErrorCode.IMAGE_SAVE_ERROR);
+            throw new MemberException(ErrorCode.IMAGE_SAVE_ERROR);
         } finally {
             byteArrayIs.close();
             imageInput.close();
@@ -326,7 +339,6 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
         }
     }
-
 
     @Override
     public PasswordUpdate.Response updatePassword(PasswordUpdate.Request request, Long id, MemberDto memberDto) {

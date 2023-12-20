@@ -126,7 +126,11 @@ public class MemberEntity {
     this.role = Role.USER;
   }
   public void updateMemberProfileImage(String profileImageAddress) {
-    this.profileImage = profileImageAddress;
+    if (profileImageAddress == null) {
+      this.profileImage = null;
+    } else {
+      this.profileImage = profileImageAddress;
+    }
   }
 
   /**
