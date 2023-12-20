@@ -35,8 +35,8 @@ public class RecruitRegister {
 
     private String gender;
 
-    private String gradeFrom;
-    private String gradeTo;
+    private SportsGrade gradeFrom;
+    private SportsGrade gradeTo;
 
     private String address;
     private String postCode;
@@ -64,8 +64,8 @@ public class RecruitRegister {
           .recruitCount(request.getRecruitCount())
           .meetingDate(request.getMeetingDate())
           .recruitStatus(RecruitStatus.RECRUITING)
-          .gradeFrom(SportsGrade.stringToInt(request.getGradeFrom()))
-          .gradeTo(SportsGrade.stringToInt(request.getGradeTo()))
+          .gradeFrom(request.getGradeFrom().getScore())
+          .gradeTo(request.getGradeTo().getScore())
           .build();
     }
   }

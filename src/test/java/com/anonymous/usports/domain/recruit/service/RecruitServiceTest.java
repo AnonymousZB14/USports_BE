@@ -130,8 +130,8 @@ class RecruitServiceTest {
           .recruitCount(recruit.getRecruitCount())
           .meetingDate(recruit.getMeetingDate())
           .gender(recruit.getGender().getDescription())
-          .gradeFrom(SportsGrade.intToGrade(recruit.getGradeFrom()).getDescription())
-          .gradeTo(SportsGrade.intToGrade(recruit.getGradeTo()).getDescription())
+          .gradeFrom(SportsGrade.intToGrade(recruit.getGradeFrom()))
+          .gradeTo(SportsGrade.intToGrade(recruit.getGradeTo()))
           .build();
     }
 

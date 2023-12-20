@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.jni.Error;
 
 @Slf4j
 @AllArgsConstructor
@@ -90,6 +91,14 @@ public enum SportsGrade {
     return Stream.of(SportsGrade.values())
         .filter(sg -> sg.getDescription().equals(grade))
         .map(sg -> sg.getScore())
+        .findFirst()
+        .orElseThrow(() -> new TypeException(ErrorCode.TYPE_INVALID_ERROR));
+  }
+
+  public static String intToString(int score){
+    return Stream.of(SportsGrade.values())
+        .filter(sg -> sg.getScore() == score)
+        .map(sg -> sg.getDescription())
         .findFirst()
         .orElseThrow(() -> new TypeException(ErrorCode.TYPE_INVALID_ERROR));
   }

@@ -5,6 +5,7 @@ import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
+import com.anonymous.usports.global.type.SportsGrade;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -62,9 +63,9 @@ public class RecruitDto {
 
   private RecruitStatus recruitStatus;
 
-  private int gradeFrom;
+  private String gradeFrom;
 
-  private int gradeTo;
+  private String gradeTo;
 
   private LocalDateTime registeredAt;
 
@@ -88,8 +89,8 @@ public class RecruitDto {
         .recruitCount(recruitEntity.getRecruitCount())
         .meetingDate(recruitEntity.getMeetingDate())
         .recruitStatus(recruitEntity.getRecruitStatus())
-        .gradeFrom(recruitEntity.getGradeFrom())
-        .gradeTo(recruitEntity.getGradeTo())
+        .gradeFrom(SportsGrade.intToString(recruitEntity.getGradeFrom()))
+        .gradeTo(SportsGrade.intToString(recruitEntity.getGradeTo()))
         .registeredAt(recruitEntity.getRegisteredAt())
         .updatedAt(recruitEntity.getUpdatedAt())
         .build();
