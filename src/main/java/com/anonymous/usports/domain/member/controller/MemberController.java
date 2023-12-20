@@ -32,7 +32,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Api(tags = "회원(Member)")
 @RestController
@@ -147,6 +149,19 @@ public class MemberController {
       @AuthenticationPrincipal MemberDto memberDto
   ) {
     return memberService.updateMember(request, memberDto, id);
+  }
+
+  /**
+   * 프로필 이미지 등록 / 변경 / 삭제 http://localhost:8080/member/{memberId}/profile-image
+   */
+  @PutMapping("/{memberId}/profile-image")
+  @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
+  @ApiOperation(value = "프로필 이미지 변경, 삭제", notes = "회원 정보 수정과 별개로 프로필 이미지만 변경 및 삭제")
+  public MemberUpdate.Response updateMemberProfileImage(
+      @PathVariable("memberId") Long id,
+      @RequestPart(value = "profileImage",required = false) MultipartFile profileImage,
+      @AuthenticationPrincipal MemberDto memberDto){
+    return memberService.updateMemberProfileImage(profileImage, memberDto, id);
   }
 
   /**

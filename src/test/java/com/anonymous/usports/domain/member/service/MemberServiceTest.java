@@ -681,7 +681,6 @@ public class MemberServiceTest {
                     .phoneNumber(phoneNumber)
                     .birthDate(birthDate)
                     .gender(Gender.FEMALE)
-                    .profileImage("picture")
                     .activeRegion(activeRegion)
                     .profileOpen("close")
                     .interestedSportsList(sports)
