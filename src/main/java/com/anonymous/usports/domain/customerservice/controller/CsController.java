@@ -12,8 +12,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/cs")
 @RequiredArgsConstructor
+@Slf4j
 public class CsController {
 
   private final CsService csService;
@@ -67,6 +70,7 @@ public class CsController {
   @ApiOperation(value = "신고글 보기", notes = "신고글의 자세한 내용을 볼 수 있다")
   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
   public CsDto getCsDetail(
+      @AuthenticationPrincipal MemberDto memberDto,
       @PathVariable("cs_id") Long csId
   ) {
     return csService.getDetailCs(csId);
@@ -85,16 +89,24 @@ public class CsController {
   /**
    * ========== admin 영역 ===========
    */
-
   @GetMapping("/admin")
   @ApiOperation(value = "신고글 찾기", notes = "Admin이 신고글 찾는 것")
   @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
   public CsListDto getCsListAdmin(
       @RequestParam(required = false, defaultValue = "1") int page,
       @RequestParam(required = false) String email,
-      @RequestParam(required = false) int statusNum,
+      @RequestParam(required = false) String statusNum,
       @AuthenticationPrincipal MemberDto memberDto
   ) {
+
+    if (!StringUtils.hasText(email)) {
+      email = null;
+    }
+
+    if (!StringUtils.hasText(statusNum)) {
+      statusNum = null;
+    }
+
     return csService.getCsListAdmin(memberDto, email, statusNum, page);
   }
 

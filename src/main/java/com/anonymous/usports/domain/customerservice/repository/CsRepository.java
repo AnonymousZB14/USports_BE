@@ -17,10 +17,13 @@ public interface CsRepository extends JpaRepository<CsEntity, Long> {
   @Query(value = "SELECT cs FROM customer_service cs"
       + " WHERE (:member IS NULL OR cs.memberEntity = :member)"
       + " AND (:status IS NULL OR cs.csStatus = :status)"
-      + "ORDER BY cs.updatedAt DESC")
-  Page<CsEntity> findALlByConditionsFromAdmin(
+      + " ORDER BY cs.updatedAt DESC")
+  Page<CsEntity> findAllByConditionsFromAdmin(
       @Param("member") MemberEntity member,
       @Param("status") CsStatus csStatus,
       Pageable pageable
   );
+
+  // http://localhost:8080/cs/admin?email=&statusNum=&page=
+  // http://localhost:8080/cs/admin
 }

@@ -20,7 +20,7 @@ public interface CsService {
 
   CsListDto getCsList(MemberDto member, int page);
 
-  CsListDto getCsListAdmin(MemberDto member, String email, int statusNum, int page);
+  CsListDto getCsListAdmin(MemberDto member, String email, String statusNum, int page);
 
   ChangeStatusDto.Response changeCsStatus(ChangeStatusDto.Request request, Long csId, MemberDto memberDto);
 

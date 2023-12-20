@@ -21,6 +21,7 @@ import com.anonymous.usports.global.type.Role;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CsServiceImpl implements CsService {
 
   private final CsRepository csRepository;
@@ -43,7 +45,7 @@ public class CsServiceImpl implements CsService {
         .title(request.getTitle())
         .content(request.getContent())
         .memberEntity(member)
-        .csStatus(CsStatus.Registered)
+        .csStatus(CsStatus.REGISTERED)
         .build();
 
     csRepository.save(cs);
@@ -60,10 +62,12 @@ public class CsServiceImpl implements CsService {
 
     if (Role.ADMIN.equals(member.getRole())) {
       csRepository.delete(cs);
-    }
-
-    if (member.equals(cs.getMemberEntity())) {
-      csRepository.delete(cs);
+    } else {
+      if (member.equals(cs.getMemberEntity())) {
+        csRepository.delete(cs);
+      } else {
+        throw new CsException(ErrorCode.CS_NOT_WRITTEN_BY_CURRENT_USER);
+      }
     }
 
     return new DeleteCS.Response(csId, CsConstant.SUCCESSFULLY_DELETED);
@@ -106,7 +110,7 @@ public class CsServiceImpl implements CsService {
     Page<CsEntity> csListPage = csRepository.findAllByMemberEntityOrderByUpdatedAtDesc(
         member, PageRequest.of(page - 1, CsConstant.maxElements));
 
-    if (page < 1 && page > csListPage.getTotalPages())
+    if (page < 1 || page > csListPage.getTotalPages())
       throw new CsException(ErrorCode.PAGE_NOT_FOUND);
 
     List<CsDto> csList = csListPage.getContent().stream()
@@ -122,28 +126,37 @@ public class CsServiceImpl implements CsService {
   }
 
   @Override
-  public CsListDto getCsListAdmin(MemberDto member, String email, int statusNum, int page) {
+  public CsListDto getCsListAdmin(MemberDto member, String email, String statusNum, int page) {
 
     if (!Role.ADMIN.equals(member.getRole()))
       throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
 
-    MemberEntity memberEntity = memberRepository.findById(member.getMemberId())
-        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+    MemberEntity memberEntity = null;
 
-    CsStatus csStatus;
-
-    if (statusNum == 1) {
-      csStatus = CsStatus.Registered;
-    } else if (statusNum == 2) {
-      csStatus = CsStatus.ING;
-    } else if (statusNum == 3) {
-      csStatus = CsStatus.Finished;
-    } else {
-      csStatus = null;
+    if (email != null) {
+      memberEntity = memberRepository.findByEmail(email)
+          .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
-    Page<CsEntity> csPage = csRepository.findALlByConditionsFromAdmin(
-        memberEntity, csStatus, PageRequest.of(page, CsConstant.maxElements));
+    CsStatus csStatus = null;
+
+    if (statusNum != null) {
+      if (statusNum.equals("1")) {
+        csStatus = CsStatus.REGISTERED;
+      } else if (statusNum.equals("2")) {
+        csStatus = CsStatus.ING;
+      } else if (statusNum.equals("3")) {
+        csStatus = CsStatus.FINISHED;
+      }
+    }
+
+    Page<CsEntity> csPage = csRepository.findAllByConditionsFromAdmin(
+        memberEntity, csStatus, PageRequest.of(page - 1, CsConstant.maxElements));
+
+    log.info("{}", csPage.getContent());
+
+    if (page < 1 || page > csPage.getTotalPages())
+      throw new CsException(ErrorCode.PAGE_NOT_FOUND);
 
     List<CsDto> csList = csPage.getContent().stream()
         .map(CsDto::fromEntity).collect(Collectors.toList());
@@ -171,16 +184,16 @@ public class CsServiceImpl implements CsService {
     String csStatus;
 
     if (request.getStatusNum() == 1) {
-      cs.updateStatus(CsStatus.Registered);
-      csStatus = CsStatus.Registered.getDescription();
+      cs.updateStatus(CsStatus.REGISTERED);
+      csStatus = CsStatus.REGISTERED.getDescription();
 
     } else if (request.getStatusNum() == 2) {
       cs.updateStatus(CsStatus.ING);
       csStatus = CsStatus.ING.getDescription();
 
     } else if (request.getStatusNum() == 3) {
-      cs.updateStatus(CsStatus.Finished);
-      csStatus = CsStatus.Finished.getDescription();
+      cs.updateStatus(CsStatus.FINISHED);
+      csStatus = CsStatus.FINISHED.getDescription();
 
     } else {
       throw new CsException(ErrorCode.INPUT_VALUE_NOT_EXIST_FOR_CS_STATUS);

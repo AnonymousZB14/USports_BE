@@ -8,6 +8,8 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -47,6 +49,7 @@ public class CsEntity {
   private String content;
 
   @Column(name = "status", nullable = false)
+  @Enumerated(value= EnumType.STRING)
   private CsStatus csStatus;
 
   @CreatedDate
