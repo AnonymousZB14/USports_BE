@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.member.security;
 
+import com.anonymous.usports.domain.member.security.handler.CustomAccessDeniedHandler;
 import com.anonymous.usports.domain.member.security.handler.OAuth2SuccessHandler;
 import com.anonymous.usports.domain.member.service.impl.CustomOAuth2MemberService;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter authenticationFilter;
     private final CustomOAuth2MemberService customOAuth2MemberService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -41,7 +44,10 @@ public class SecurityConfig {
                  .and().successHandler(oAuth2SuccessHandler);
 
          http
-                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                  .authenticationEntryPoint(customAuthenticationEntryPoint)
+                  .accessDeniedHandler(customAccessDeniedHandler);
 
         return http.build();
     }
