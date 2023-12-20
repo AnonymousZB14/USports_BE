@@ -252,22 +252,21 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
       if(memberEntity.getProfileImage()!=null){
         deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
       }
-      memberEntity.updateMemberProfileImage(profileImageAddress); //DB에 새로운 프로필 이미지 업데이트
-    } else { //profileImage에 null 값 들어올 때 -> 프로필 이미지 제거
-      if(memberEntity.getProfileImage()!=null){
-        deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
-        memberEntity.updateMemberProfileImage(null);
-      }
+      memberEntity.updateMemberProfileImage(profileImageAddress);//DB에 새로운 프로필 이미지 업데이트
+      return MemberUpdate.Response.fromEntity(memberEntity);
     }
-    MemberUpdate.Response response = MemberUpdate.Response.fromEntity(memberEntity);
-    return response;
+    //profileImage에 null 값 들어올 때 -> 프로필 이미지 제거
+    if(memberEntity.getProfileImage()!=null){
+      deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
+    }
+    memberEntity.updateMemberProfileImage(null);
+    return MemberUpdate.Response.fromEntity(memberEntity);
   }
 
   private String saveImage(MultipartFile profileImage) {
     isValidImageExtension(profileImage.getOriginalFilename());
     try {
-      String storedImagePath = uploadImageToS3(profileImage);
-      return storedImagePath;
+      return uploadImageToS3(profileImage);
     } catch (IOException e) {
       throw new MemberException(ErrorCode.IMAGE_SAVE_ERROR);
     }
@@ -287,11 +286,10 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     ByteArrayInputStream byteArrayIs = new ByteArrayInputStream(bytes);
 
     try {
-      PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(
+      amazonS3.putObject(new PutObjectRequest(
           //bucketname, key, inputStream, metadata
           bucketName, changedName, byteArrayIs, metadata
       ).withCannedAcl(CannedAccessControlList.PublicRead));
-
     } catch (Exception e) {
       throw new MemberException(ErrorCode.IMAGE_SAVE_ERROR);
     } finally {
@@ -337,9 +335,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
       URL url = new URL(imageUrl);
       String Decoding = URLDecoder.decode(url.getPath(), "UTF-8"); // 파일명에 한글이 있을 경우 Decode 필요
       return Decoding.substring(1); // '/'제거
-    } catch (MalformedURLException e) {
-      throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
-    } catch (UnsupportedEncodingException e) {
+    } catch (MalformedURLException|UnsupportedEncodingException e) {
       throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
     }
   }
