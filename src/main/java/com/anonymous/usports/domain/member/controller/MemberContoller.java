@@ -30,7 +30,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Api(tags = "회원(Member)")
 @RestController
@@ -136,10 +138,11 @@ public class MemberContoller {
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
   public MemberUpdate.Response updateMember(
       @PathVariable("memberId") Long id,
-      @RequestBody @Valid MemberUpdate.Request request,
+      @RequestPart(value = "profileImage",required = false) MultipartFile profileImage,
+      @RequestPart(value = "userInfo") @Valid MemberUpdate.Request request,
       @AuthenticationPrincipal MemberDto memberDto
   ) {
-    return memberService.updateMember(request, memberDto, id);
+    return memberService.updateMember(request, memberDto, id, profileImage);
   }
 
   /**

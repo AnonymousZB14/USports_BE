@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.member.service;
 
 
 import com.anonymous.usports.domain.member.dto.*;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberService {
 
@@ -30,7 +31,7 @@ public interface MemberService {
     /**
      * 회원 수정
      */
-    MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId);
+    MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId, MultipartFile profileImage);
 
     /**
      * 회원 비밀번호 수정

@@ -44,8 +44,6 @@ public class MemberUpdate {
 
         private String profileContent;
 
-        private String profileImage;
-
         @NotBlank(message="자주 활동하는 '시'를 꼭 입력해주세요")
         private String activeRegion;
 
