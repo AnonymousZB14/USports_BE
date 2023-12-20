@@ -14,6 +14,7 @@ import com.anonymous.usports.domain.member.repository.InterestedSportsRepository
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.MailService;
 import com.anonymous.usports.domain.member.service.MemberService;
+import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.MailConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
@@ -150,66 +151,68 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
         return memberEntity;
     }
 
-    // 관심 운동이 있을 경우, 수정을 했을 상황을 대비해, 이미 저장되어 있는 데이터는 다 삭제하고 다시 저장하기
-    private List<InterestedSportsEntity> saveInterestedSports(List<Long> allSelectedSports, MemberEntity memberEntity){
+  // 관심 운동이 있을 경우, 수정을 했을 상황을 대비해, 이미 저장되어 있는 데이터는 다 삭제하고 다시 저장하기
+  private List<InterestedSportsEntity> saveInterestedSportsEntities(List<Long> allSelectedSports,
+      MemberEntity memberEntity) {
 
-        interestedSportsRepository.deleteAllByMemberEntity(memberEntity);
+    interestedSportsRepository.deleteAllByMemberEntity(memberEntity);
 
-        return allSelectedSports.stream()
-                    .map(id -> InterestedSportsEntity.builder()
-                        .sports(sportsRepository.findById(id)
-                            .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND)))
-                        .memberEntity(memberEntity)
-                        .build())
-                    .collect(Collectors.toList());
+    return interestedSportsRepository.saveAll(
+        allSelectedSports.stream()
+            .map(id ->
+                InterestedSportsEntity.builder()
+                    .sports(sportsRepository.findById(id)
+                        .orElseThrow(() -> new MyException(ErrorCode.SPORTS_NOT_FOUND)))
+                    .memberEntity(memberEntity)
+                    .build())
+            .collect(Collectors.toList()));
+  }
+
+  @Override
+  @Transactional
+  public MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto,
+      Long memberId) {
+
+    if (!Role.ADMIN.equals(memberDto.getRole()) && !memberId.equals(memberDto.getMemberId())) {
+      throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
     }
 
-    @Override
-    @Transactional
-    public MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId) {
+    // 닉네임, 이메일를 수정 할 때, 겹치지 않게
+    // 하는 김에 MemberEntity 가지고 오기
+    MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
 
-        if (!Role.ADMIN.equals(memberDto.getRole()) && !memberId.equals(memberDto.getMemberId())) {
-            throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
-        }
+    if (Role.UNAUTH.equals(memberDto.getRole()) && memberDto.getEmailAuthAt() == null) {
+      int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(memberDto.getEmail());
 
-        // 닉네임, 이메일를 수정 할 때, 겹치지 않게
-        // 하는 김에 MemberEntity 가지고 오기
-        MemberEntity memberEntity = checkDuplicationUpdate(memberDto, request);
+      if (redisEmailAuthNumber != request.getEmailAuthNumber()) {
+        throw new MemberException(ErrorCode.EMAIL_AUTH_NUMBER_UNMATCH);
+      }
 
-        if (Role.UNAUTH.equals(memberDto.getRole()) && memberDto.getEmailAuthAt() == null) {
-            int redisEmailAuthNumber = authRedisRepository.getEmailAuthNumber(memberDto.getEmail());
-
-            if (redisEmailAuthNumber != request.getEmailAuthNumber()) {
-                throw new MemberException(ErrorCode.EMAIL_AUTH_NUMBER_UNMATCH);
-            }
-
-            memberEntity.setEmailAuthAt(LocalDateTime.now());
-        }
-
-        // 관심 운동이 아예 없으면 안 된다
-        if (request.getInterestedSports().size() == 0) {
-            throw new MemberException(ErrorCode.NEED_AT_LEAST_ONE_SPORTS);
-        }
-
-        // 맴버 entity 수정
-        memberEntity.updateMember(request);
-
-        // 관심 운동 저장
-        interestedSportsRepository.saveAll(saveInterestedSports(
-                request.getInterestedSports(),
-                memberEntity
-        ));
-
-        List<String> sportsList = interestedSportsRepository.findAllByMemberEntity(memberEntity)
-                .stream()
-                .map(s -> s.getSports().getSportsName())
-                .collect(Collectors.toList());
-
-        MemberUpdate.Response response = MemberUpdate.Response.fromEntity(memberEntity);
-        response.setInterestedSports(sportsList);
-
-        return response;
+      memberEntity.setEmailAuthAt(LocalDateTime.now());
     }
+
+    // 관심 운동이 아예 없으면 안 된다
+    if (request.getInterestedSportsList().isEmpty()) {
+      throw new MemberException(ErrorCode.NEED_AT_LEAST_ONE_SPORTS);
+    }
+
+    // 맴버 entity 수정
+    memberEntity.updateMember(request);
+
+    // 관심 운동 삭제 후 저장
+    List<InterestedSportsEntity> savedInterestedSportsList =
+        saveInterestedSportsEntities(request.getInterestedSportsList(), memberEntity);
+
+    MemberUpdate.Response response = MemberUpdate.Response.fromEntity(memberEntity);
+    response.setInterestedSportsList(
+        savedInterestedSportsList.stream()
+            .map(InterestedSportsEntity::getSports)
+            .map(SportsDto::new)
+            .collect(Collectors.toList())
+    );
+
+    return response;
+  }
 
     @Override
     public PasswordUpdate.Response updatePassword(PasswordUpdate.Request request, Long id, MemberDto memberDto) {
