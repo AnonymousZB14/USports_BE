@@ -122,9 +122,16 @@ public class MemberEntity {
     this.phoneNumber = request.getPhoneNumber();
     this.birthDate = request.getBirthDate();
     this.gender = request.getGender();
-    this.profileImage = request.getProfileImage();
     this.activeRegion = request.getActiveRegion();
     this.role = Role.USER;
+  }
+
+  public void updateMemberProfileImage(String profileImageAddress) {
+    if (profileImageAddress == null) {
+      this.profileImage = null;
+    } else {
+      this.profileImage = profileImageAddress;
+    }
   }
 
   /**

@@ -1,5 +1,12 @@
 package com.anonymous.usports.domain.member.service.impl;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.util.IOUtils;
 import com.anonymous.usports.domain.member.dto.MailResponse;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberLogin;
@@ -22,21 +29,33 @@ import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
+import com.anonymous.usports.global.exception.RecordException;
 import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -50,6 +69,10 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     private final TokenRepository tokenRepository;
     private final AuthRedisRepository authRedisRepository;
     private final MailService mailService;
+    private final AmazonS3 amazonS3;
+    @Value("${cloud.aws.s3.bucketName}")
+    private String bucketName;
+
 
     private void checkDuplication(String accountName, String email){
         if (memberRepository.existsByAccountName(accountName)) {
@@ -214,7 +237,114 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     return response;
   }
 
-    @Override
+  // 프로필 이미지만 등록 / 변경 / 삭제
+  @Override
+  @Transactional
+  public MemberUpdate.Response updateMemberProfileImage(MultipartFile profileImage, MemberDto memberDto,
+      Long memberId) {
+    if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
+      throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
+    }
+    MemberEntity memberEntity = memberRepository.findById(memberDto.getMemberId())
+        .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+    if(!profileImage.isEmpty()) { // 파일 업로드 있을 때 -> 프로필 이미지 등록 및 변경
+      String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
+      if(memberEntity.getProfileImage()!=null){
+        deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
+      }
+      memberEntity.updateMemberProfileImage(profileImageAddress); //DB에 새로운 프로필 이미지 업데이트
+    } else { //profileImage에 null 값 들어올 때 -> 프로필 이미지 제거
+      if(memberEntity.getProfileImage()!=null){
+        deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
+        memberEntity.updateMemberProfileImage(null);
+      }
+    }
+    MemberUpdate.Response response = MemberUpdate.Response.fromEntity(memberEntity);
+    return response;
+  }
+
+  private String saveImage(MultipartFile profileImage) {
+    isValidImageExtension(profileImage.getOriginalFilename());
+    try {
+      String storedImagePath = uploadImageToS3(profileImage);
+      return storedImagePath;
+    } catch (IOException e) {
+      throw new MemberException(ErrorCode.IMAGE_SAVE_ERROR);
+    }
+  }
+
+  // 파일 S3 업로드
+  private String uploadImageToS3(MultipartFile profileImage) throws IOException {
+    // 이미지를 S3에 업로드하고 이미지의 URL을 반환
+    String originName = profileImage.getOriginalFilename(); // 원본 이미지 이름
+    String ext = originName.substring(originName.lastIndexOf(".")); // 확장자
+    String changedName = changedImageName(originName); // 새로 생성된 이미지 이름
+    ObjectMetadata metadata = new ObjectMetadata();// 메타데이터
+    metadata.setContentType("image/" + ext);
+    InputStream imageInput = profileImage.getInputStream();
+    byte[] bytes = IOUtils.toByteArray(imageInput);
+    metadata.setContentLength(bytes.length);
+    ByteArrayInputStream byteArrayIs = new ByteArrayInputStream(bytes);
+
+    try {
+      PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(
+          //bucketname, key, inputStream, metadata
+          bucketName, changedName, byteArrayIs, metadata
+      ).withCannedAcl(CannedAccessControlList.PublicRead));
+
+    } catch (Exception e) {
+      throw new MemberException(ErrorCode.IMAGE_SAVE_ERROR);
+    } finally {
+      byteArrayIs.close();
+      imageInput.close();
+    }
+    return amazonS3.getUrl(bucketName, changedName).toString(); // 데이터베이스에 저장할 이미지가 저장된 주소
+  }
+
+  // 파일명에 붙일 UUID 생성
+  private String changedImageName(String originName) {
+    String random = UUID.randomUUID().toString();
+    return random + originName;
+  }
+
+  // 파일 확장자 체크
+  private void isValidImageExtension(String filename) {
+    int dotIndex = filename.lastIndexOf('.');
+    if (dotIndex == -1) {
+      throw new MemberException(ErrorCode.INVALID_IMAGE_EXTENSION); // 파일에 확장자가 없는 경우
+    }
+
+    String extension = filename.substring(dotIndex + 1).toLowerCase();
+    List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");//img 태그에서 사용할 수 있는 것들
+    if (!allowedExtensions.contains(extension)) {
+      throw new MemberException(ErrorCode.INVALID_IMAGE_EXTENSION); // 허용되지 않는 확장자인 경우 예외 던지기
+    }
+  }
+
+  // S3에서 객체 제거 메서드
+  private void deleteImageFromS3(String imageAddress) {
+    String key = extractKeyFromImageUrl(imageAddress);
+    try {
+      amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
+    } catch (Exception e) {
+      throw new RecordException(ErrorCode.IMAGE_DELETE_ERROR);
+    }
+  }
+
+  // 객체에서 Key 추출하는 메서드
+  private String extractKeyFromImageUrl(String imageUrl) {
+    try {
+      URL url = new URL(imageUrl);
+      String Decoding = URLDecoder.decode(url.getPath(), "UTF-8"); // 파일명에 한글이 있을 경우 Decode 필요
+      return Decoding.substring(1); // '/'제거
+    } catch (MalformedURLException e) {
+      throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
+    } catch (UnsupportedEncodingException e) {
+      throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
+    }
+  }
+
+  @Override
     public PasswordUpdate.Response updatePassword(PasswordUpdate.Request request, Long id, MemberDto memberDto) {
 
         // 기존 비밀번호와 일치하는지 확인
