@@ -98,6 +98,9 @@ public class MemberEntity {
   @Column(name = "evaluation_count")
   private Long evaluationCount;
 
+  @Column(name = "penalty_count")
+  private Long penaltyCount;
+
   @Column(name = "role", nullable = false)
   @Enumerated(EnumType.STRING)
   private Role role;
@@ -143,6 +146,10 @@ public class MemberEntity {
         ((this.mannerScore * currentCount) + (double) total / 3) / (currentCount + 1);
 
     this.evaluationCount += 1;
+  }
+
+  public void addPenaltyCount(){
+    this.penaltyCount += 1;
   }
 
   @Override

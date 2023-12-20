@@ -38,4 +38,6 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
       Pageable pageable);
 
   boolean existsByStatusAndMemberAndRecruit(ParticipantStatus status, MemberEntity member, RecruitEntity recruit);
+
+  List<ParticipantEntity> findAllByEvaluationAtIsNullAndMeetingDateBetween(LocalDateTime from, LocalDateTime to);
 }
