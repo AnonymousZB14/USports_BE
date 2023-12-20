@@ -1,6 +1,7 @@
 package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
@@ -42,12 +43,10 @@ public class MemberUpdate {
         @NotBlank(message="공개 비공개 여부를 입력해주세요, open 또는 close을 입력해주세요")
         private String profileOpen;
 
-        private String profileContent;
-
         @NotBlank(message="자주 활동하는 '시'를 꼭 입력해주세요")
         private String activeRegion;
 
-        private List<Long> interestedSports;
+        private List<Long> interestedSportsList;
     }
 
     @Getter
@@ -66,7 +65,8 @@ public class MemberUpdate {
         private String profileImage;
         private String activeRegion;
         private Role role;
-        private List<String> interestedSports;
+
+        private List<SportsDto> interestedSportsList;
 
         public static MemberUpdate.Response fromEntity(MemberEntity memberEntity) {
             return MemberUpdate.Response.builder()
