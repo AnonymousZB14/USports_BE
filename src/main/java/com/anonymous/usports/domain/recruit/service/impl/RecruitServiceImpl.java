@@ -162,7 +162,7 @@ public class RecruitServiceImpl implements RecruitService {
       sportsEntity = sportsRepository.findBySportsName(sports)
           .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
     }
-    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT, Sort.by("registeredAt").descending());
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX, Sort.by("registeredAt").descending());
 
     Page<RecruitEntity> findPage = Page.empty();
 
