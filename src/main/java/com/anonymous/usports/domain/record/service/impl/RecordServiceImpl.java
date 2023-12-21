@@ -226,7 +226,7 @@ public class RecordServiceImpl implements RecordService {
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
 
     Page<RecordEntity> recordEntityPage;
-    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT,
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
         Sort.by(Direction.DESC, "updatedAt"));
 
     if (recordType == RecordType.RECOMMENDATION) {
