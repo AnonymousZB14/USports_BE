@@ -52,8 +52,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -311,18 +314,24 @@ class RecordServiceImplTest {
             ));
         recordEntityList.add(record);
       }
+      int page = 1;
+      PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
+          Sort.by(Direction.DESC, "updatedAt"));
+      int start = (int) pageRequest.getOffset();
+      int end = Math.min((start + pageRequest.getPageSize()), recordEntityList.size());
+      List<RecordEntity> paginatedRecordEntities = recordEntityList.subList(start,end);
       when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
       when(interestedSportsRepository.findAllByMemberEntity(member)).thenReturn(
           interestedSportsList);
-      when(recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList)).thenReturn(
-          recordEntityList);
+      when(recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList,pageRequest)).thenReturn(
+          new PageImpl<>(paginatedRecordEntities,pageRequest,recordEntityList.size()));
 
       RecordListDto result = recordService.getRecordsPage(RecordType.RECOMMENDATION, 1,
           member.getMemberId());
 
       verify(memberRepository, times(1)).findById(1L);
       verify(interestedSportsRepository, times(1)).findAllByMemberEntity(member);
-      verify(recordRepository, times(1)).findAllOpenProfileRecordsBySportsIn(any(List.class));
+      verify(recordRepository, times(1)).findAllOpenProfileRecordsBySportsIn(sportsList,pageRequest);
 
       assertEquals(result.getCurrentElements(), 2);
     }
@@ -342,12 +351,20 @@ class RecordServiceImplTest {
           Collections.emptyList());
       RecordEntity record2 = createRecord(101L, theOtherMember, createSports(30L),
           Collections.emptyList());
-      List<RecordEntity> followRecords = Arrays.asList(record1, record2);
+      List<RecordEntity> recordEntityList = new ArrayList<>();
+      recordEntityList.add(record1);
+      recordEntityList.add(record2);
+      int page = 1;
+      PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
+          Sort.by(Direction.DESC, "updatedAt"));
+      int start = (int) pageRequest.getOffset();
+      int end = Math.min((start + pageRequest.getPageSize()), recordEntityList.size());
+      List<RecordEntity> paginatedRecordEntities = recordEntityList.subList(start,end);
       when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
       when(followRepository.findAllByFromMemberAndFollowStatus(member, FollowStatus.ACTIVE))
           .thenReturn(followEntityList);
-      when(recordRepository.findAllByMemberIn(Arrays.asList(otherMember, theOtherMember)))
-          .thenReturn(followRecords);
+      when(recordRepository.findAllByMemberIn(Arrays.asList(otherMember, theOtherMember),pageRequest))
+          .thenReturn(new PageImpl<>(paginatedRecordEntities,pageRequest,recordEntityList.size()));
       RecordListDto result = recordService.getRecordsPage(RecordType.FOLLOW, 1,
           member.getMemberId());
 
@@ -355,7 +372,7 @@ class RecordServiceImplTest {
       verify(followRepository, times(1)).findAllByFromMemberAndFollowStatus(member,
           FollowStatus.ACTIVE);
       verify(recordRepository, times(1)).findAllByMemberIn(
-          Arrays.asList(otherMember, theOtherMember));
+          Arrays.asList(otherMember,theOtherMember),pageRequest);
 
       assertEquals(result.getCurrentElements(), 2);
 
