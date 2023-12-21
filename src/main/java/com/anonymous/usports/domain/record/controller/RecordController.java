@@ -96,9 +96,8 @@ public class RecordController {
   @ApiOperation("기록 상세 페이지")
   @GetMapping("/record/{recordId}")
   public ResponseEntity<RecordDto> getRecordDetail(@PathVariable Long recordId,
-      @AuthenticationPrincipal MemberDto loginMember,
       @RequestParam(value = "page",defaultValue = "1") int page) {
-    RecordDto recordDetail = recordService.getRecordDetail(recordId, loginMember.getMemberId(), page);
+    RecordDto recordDetail = recordService.getRecordDetail(recordId, page);
     return ResponseEntity.ok(recordDetail);
   }
 
