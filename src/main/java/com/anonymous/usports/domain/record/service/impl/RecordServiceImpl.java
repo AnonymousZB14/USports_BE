@@ -5,7 +5,6 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.util.IOUtils;
 import com.anonymous.usports.domain.comment.entity.CommentEntity;
 import com.anonymous.usports.domain.comment.repository.CommentRepository;
@@ -49,12 +48,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -212,32 +209,33 @@ public class RecordServiceImpl implements RecordService {
     MemberEntity member = memberRepository.findById(loginMemberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    Page<RecordEntity> recordEntityPage;
-    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT,
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
         Sort.by(Direction.DESC, "updatedAt"));
 
+    //RecordType : RECOMMENDATION
     if (recordType == RecordType.RECOMMENDATION) {
-      List<InterestedSportsEntity> interestedSportsEntityList = interestedSportsRepository.findAllByMemberEntity(
-          member);
+      List<InterestedSportsEntity> interestedSportsEntityList =
+          interestedSportsRepository.findAllByMemberEntity(member);
+
       List<SportsEntity> sportsList = interestedSportsEntityList.stream()
           .map(InterestedSportsEntity::getSports)
           .collect(Collectors.toList());
-      List<RecordEntity> recommendationRecords = recordRepository.findAllOpenProfileRecordsBySportsIn(
-          sportsList);
-      recordEntityPage = new PageImpl<>(recommendationRecords, pageRequest,
-          recommendationRecords.size());
-    } else {
-      List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
-          FollowStatus.ACTIVE);
 
-      List<MemberEntity> followingsMembers = followings.stream()
-          .map(FollowEntity::getToMember)
-          .collect(Collectors.toList());
-      List<RecordEntity> followRecords = recordRepository.findAllByMemberIn(followingsMembers);
-      recordEntityPage = new PageImpl<>(followRecords, pageRequest, followRecords.size());
+      Page<RecordEntity> recommendationRecords =
+          recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList, pageRequest);
+      return new RecordListDto(recommendationRecords);
     }
 
-    return new RecordListDto(recordEntityPage);
+    //Record Type : FOLLOW
+    List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
+        FollowStatus.ACTIVE);
+
+    List<MemberEntity> followingsMembers = followings.stream()
+        .map(FollowEntity::getToMember)
+        .collect(Collectors.toList());
+    Page<RecordEntity> followRecords = recordRepository.findAllByMemberIn(followingsMembers, pageRequest);
+
+    return new RecordListDto(followRecords);
   }
 
   /**

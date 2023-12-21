@@ -15,10 +15,10 @@ import org.springframework.stereotype.Repository;
 public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
 
   @Query("SELECT r FROM record r JOIN r.member m where m.profileOpen = true and r.sports IN :sportsList order by r.updatedAt DESC")
-  List<RecordEntity> findAllOpenProfileRecordsBySportsIn(
-      @Param("sportsList") List<SportsEntity> sportsList);
+  Page<RecordEntity> findAllOpenProfileRecordsBySportsIn(
+      @Param("sportsList") List<SportsEntity> sportsList, Pageable pageable);
 
-  List<RecordEntity> findAllByMemberIn(List<MemberEntity> member);
+  Page<RecordEntity> findAllByMemberIn(List<MemberEntity> member, Pageable pageable);
 
   Page<RecordEntity> findByMemberOrderByRegisteredAtDesc(MemberEntity member, Pageable pageable);
 }

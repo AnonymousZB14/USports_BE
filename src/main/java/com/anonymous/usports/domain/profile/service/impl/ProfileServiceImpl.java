@@ -54,7 +54,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     Page<RecordEntity> recordEntityPage = recordRepository
         .findByMemberOrderByRegisteredAtDesc(
-            member, PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_PROFILE));
+            member, PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX));
 
     return new RecordListDto(recordEntityPage);
   }
@@ -68,7 +68,7 @@ public class ProfileServiceImpl implements ProfileService {
             member,
             ParticipantStatus.ACCEPTED,
             LocalDateTime.now(),
-            PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT,
+            PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
                 Sort.by("meetingDate").descending()));
 
     List<RecruitEntity> recruitEntityList =

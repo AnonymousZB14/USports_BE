@@ -169,7 +169,7 @@ class RecruitServiceTest {
 
       //then
       verify(participantRepository, times(1)).save(participantEntity);
-      assertThat(result.getSportsId()).isEqualTo(sports.getSportsId());
+      assertThat(result.getSportsName()).isEqualTo(sports.getSportsName());
       assertThat(result.getMemberId()).isEqualTo(member.getMemberId());
       assertThat(result.getRecruitStatus()).isEqualTo(RecruitStatus.RECRUITING);
     }
@@ -522,7 +522,7 @@ class RecruitServiceTest {
       Gender gender = Gender.MALE;
       boolean closeInclude = false;
 
-      for(long i = 101; i <= 108; i++){
+      for(long i = 101; i <= 105; i++){
         RecruitEntity recruit = createRecruit(i, memberEntity, football);
         recruit.setRegion(region);
         recruit.setGender(gender);
@@ -534,21 +534,22 @@ class RecruitServiceTest {
 
       when(recruitRepository.findAllByConditionNotIncludeEND(
           search, region, football, gender,
-          PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT, Sort.by("registeredAt").descending())))
+          PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX, Sort.by("registeredAt").descending())))
           .thenReturn(new PageImpl<>(recruitList));
+
       //when
       RecruitListDto result =
           recruitService.getRecruitsByConditions(
               page, search, region, footballString, gender, closeInclude);
 
       //then
-      assertThat(result.getCurrentElements()).isEqualTo(8);
+      assertThat(result.getCurrentElements()).isEqualTo(5);
       assertThat(result.getTotalPages()).isEqualTo(1);
       List<RecruitDto> list = result.getList();
       for (RecruitDto r : list){
         assertThat(r.getTitle().contains(search)).isTrue();
         assertThat(r.getRegion()).isEqualTo(region);
-        assertThat(r.getSportsId()).isEqualTo(football.getSportsId());
+        assertThat(r.getSportsName()).isEqualTo(football.getSportsName());
         assertThat(r.getGender()).isEqualTo(Gender.MALE);
         assertThat(r.getRecruitStatus()).isNotEqualTo(RecruitStatus.END);
       }

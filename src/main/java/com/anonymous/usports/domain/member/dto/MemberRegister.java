@@ -67,6 +67,7 @@ public class MemberRegister {
                     .passionScore(0L)
                     .teamworkScore(0L)
                     .evaluationCount(0L)
+                    .penaltyCount(0L)
                     .build();
     }
   }
