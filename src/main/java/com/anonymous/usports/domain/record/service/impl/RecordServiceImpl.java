@@ -225,33 +225,33 @@ public class RecordServiceImpl implements RecordService {
     MemberEntity member = memberRepository.findById(loginMemberId)
         .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
 
-    Page<RecordEntity> recordEntityPage;
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
         Sort.by(Direction.DESC, "updatedAt"));
 
+    //RecordType : RECOMMENDATION
     if (recordType == RecordType.RECOMMENDATION) {
-      List<InterestedSportsEntity> interestedSportsEntityList = interestedSportsRepository.findAllByMemberEntity(
-          member);
+      List<InterestedSportsEntity> interestedSportsEntityList =
+          interestedSportsRepository.findAllByMemberEntity(member);
+
       List<SportsEntity> sportsList = interestedSportsEntityList.stream()
           .map(InterestedSportsEntity::getSports)
           .collect(Collectors.toList());
-      List<RecordEntity> recommendationRecords = recordRepository.findAllOpenProfileRecordsBySportsIn(
-          sportsList);
-      recordEntityPage = new PageImpl<>(recommendationRecords, pageRequest,
-          recommendationRecords.size());
-    } else {
-      List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
-          FollowStatus.ACTIVE);
 
-      List<MemberEntity> followingsMembers = followings.stream()
-          .map(FollowEntity::getToMember)
-          .collect(Collectors.toList());
-      List<RecordEntity> followRecords = recordRepository.findAllByMemberIn(followingsMembers);
-      recordEntityPage = new PageImpl<>(followRecords, pageRequest, followRecords.size());
+      Page<RecordEntity> recommendationRecords =
+          recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList, pageRequest);
+      return new RecordListDto(recommendationRecords);
     }
 
-    RecordListDto recordListDto = new RecordListDto(recordEntityPage);
-    return recordListDto;
+    //Record Type : FOLLOW
+    List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
+        FollowStatus.ACTIVE);
+
+    List<MemberEntity> followingsMembers = followings.stream()
+        .map(FollowEntity::getToMember)
+        .collect(Collectors.toList());
+    Page<RecordEntity> followRecords = recordRepository.findAllByMemberIn(followingsMembers, pageRequest);
+
+    return new RecordListDto(followRecords);
   }
 
   /**
