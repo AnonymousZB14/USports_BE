@@ -33,7 +33,7 @@ public class RecruitDto {
 
   private Long recruitId;
 
-  private Long sportsId;
+  private String sportsName;
 
   private Long memberId;
 
@@ -74,7 +74,7 @@ public class RecruitDto {
   public static RecruitDto fromEntity(RecruitEntity recruitEntity){
     return RecruitDto.builder()
         .recruitId(recruitEntity.getRecruitId())
-        .sportsId(recruitEntity.getSports().getSportsId())
+        .sportsName(recruitEntity.getSports().getSportsName())
         .memberId(recruitEntity.getMember().getMemberId())
         .title(recruitEntity.getTitle())
         .content(recruitEntity.getContent())
