@@ -169,7 +169,7 @@ class RecruitServiceTest {
 
       //then
       verify(participantRepository, times(1)).save(participantEntity);
-      assertThat(result.getSportsId()).isEqualTo(sports.getSportsId());
+      assertThat(result.getSportsName()).isEqualTo(sports.getSportsName());
       assertThat(result.getMemberId()).isEqualTo(member.getMemberId());
       assertThat(result.getRecruitStatus()).isEqualTo(RecruitStatus.RECRUITING);
     }
@@ -549,7 +549,7 @@ class RecruitServiceTest {
       for (RecruitDto r : list){
         assertThat(r.getTitle().contains(search)).isTrue();
         assertThat(r.getRegion()).isEqualTo(region);
-        assertThat(r.getSportsId()).isEqualTo(football.getSportsId());
+        assertThat(r.getSportsName()).isEqualTo(football.getSportsName());
         assertThat(r.getGender()).isEqualTo(Gender.MALE);
         assertThat(r.getRecruitStatus()).isNotEqualTo(RecruitStatus.END);
       }
