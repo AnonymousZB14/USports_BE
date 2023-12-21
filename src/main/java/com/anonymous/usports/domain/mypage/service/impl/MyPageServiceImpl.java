@@ -5,8 +5,8 @@ import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
-import com.anonymous.usports.domain.mypage.dto.MyPageMainDto;
 import com.anonymous.usports.domain.mypage.dto.MemberInfo;
+import com.anonymous.usports.domain.mypage.dto.MyPageMainDto;
 import com.anonymous.usports.domain.mypage.dto.MyPageParticipant;
 import com.anonymous.usports.domain.mypage.dto.MyPageRecruit;
 import com.anonymous.usports.domain.mypage.dto.RecruitAndParticipants;
@@ -16,6 +16,7 @@ import com.anonymous.usports.domain.participant.repository.ParticipantRepository
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
+import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.domain.sportsskill.dto.SportsSkillDto;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
@@ -23,9 +24,9 @@ import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class MyPageServiceImpl implements MyPageService {
   @Transactional
   public MyPageMainDto getMyPageMainData(Long memberId) {
     //회원 정보
-    MemberInfo memberInfo = this.getMyPageMember(memberId);
+    MemberInfo memberInfo = this.getMemberInfo(memberId);
 
     //팝업으로 띄워줄 sportSkill
     List<SportsSkillDto> sportsSkills = this.getSportsSkills(memberId);
@@ -61,7 +62,6 @@ public class MyPageServiceImpl implements MyPageService {
     //내 모집 관리 : 내가 만든 모집 관리
     List<MyPageRecruit> myRecruitList = this.getMyRecruitList(memberId);
 
-
     return MyPageMainDto.builder()
         .memberProfile(memberInfo)
         .sportsSkills(sportsSkills)
@@ -72,41 +72,31 @@ public class MyPageServiceImpl implements MyPageService {
   }
 
   @Override
-  public MemberInfo getMyPageMember(Long memberId) {
+  public MemberInfo getMemberInfo(Long memberId) {
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    List<SportsDto> interestedSportsList = this.getInterestedSportsList(memberId);
+
+    Collections.shuffle(interestedSportsList);
+
+    return new MemberInfo(member, interestedSportsList);
+  }
+
+  @Override
+  public List<SportsDto> getInterestedSportsList(Long memberId) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     List<InterestedSportsEntity> interestedSportsEntityList =
         interestedSportsRepository.findAllByMemberEntity(member);
-    int listSize = interestedSportsEntityList.size();
 
-    List<String> interestSportsList = new ArrayList<>();
-
-    if (listSize == 0) {
-      interestSportsList.add("none");
-      return new MemberInfo(member, interestSportsList, 0);
-    }
-
-    int plusAlpha = 0;
-    if (listSize > 3) {
-      plusAlpha = listSize - 3;
-      Random random = new Random();
-      for (int i = 0; i < 3; i++) {
-        interestSportsList.add(
-            interestedSportsEntityList
-                .get(random.nextInt(listSize))
-                .getSports()
-                .getSportsName());
-      }
-
-    } else {
-      for (InterestedSportsEntity interestedSports : interestedSportsEntityList) {
-        interestSportsList.add(interestedSports.getSports().getSportsName());
-      }
-    }
-
-    return new MemberInfo(member, interestSportsList, plusAlpha);
+    return interestedSportsEntityList.stream()
+        .map(InterestedSportsEntity::getSports)
+        .map(SportsDto::new)
+        .collect(Collectors.toList());
   }
+
 
   /**
    * 팝업으로 띄워줄 sportSkill
@@ -141,7 +131,7 @@ public class MyPageServiceImpl implements MyPageService {
 
     for (ParticipantEntity loginMemberParticipate : thisMemberParticipateList) {
       RecruitEntity recruit = loginMemberParticipate.getRecruit();
-      if(recruit.getMeetingDate().isAfter(LocalDateTime.now())){
+      if (recruit.getMeetingDate().isAfter(LocalDateTime.now())) {
         continue;
       }
 
@@ -190,15 +180,14 @@ public class MyPageServiceImpl implements MyPageService {
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     List<RecruitEntity> findList =
-        recruitRepository.findAllByMemberAndMeetingDateIsAfter(member, LocalDateTime.now().minusHours(6));
+        recruitRepository.findAllByMemberAndMeetingDateIsAfter(member,
+            LocalDateTime.now().minusHours(6));
     List<MyPageRecruit> list = new ArrayList<>();
     for (RecruitEntity recruit : findList) {
       list.add(new MyPageRecruit(recruit));
     }
     return list;
   }
-
-
 
 
 }

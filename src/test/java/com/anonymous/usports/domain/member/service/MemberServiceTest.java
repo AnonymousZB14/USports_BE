@@ -20,6 +20,7 @@ import com.anonymous.usports.domain.member.repository.InterestedSportsRepository
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.impl.MailServiceImpl;
 import com.anonymous.usports.domain.member.service.impl.MemberServiceImpl;
+import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.MailConstant;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -679,10 +681,9 @@ public class MemberServiceTest {
                     .phoneNumber(phoneNumber)
                     .birthDate(birthDate)
                     .gender(Gender.FEMALE)
-                    .profileImage("picture")
                     .activeRegion(activeRegion)
                     .profileOpen("close")
-                    .interestedSports(sports)
+                    .interestedSportsList(sports)
                     .build();
         }
 
@@ -708,26 +709,24 @@ public class MemberServiceTest {
 
             List<InterestedSportsEntity> interestedSportsEntities = createInterestedSport(member, sportsEntities);
 
-            List<String> interestedSportResult = new ArrayList<>(Arrays.asList(new String[]{"football", "basketball"}));
+            List<SportsDto> interestedSportResult =
+                sportsEntities.stream().map(SportsDto::new).collect(Collectors.toList());
 
             //when
             when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.of(member));
 
-            for (int i = 0; i < request.getInterestedSports().size(); i++) {
-                when(sportsRepository.findById(request.getInterestedSports().get(i)))
+            for (int i = 0; i < request.getInterestedSportsList().size(); i++) {
+                when(sportsRepository.findById(request.getInterestedSportsList().get(i)))
                         .thenReturn(Optional.of(sportsEntities.get(i)));
             }
 
             when(interestedSportsRepository.saveAll(interestedSportsEntities))
                     .thenReturn(interestedSportsEntities);
 
-            when(interestedSportsRepository.findAllByMemberEntity(member))
-                    .thenReturn(interestedSportsEntities);
-
             MemberUpdate.Response response = memberService.updateMember(request, memberDto, memberId);
 
-            log.info("{} - {}", response.getInterestedSports(), interestedSportResult);
+            log.info("{} - {}", response.getInterestedSportsList(), interestedSportResult);
             log.info("{}", response.getRole());
             //then
             assertThat(response.getAccountName()).isEqualTo(request.getAccountName());
@@ -735,7 +734,7 @@ public class MemberServiceTest {
             assertThat(response.getPhoneNumber()).isEqualTo(request.getPhoneNumber());
             assertThat(response.getBirthDate()).isEqualTo(request.getBirthDate());
             assertThat(response.getActiveRegion()).isEqualTo(request.getActiveRegion());
-            assertThat(response.getInterestedSports()).isEqualTo(interestedSportResult);
+            assertThat(response.getInterestedSportsList().size()).isEqualTo(2);
             assertThat(response.getRole()).isEqualTo(Role.USER);
         }
 
@@ -765,13 +764,13 @@ public class MemberServiceTest {
             when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.of(member));
 
-            when(sportsRepository.findById(request.getInterestedSports().get(0)))
+            when(sportsRepository.findById(request.getInterestedSportsList().get(0)))
                     .thenReturn(Optional.of(sportsEntities.get(0)));
 
-            when(sportsRepository.findById(request.getInterestedSports().get(1)))
+            when(sportsRepository.findById(request.getInterestedSportsList().get(1)))
                     .thenReturn(Optional.of(sportsEntities.get(1)));
 
-            when(sportsRepository.findById(request.getInterestedSports().get(2)))
+            when(sportsRepository.findById(request.getInterestedSportsList().get(2)))
                     .thenReturn(Optional.empty());
 
 

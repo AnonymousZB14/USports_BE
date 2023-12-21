@@ -62,6 +62,8 @@ public class MemberDto implements UserDetails, OAuth2User {
 
     private Long evaluationCount;
 
+    private Long penaltyCount;
+
     private Role role;
 
     private LoginBy loginBy;
@@ -89,6 +91,7 @@ public class MemberDto implements UserDetails, OAuth2User {
                 .passionScore(memberEntity.getPassionScore())
                 .teamworkScore(memberEntity.getTeamworkScore())
                 .evaluationCount(memberEntity.getEvaluationCount())
+                .penaltyCount(memberEntity.getPenaltyCount())
                 .role(memberEntity.getRole())
                 .loginBy(memberEntity.getLoginBy())
                 .build();

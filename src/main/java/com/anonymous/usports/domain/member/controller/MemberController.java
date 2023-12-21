@@ -12,9 +12,13 @@ import com.anonymous.usports.domain.member.dto.TokenDto;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.CookieService;
 import com.anonymous.usports.domain.member.service.MemberService;
+import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.notification.service.NotificationService;
+import com.anonymous.usports.domain.sports.dto.SportsDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -29,7 +33,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Api(tags = "회원(Member)")
 @RestController
@@ -41,6 +47,7 @@ public class MemberController {
   private final TokenProvider tokenProvider;
   private final NotificationService notificationService;
   private final CookieService cookieService;
+  private final MyPageService myPageService;
 
   /**
    * 회원 가입 http://localhost:8080/member/register
@@ -72,9 +79,13 @@ public class MemberController {
     TokenDto tokenDto = tokenProvider.saveTokenInRedis(memberDto.getEmail());
     cookieService.setCookieForLogin(httpServletResponse, tokenDto.getAccessToken());
 
+    List<SportsDto> interestedSportsList = myPageService.getInterestedSportsList(
+        memberDto.getMemberId());
+
     return ResponseEntity.ok(MemberLogin.Response.builder()
         .member(memberDto)
         .tokenDto(tokenDto)
+        .interestedSportsList(interestedSportsList)
         .build());
   }
 
@@ -139,6 +150,19 @@ public class MemberController {
       @AuthenticationPrincipal MemberDto memberDto
   ) {
     return memberService.updateMember(request, memberDto, id);
+  }
+
+  /**
+   * 프로필 이미지 등록 / 변경 / 삭제 http://localhost:8080/member/{memberId}/profile-image
+   */
+  @PutMapping("/{memberId}/profile-image")
+  @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
+  @ApiOperation(value = "프로필 이미지 변경, 삭제", notes = "회원 정보 수정과 별개로 프로필 이미지만 변경 및 삭제")
+  public MemberUpdate.Response updateMemberProfileImage(
+      @PathVariable("memberId") Long id,
+      @RequestPart(value = "profileImage",required = false) MultipartFile profileImage,
+      @AuthenticationPrincipal MemberDto memberDto){
+    return memberService.updateMemberProfileImage(profileImage, memberDto, id);
   }
 
   /**

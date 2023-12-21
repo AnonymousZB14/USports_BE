@@ -98,11 +98,14 @@ public class MemberEntity {
   @Column(name = "evaluation_count")
   private Long evaluationCount;
 
+  @Column(name = "penalty_count")
+  private Long penaltyCount;
+
   @Column(name = "role", nullable = false)
   @Enumerated(EnumType.STRING)
   private Role role;
 
-  @Column(name="login_by", nullable=false)
+  @Column(name = "login_by", nullable = false)
   @Enumerated(EnumType.STRING)
   private LoginBy loginBy;
 
@@ -122,9 +125,16 @@ public class MemberEntity {
     this.phoneNumber = request.getPhoneNumber();
     this.birthDate = request.getBirthDate();
     this.gender = request.getGender();
-    this.profileImage = request.getProfileImage();
     this.activeRegion = request.getActiveRegion();
     this.role = Role.USER;
+  }
+
+  public void updateMemberProfileImage(String profileImageAddress) {
+    if (profileImageAddress == null) {
+      this.profileImage = null;
+    } else {
+      this.profileImage = profileImageAddress;
+    }
   }
 
   /**
@@ -135,14 +145,34 @@ public class MemberEntity {
     this.kindnessScore += mannerDto.getKindness();
     this.passionScore += mannerDto.getPassion();
     this.teamworkScore += mannerDto.getTeamwork();
-    Long currentCount = this.evaluationCount;
-
-    int total = mannerDto.getKindness() + mannerDto.getPassion() + mannerDto.getTeamwork();
-
-    this.mannerScore =
-        ((this.mannerScore * currentCount) + (double) total / 3) / (currentCount + 1);
-
     this.evaluationCount += 1;
+
+    double total =
+        (double) this.kindnessScore / 3 +
+            (double) this.passionScore / 3 +
+            (double) this.teamworkScore / 3;
+
+    double score = (total - penaltyCount * 3) / evaluationCount;
+
+    if (score < 0) {
+      this.mannerScore = 0.0;
+    } else {
+      this.mannerScore = score;
+    }
+  }
+
+  public void addPenaltyCount() {
+    this.penaltyCount += 1;
+    double total =
+        (double) this.kindnessScore / 3 +
+            (double) this.passionScore / 3 +
+            (double) this.teamworkScore / 3;
+    double score = (total - penaltyCount * 3) / evaluationCount;
+    if (score < 0) {
+      this.mannerScore = 0.0;
+    } else {
+      this.mannerScore = score;
+    }
   }
 
   @Override

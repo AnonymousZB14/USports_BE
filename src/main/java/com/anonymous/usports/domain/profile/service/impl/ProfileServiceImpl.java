@@ -42,7 +42,7 @@ public class ProfileServiceImpl implements ProfileService {
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     return MemberProfile.builder()
-        .memberInfo(myPageService.getMyPageMember(member.getMemberId()))
+        .memberInfo(myPageService.getMemberInfo(member.getMemberId()))
         .sportsSkills(myPageService.getSportsSkills(member.getMemberId()))
         .build();
   }
@@ -54,7 +54,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     Page<RecordEntity> recordEntityPage = recordRepository
         .findByMemberOrderByRegisteredAtDesc(
-            member, PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_PROFILE));
+            member, PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX));
 
     return new RecordListDto(recordEntityPage);
   }
@@ -68,7 +68,7 @@ public class ProfileServiceImpl implements ProfileService {
             member,
             ParticipantStatus.ACCEPTED,
             LocalDateTime.now(),
-            PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT,
+            PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
                 Sort.by("meetingDate").descending()));
 
     List<RecruitEntity> recruitEntityList =
