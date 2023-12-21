@@ -72,6 +72,7 @@ class EvaluationServiceTest {
         .passionScore(0L)
         .teamworkScore(0L)
         .evaluationCount(0L)
+        .penaltyCount(0L)
         .role(Role.USER)
         .profileOpen(true)
         .build();

@@ -105,7 +105,7 @@ public class MemberEntity {
   @Enumerated(EnumType.STRING)
   private Role role;
 
-  @Column(name="login_by", nullable=false)
+  @Column(name = "login_by", nullable = false)
   @Enumerated(EnumType.STRING)
   private LoginBy loginBy;
 
@@ -147,24 +147,30 @@ public class MemberEntity {
     this.teamworkScore += mannerDto.getTeamwork();
     this.evaluationCount += 1;
 
-    Long total = this.kindnessScore / 3 + this.passionScore / 3 + this.teamworkScore / 3;
+    double total =
+        (double) this.kindnessScore / 3 +
+            (double) this.passionScore / 3 +
+            (double) this.teamworkScore / 3;
 
-    double score = (total  - penaltyCount*3)/evaluationCount;
+    double score = (total - penaltyCount * 3) / evaluationCount;
 
-    if(score < 0){
+    if (score < 0) {
       this.mannerScore = 0.0;
-    }else{
+    } else {
       this.mannerScore = score;
     }
   }
 
-  public void addPenaltyCount(){
+  public void addPenaltyCount() {
     this.penaltyCount += 1;
-    Long total = this.kindnessScore / 3 + this.passionScore / 3 + this.teamworkScore / 3;
-    double score = (total  - penaltyCount*3)/evaluationCount;
-    if(score < 0){
+    double total =
+        (double) this.kindnessScore / 3 +
+            (double) this.passionScore / 3 +
+            (double) this.teamworkScore / 3;
+    double score = (total - penaltyCount * 3) / evaluationCount;
+    if (score < 0) {
       this.mannerScore = 0.0;
-    }else{
+    } else {
       this.mannerScore = score;
     }
   }
