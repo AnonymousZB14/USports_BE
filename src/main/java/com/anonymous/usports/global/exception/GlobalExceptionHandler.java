@@ -3,6 +3,7 @@ package com.anonymous.usports.global.exception;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -16,6 +17,12 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(errorResponse, errorResponse.getErrorCode().getStatusCode());
   }
 
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e) {
+    ErrorResponse errorResponse = new ErrorResponse(ErrorCode.NO_AUTHORITY_ERROR, e.getMessage());
+    return new ResponseEntity<>(errorResponse, errorResponse.getErrorCode().getStatusCode());
+  }
+
   @ExceptionHandler(MyException.class)
   protected ResponseEntity<ErrorResponse> myException(MyException e) {
     ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
@@ -24,6 +31,12 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(RecordException.class)
   public ResponseEntity<ErrorResponse> handleRecordException(RecordException e) {
+    ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
+    return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
+  }
+
+  @ExceptionHandler(CsException.class)
+  public ResponseEntity<ErrorResponse> handleCsException(CsException e) {
     ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode(), e.getErrorMessage());
     return new ResponseEntity<>(errorResponse, e.getErrorCode().getStatusCode());
   }
