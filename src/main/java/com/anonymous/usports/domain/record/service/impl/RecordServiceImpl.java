@@ -81,11 +81,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 기록 게시글 등록
-   *
-   * @param request       게시글 등록 Dto
-   * @param loginMemberId 로그인 회원 Id
-   * @param images        등록할 images
-   * @return RecordDto 반환
    */
   @Override
   @Transactional
@@ -142,9 +137,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 확장자 체크 메서드
-   *
-   * @param filename 파일 이름
-   * @return 해당 확장자들 중 하나인지 여부
    */
   private void isValidImageExtension(String filename) {
     int dotIndex = filename.lastIndexOf('.');
@@ -161,7 +153,6 @@ public class RecordServiceImpl implements RecordService {
   /**
    * S3에 이미지 저장
    *
-   * @param image 저장할 image
    * @return 객체 URL을 반환
    */
   private String uploadImageToS3(MultipartFile image) throws IOException {
@@ -196,9 +187,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 이름 중복 방지를 위한 UUID 생성
-   *
-   * @param originName 기존 파일명
-   * @return UUID+originName
    */
   private String changedImageName(String originName) {
     String random = UUID.randomUUID().toString();
@@ -207,8 +195,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 저장할 이미지 수 체크
-   *
-   * @param images 저장할 이미지 리스트
    */
   private void validateImageCount(List<MultipartFile> images) {
     if (images.size() > NumberConstant.MAX_IMAGE_COUNT) {
@@ -220,9 +206,6 @@ public class RecordServiceImpl implements RecordService {
    * 기록 리스트 불러오기
    *
    * @param recordType    불러올 리스트 타입 (RECOMMENDATION or FOLLOW)
-   * @param page          불러올 페이지 정보
-   * @param loginMemberId 로그인 회원 Id
-   * @return RecordListDto 형태로 반환
    */
   @Override
   public RecordListDto getRecordsPage(RecordType recordType, int page, Long loginMemberId) {
@@ -259,10 +242,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 기록 수정 페이지 불러오기
-   *
-   * @param recordId 수정할 기록 게시글 ID
-   * @param loginMemberId 로그인 회원 ID
-   * @return RecordDto로 반환
    */
   @Override
   public RecordDto getRecordUpdatePage(Long recordId, Long loginMemberId) {
@@ -274,11 +253,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 기록 수정 메서드
-   *
-   * @param recordId      수정할 기록 Id
-   * @param request       기록 수정할 것들(sportsId, recordContent)
-   * @param loginMemberId 로그인 회원 Id
-   * @return RecordDto 반환
    */
   @Override
   @Transactional
@@ -324,10 +298,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 기록 게시글 삭제
-   *
-   * @param recordId      기록 게시글 번호
-   * @param loginMemberId 로그인 회원 ID
-   * @return RecordDto 형태로 반환
    */
   @Override
   @Transactional
@@ -358,9 +328,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 기록 상세 페이지 불러오기
-   *
-   * @param recordId 기록Id
-   * @return CommentEntity 리스트를 포함한 RecordDto 형태로 반환
    */
   @Override
   public RecordDto getRecordDetail(Long recordId, int page) {
@@ -372,8 +339,7 @@ public class RecordServiceImpl implements RecordService {
   }
 
   /**
-   * @param recordEntity  기록 엔티티
-   * @param loginMemberId 로그인 회원 Id
+   * 기록과 로그인 회원 Id 검증 메서드
    */
   private void validateAuthority(RecordEntity recordEntity, Long loginMemberId) {
     memberRepository.findById(loginMemberId)
