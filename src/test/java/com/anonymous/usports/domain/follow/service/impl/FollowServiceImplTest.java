@@ -61,8 +61,6 @@ class FollowServiceImplTest {
         .name("testName" + id)
         .email("test@test" + id + ".com")
         .password("password" + id)
-        .phoneNumber("010-1111-111" + id)
-        .birthDate(LocalDate.now())
         .gender(Gender.MALE)
         .role(Role.USER)
         .profileOpen(true)
