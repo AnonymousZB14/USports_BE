@@ -14,12 +14,14 @@ import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
 import com.anonymous.usports.domain.member.dto.PasswordUpdate;
+import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.impl.MailServiceImpl;
 import com.anonymous.usports.domain.member.service.impl.MemberServiceImpl;
+import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
@@ -77,6 +79,8 @@ public class MemberServiceTest {
 
     @Mock
     private MailServiceImpl mailService;
+    @Mock
+    private MyPageService myPageService;
 
     @InjectMocks
     private MemberServiceImpl memberService;
@@ -123,6 +127,11 @@ public class MemberServiceTest {
                 .sports(sports)
                 .build();
     }
+
+    private SportsEntity createSports(Long id, String sportsName) {
+        return new SportsEntity(id, sportsName);
+    }
+
 
     @Nested
     @DisplayName("첫 회원가입")
@@ -252,6 +261,10 @@ public class MemberServiceTest {
                     .password("abcd1234!")
                     .build();
 
+            List<SportsDto> interestedSportsList = new ArrayList<>();
+            interestedSportsList.add(new SportsDto(createSports(10L, "축구")));
+            interestedSportsList.add(new SportsDto(createSports(11L, "농구")));
+
             //when
             when(passwordEncoder.matches(request.getPassword(), member.getPassword()))
                     .thenReturn(true);
@@ -260,13 +273,16 @@ public class MemberServiceTest {
                     .thenReturn(Optional.ofNullable(member));
             log.info("{}", member.getAccountName());
 
-            MemberDto memberDto = memberService.loginMember(request);
+            when(myPageService.getInterestedSportsList(member.getMemberId()))
+                .thenReturn(interestedSportsList);
+
+            MemberResponse memberResponse = memberService.loginMember(request);
 
             //then
-            assertThat(memberDto.getMemberId()).isEqualTo(member.getMemberId());
-            assertThat(memberDto.getAccountName()).isEqualTo(member.getAccountName());
-            assertThat(memberDto.getEmail()).isEqualTo(member.getEmail());
-            assertThat(memberDto.getPhoneNumber()).isEqualTo(member.getPhoneNumber());
+            assertThat(memberResponse.getMemberId()).isEqualTo(member.getMemberId());
+            assertThat(memberResponse.getAccountName()).isEqualTo(member.getAccountName());
+            assertThat(memberResponse.getEmail()).isEqualTo(member.getEmail());
+            assertThat(memberResponse.getPhoneNumber()).isEqualTo(member.getPhoneNumber());
         }
 
         @Test
@@ -724,7 +740,7 @@ public class MemberServiceTest {
             when(interestedSportsRepository.saveAll(interestedSportsEntities))
                     .thenReturn(interestedSportsEntities);
 
-            MemberUpdate.Response response = memberService.updateMember(request, memberDto, memberId);
+            MemberResponse response = memberService.updateMember(request, memberDto, memberId);
 
             log.info("{} - {}", response.getInterestedSportsList(), interestedSportResult);
             log.info("{}", response.getRole());
