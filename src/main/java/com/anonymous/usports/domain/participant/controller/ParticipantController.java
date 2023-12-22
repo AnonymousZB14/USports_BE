@@ -32,8 +32,10 @@ public class ParticipantController {
   @GetMapping("/recruit/{recruitId}/applicants")
   public ResponseEntity<ParticipantListDto> getApplicants(@PathVariable Long recruitId,
       @AuthenticationPrincipal MemberDto loginMember) {
+
     ParticipantListDto result =
         participantService.getParticipants(recruitId, loginMember.getMemberId());
+
     return ResponseEntity.ok(result);
   }
 

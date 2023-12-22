@@ -50,18 +50,25 @@ public class ParticipantServiceImpl implements ParticipantService {
 
     this.validateAuthority(recruitEntity, loginMemberId);
 
-    List<ParticipantEntity> ingList =
-        participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
-            recruitEntity, ParticipantStatus.ING);
-    List<ParticipantEntity> acceptedList =
-        participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
-            recruitEntity, ParticipantStatus.ACCEPTED);
+    List<ParticipantInfo> ingList =
+        participantRepository
+            .findAllByRecruitAndStatusOrderByParticipantId(recruitEntity, ParticipantStatus.ING)
+            .stream()
+            .map(ParticipantInfo::fromEntity)
+            .collect(Collectors.toList());
+
+    List<ParticipantInfo> acceptedList =
+        participantRepository
+            .findAllByRecruitAndStatusOrderByParticipantId(recruitEntity, ParticipantStatus.ACCEPTED)
+            .stream()
+            .map(ParticipantInfo::fromEntity)
+            .collect(Collectors.toList());
 
     return ParticipantListDto.builder()
         .currentCount(recruitEntity.getCurrentCount())
         .totalCount(recruitEntity.getRecruitCount())
-        .ingList(ingList.stream().map(ParticipantInfo::fromEntity).collect(Collectors.toList()))
-        .acceptedList(acceptedList.stream().map(ParticipantInfo::fromEntity).collect(Collectors.toList()))
+        .ingList(ingList)
+        .acceptedList(acceptedList)
         .build();
   }
 
