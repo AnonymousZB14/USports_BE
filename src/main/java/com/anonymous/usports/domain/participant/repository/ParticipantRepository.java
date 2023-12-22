@@ -21,8 +21,8 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
   Optional<ParticipantEntity> findByMemberAndRecruit(MemberEntity member, RecruitEntity recruit);
 
-  Page<ParticipantEntity> findAllByRecruitAndStatusOrderByParticipantId(RecruitEntity recruit,
-      ParticipantStatus status, Pageable pageable);
+  List<ParticipantEntity> findAllByRecruitAndStatusOrderByParticipantId(RecruitEntity recruit,
+      ParticipantStatus status);
 
   void deleteAllByRecruit(RecruitEntity recruit);
 

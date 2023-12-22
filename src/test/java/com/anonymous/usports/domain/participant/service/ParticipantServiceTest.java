@@ -1,6 +1,7 @@
 package com.anonymous.usports.domain.participant.service;
 
 
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.Mockito.any;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.participant.dto.ParticipantDto;
+import com.anonymous.usports.domain.participant.dto.ParticipantInfo;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage.Request;
@@ -25,7 +27,6 @@ import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
-import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
@@ -35,14 +36,12 @@ import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,8 +49,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
 
 @Slf4j
@@ -112,6 +109,8 @@ class ParticipantServiceTest {
         .participantId(id)
         .member(member)
         .recruit(recruit)
+        .status(ParticipantStatus.ING)
+        .sportsSkill(0.9)
         .registeredAt(LocalDateTime.now())
         .build();
   }
@@ -126,41 +125,54 @@ class ParticipantServiceTest {
       //given
       MemberEntity recruitWriter = createMember(999L);
       RecruitEntity recruit = createRecruit(10L, recruitWriter);
-      List<ParticipantEntity> participantList = new ArrayList<>();
+      List<ParticipantEntity> ingList = new ArrayList<>();
+      List<ParticipantEntity> acceptedList = new ArrayList<>();
 
       for (long i = 1; i <= 7; i++) {
-        MemberEntity memberEntity = createMember(i);
+        MemberEntity memberEntity = createMember(i + 10);
         ParticipantEntity participant = createParticipant(i + 100, memberEntity, recruit);
-        participantList.add(participant);
+        ingList.add(participant);
       }
-
-      int page = 2;
+      for (long i = 1; i <= 7; i++) {
+        MemberEntity memberEntity = createMember(i + 20);
+        ParticipantEntity participant = createParticipant(i + 200, memberEntity, recruit);
+        participant.setStatus(ParticipantStatus.ACCEPTED);
+        acceptedList.add(participant);
+      }
 
       when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
-      when(participantRepository
-          .findAllByRecruitAndStatusOrderByParticipantId(
-              recruit,
-              ParticipantStatus.ING,
-              PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT))
-      ).thenReturn(new PageImpl<>(participantList));
+      when(participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
+              recruit, ParticipantStatus.ING)
+      ).thenReturn(ingList);
+      when(participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
+          recruit, ParticipantStatus.ACCEPTED)
+      ).thenReturn(acceptedList);
 
       //when
-      ParticipantListDto participants =
-          participantService.getParticipants(recruit.getRecruitId(), page,
-              recruitWriter.getMemberId());
-      log.info("participants : {}", participants);
+      ParticipantListDto result =
+          participantService.getParticipants(recruit.getRecruitId(), recruitWriter.getMemberId());
+      log.info("participants : {}", result);
 
       //then
-      assertThat(participants.getCurrentPage()).isEqualTo(1);
-      assertThat(participants.getPageSize()).isEqualTo(7);
-      assertThat(participants.getTotalPages()).isEqualTo(1);
-      assertThat(participants.getTotalElement()).isEqualTo(7);
+      List<ParticipantInfo> ingListResult = result.getIngList();
+      List<ParticipantInfo> acceptedListResult = result.getAcceptedList();
 
-      List<ParticipantDto> list = participants.getList();
-      for (int i = 0; i < list.size(); i++) {
-        ParticipantDto participantDto = list.get(i);
-        assertThat(participantDto.getRecruitId()).isEqualTo(recruit.getRecruitId());
+      for (int i = 0; i < ingListResult.size(); i++) {
+        ParticipantInfo info = ingListResult.get(i);
+        assertThat(info.getMemberId()).isNotNull();
+        assertThat(info.getAccountName()).isNotBlank();
+        assertThat(info.getGender()).isEqualTo("남성");
+        assertThat(info.getSportsSkill()).isEqualTo("루키");
+        assertThat(info.getStatus()).isEqualTo("신청중");
+      }
+      for (int i = 0; i < acceptedListResult.size(); i++) {
+        ParticipantInfo info = acceptedListResult.get(i);
+        assertThat(info.getMemberId()).isNotNull();
+        assertThat(info.getAccountName()).isNotBlank();
+        assertThat(info.getGender()).isEqualTo("남성");
+        assertThat(info.getSportsSkill()).isEqualTo("루키");
+        assertThat(info.getStatus()).isEqualTo("수락");
       }
     }
 
@@ -187,7 +199,7 @@ class ParticipantServiceTest {
       RecruitException exception =
           catchThrowableOfType(() ->
                   participantService
-                      .getParticipants(9L, page, recruitWriter.getMemberId()),
+                      .getParticipants(9L, recruitWriter.getMemberId()),
               RecruitException.class);
 
       assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RECRUIT_NOT_FOUND);
@@ -497,7 +509,8 @@ class ParticipantServiceTest {
       log.info("recruit : {}", recruit);
       assertThat(participant.getStatus()).isEqualTo(ParticipantStatus.ACCEPTED); //confirm()
       assertThat(recruit.getCurrentCount()).isEqualTo(9);//participantAdded()
-      assertThat(recruit.getRecruitStatus()).isEqualTo(RecruitStatus.ALMOST_END); //statusToAlmostFinished()
+      assertThat(recruit.getRecruitStatus()).isEqualTo(
+          RecruitStatus.ALMOST_END); //statusToAlmostFinished()
 
       assertThat(response.getRecruitId()).isEqualTo(recruit.getRecruitId());
       assertThat(response.getApplicantId()).isEqualTo(applicant.getMemberId());

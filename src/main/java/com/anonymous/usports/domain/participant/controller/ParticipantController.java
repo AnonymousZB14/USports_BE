@@ -28,13 +28,14 @@ public class ParticipantController {
 
   private final ParticipantService participantService;
 
-  @ApiOperation(value = "운동 모집 글 지원자 조회", notes = "page는 1부터 시작한다.")
+  @ApiOperation(value = "운동 모집 글 지원자 조회")
   @GetMapping("/recruit/{recruitId}/applicants")
   public ResponseEntity<ParticipantListDto> getApplicants(@PathVariable Long recruitId,
-      @RequestParam(name = "page", defaultValue = "1") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
-    ParticipantListDto result = participantService.getParticipants(recruitId, page,
-        loginMember.getMemberId());
+
+    ParticipantListDto result =
+        participantService.getParticipants(recruitId, loginMember.getMemberId());
+
     return ResponseEntity.ok(result);
   }
 
