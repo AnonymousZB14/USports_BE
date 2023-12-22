@@ -61,7 +61,7 @@ public class RecruitDto {
 
   private LocalDateTime meetingDate;
 
-  private RecruitStatus recruitStatus;
+  private String recruitStatus;
 
   private String gradeFrom;
 
@@ -88,7 +88,7 @@ public class RecruitDto {
         .gender(recruitEntity.getGender())
         .recruitCount(recruitEntity.getRecruitCount())
         .meetingDate(recruitEntity.getMeetingDate())
-        .recruitStatus(recruitEntity.getRecruitStatus())
+        .recruitStatus(recruitEntity.getRecruitStatus().getDescription())
         .gradeFrom(SportsGrade.intToString(recruitEntity.getGradeFrom()))
         .gradeTo(SportsGrade.intToString(recruitEntity.getGradeTo()))
         .registeredAt(recruitEntity.getRegisteredAt())

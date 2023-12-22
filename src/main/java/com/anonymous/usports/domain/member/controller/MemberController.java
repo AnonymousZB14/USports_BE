@@ -196,5 +196,4 @@ public class MemberController {
   ) {
     return memberService.resendEmailAuth(memberDto, id);
   }
-
 }
