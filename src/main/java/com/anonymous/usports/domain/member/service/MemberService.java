@@ -1,8 +1,15 @@
 package com.anonymous.usports.domain.member.service;
 
 
-import com.anonymous.usports.domain.member.dto.*;
-import com.anonymous.usports.domain.member.dto.MemberUpdate.Response;
+import com.anonymous.usports.domain.member.dto.MailResponse;
+import com.anonymous.usports.domain.member.dto.MemberDto;
+import com.anonymous.usports.domain.member.dto.MemberLogin;
+import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberUpdate;
+import com.anonymous.usports.domain.member.dto.MemberWithdraw;
+import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
+import com.anonymous.usports.domain.member.dto.PasswordUpdate;
+import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberService {
@@ -16,7 +23,7 @@ public interface MemberService {
     /**
      * 회원 로그인
      */
-    MemberDto loginMember(MemberLogin.Request request);
+    MemberResponse loginMember(MemberLogin.Request request);
 
     /**
      * 회원 로그아웃
@@ -32,12 +39,12 @@ public interface MemberService {
     /**
      * 회원 수정
      */
-    MemberUpdate.Response updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId);
+    MemberResponse updateMember(MemberUpdate.Request request, MemberDto memberDto, Long memberId);
 
     /**
      * 프로필 이미지 변경 / 삭제
      */
-    MemberUpdate.Response updateMemberProfileImage(MultipartFile profileImage, MemberDto memberDto, Long memberId);
+    MemberResponse updateMemberProfileImage(MultipartFile profileImage, MemberDto memberDto, Long memberId);
 
     /**
      * 회원 비밀번호 수정
