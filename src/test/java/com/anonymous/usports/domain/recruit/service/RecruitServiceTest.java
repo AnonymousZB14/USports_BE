@@ -171,7 +171,7 @@ class RecruitServiceTest {
       verify(participantRepository, times(1)).save(participantEntity);
       assertThat(result.getSportsName()).isEqualTo(sports.getSportsName());
       assertThat(result.getMemberId()).isEqualTo(member.getMemberId());
-      assertThat(result.getRecruitStatus()).isEqualTo(RecruitStatus.RECRUITING);
+      assertThat(result.getRecruitStatus()).isEqualTo(RecruitStatus.RECRUITING.getDescription());
     }
 
     @Test
