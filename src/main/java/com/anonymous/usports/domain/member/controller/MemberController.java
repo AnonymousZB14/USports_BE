@@ -9,16 +9,14 @@ import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
 import com.anonymous.usports.domain.member.dto.PasswordUpdate;
 import com.anonymous.usports.domain.member.dto.TokenDto;
+import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.CookieService;
 import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.notification.service.NotificationService;
-import com.anonymous.usports.domain.sports.dto.SportsDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -71,21 +69,17 @@ public class MemberController {
       HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse
   ) {
 
-    MemberDto memberDto = memberService.loginMember(request);
+    MemberResponse member = memberService.loginMember(request);
 
-    notificationService.checkUnreadNotificationAndSetSession(memberDto.getMemberId(),
+    notificationService.checkUnreadNotificationAndSetSession(member.getMemberId(),
         httpServletRequest);
 
-    TokenDto tokenDto = tokenProvider.saveTokenInRedis(memberDto.getEmail());
+    TokenDto tokenDto = tokenProvider.saveTokenInRedis(member.getEmail());
     cookieService.setCookieForLogin(httpServletResponse, tokenDto.getAccessToken());
 
-    List<SportsDto> interestedSportsList = myPageService.getInterestedSportsList(
-        memberDto.getMemberId());
-
     return ResponseEntity.ok(MemberLogin.Response.builder()
-        .member(memberDto)
+        .memberResponse(member) // todo
         .tokenDto(tokenDto)
-        .interestedSportsList(interestedSportsList)
         .build());
   }
 
@@ -144,7 +138,7 @@ public class MemberController {
   @PutMapping("/{memberId}")
   @ApiOperation(value = "회원 정보 수정하기", notes = "ADMIN은 아무나 삭제가 가능해서 URI에 pathVariable로 memberId 넣기")
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
-  public MemberUpdate.Response updateMember(
+  public MemberResponse updateMember(
       @PathVariable("memberId") Long id,
       @RequestBody @Valid MemberUpdate.Request request,
       @AuthenticationPrincipal MemberDto memberDto
@@ -158,10 +152,10 @@ public class MemberController {
   @PutMapping("/{memberId}/profile-image")
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
   @ApiOperation(value = "프로필 이미지 변경, 삭제", notes = "회원 정보 수정과 별개로 프로필 이미지만 변경 및 삭제")
-  public MemberUpdate.Response updateMemberProfileImage(
+  public MemberResponse updateMemberProfileImage(
       @PathVariable("memberId") Long id,
-      @RequestPart(value = "profileImage",required = false) MultipartFile profileImage,
-      @AuthenticationPrincipal MemberDto memberDto){
+      @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+      @AuthenticationPrincipal MemberDto memberDto) {
     return memberService.updateMemberProfileImage(profileImage, memberDto, id);
   }
 

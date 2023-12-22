@@ -1,17 +1,18 @@
 package com.anonymous.usports.domain.member.dto;
 
-import com.anonymous.usports.domain.member.entity.MemberEntity;
-import com.anonymous.usports.domain.sports.dto.SportsDto;
+import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.Role;
-import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
-
+import java.time.LocalDate;
+import java.util.List;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
-import java.time.LocalDate;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 public class MemberUpdate {
 
@@ -49,39 +50,4 @@ public class MemberUpdate {
         private List<Long> interestedSportsList;
   }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    public static class Response {
-        private String accountName;
-        private String name;
-        private String email;
-        private String phoneNumber;
-        private LocalDate birthDate;
-        private Gender gender;
-        private boolean profileOpen;
-        private String profileImage;
-        private String activeRegion;
-        private Role role;
-
-        private List<SportsDto> interestedSportsList;
-
-        public static MemberUpdate.Response fromEntity(MemberEntity memberEntity) {
-            return MemberUpdate.Response.builder()
-                    .accountName(memberEntity.getAccountName())
-                    .email(memberEntity.getEmail())
-                    .profileOpen(memberEntity.isProfileOpen())
-                    .name(memberEntity.getName())
-                    .phoneNumber(memberEntity.getPhoneNumber())
-                    .birthDate(memberEntity.getBirthDate())
-                    .gender(memberEntity.getGender())
-                    .profileImage(memberEntity.getProfileImage())
-                    .activeRegion(memberEntity.getActiveRegion())
-                    .role(memberEntity.getRole())
-                    .build();
-        }
-
-    }
 }
