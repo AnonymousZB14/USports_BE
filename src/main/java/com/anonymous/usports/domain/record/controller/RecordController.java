@@ -35,13 +35,6 @@ public class RecordController {
 
   private final RecordService recordService;
 
-  @ApiOperation("기록 작성 페이지")
-  @GetMapping("/record")
-  public ResponseEntity<?> registerRecordPage() {
-    //TODO
-    return ResponseEntity.ok(null);
-  }
-
   @ApiOperation("팔로우, 추천 기록 내용 보기")
   @GetMapping("/home")
   public ResponseEntity<RecordListDto> getRecordList(
@@ -96,9 +89,8 @@ public class RecordController {
   @ApiOperation("기록 상세 페이지")
   @GetMapping("/record/{recordId}")
   public ResponseEntity<RecordDto> getRecordDetail(@PathVariable Long recordId,
-      @AuthenticationPrincipal MemberDto loginMember,
       @RequestParam(value = "page",defaultValue = "1") int page) {
-    RecordDto recordDetail = recordService.getRecordDetail(recordId, loginMember.getMemberId(), page);
+    RecordDto recordDetail = recordService.getRecordDetail(recordId, page);
     return ResponseEntity.ok(recordDetail);
   }
 

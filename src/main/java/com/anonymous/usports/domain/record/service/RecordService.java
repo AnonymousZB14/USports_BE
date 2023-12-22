@@ -39,5 +39,5 @@ public interface RecordService {
   /**
    * 기록 게시글 상세 페이지
    */
-  RecordDto getRecordDetail(Long recordId, Long loginMemberId, int page);
+  RecordDto getRecordDetail(Long recordId, int page);
 }
