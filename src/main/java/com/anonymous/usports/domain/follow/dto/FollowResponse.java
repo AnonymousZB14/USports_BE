@@ -13,12 +13,12 @@ import lombok.Setter;
 @Builder
 public class FollowResponse {
 
-  private Long id;
+  private Long followId;
   private String message;
 
   public static FollowResponse Response(Long followId, String message) {
     return FollowResponse.builder()
-        .id(followId)
+        .followId(followId)
         .message(message)
         .build();
   }

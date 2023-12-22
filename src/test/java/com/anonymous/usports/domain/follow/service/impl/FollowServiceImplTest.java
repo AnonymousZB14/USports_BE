@@ -25,7 +25,6 @@ import com.anonymous.usports.global.type.FollowListType;
 import com.anonymous.usports.global.type.FollowStatus;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.Role;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -337,7 +336,7 @@ class FollowServiceImplTest {
 
       verify(followRepository, times(1)).save(follow);
       assertEquals(ResponseConstant.ACCEPT_FOLLOW, response.getMessage());
-      assertNotNull(response.getId());
+      assertNotNull(response.getFollowId());
     }
 
     @Test
@@ -360,7 +359,7 @@ class FollowServiceImplTest {
 
       verify(followRepository, times(1)).delete(follow);
       assertEquals(ResponseConstant.REFUSE_FOLLOW, response.getMessage());
-      assertNull(response.getId());
+      assertNull(response.getFollowId());
     }
 
     @Test
