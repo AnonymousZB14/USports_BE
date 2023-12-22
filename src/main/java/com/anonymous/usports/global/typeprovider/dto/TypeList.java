@@ -19,4 +19,5 @@ public class TypeList {
   private List<String> regionList; //지역
   private List<SportsDto> sportsList; //운동 종목
   private List<SportsLevelDto> sportsLevelList; //운동 실력 지표
+  private List<RecruitStatusDto> recruitStatusList;//모집 상태
 }
