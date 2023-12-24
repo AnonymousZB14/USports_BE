@@ -21,6 +21,14 @@ public interface RecordService {
    */
   RecordListDto getRecordsPage(RecordType recordType, int page, Long loginMemberId);
 
+  /**
+   * 기록 게시글 수정 페이지
+   */
+  RecordDto getRecordUpdatePage(Long recordId, Long loginMemberId);
+
+  /**
+   * 기록 게시글 수정
+   */
   RecordDto updateRecord(Long recordId, RecordUpdate.Request request, Long loginMemberId);
 
   /**
@@ -28,4 +36,8 @@ public interface RecordService {
    */
   RecordDto deleteRecord(Long recordId, Long loginMemberId);
 
+  /**
+   * 기록 게시글 상세 페이지
+   */
+  RecordDto getRecordDetail(Long recordId, int page);
 }

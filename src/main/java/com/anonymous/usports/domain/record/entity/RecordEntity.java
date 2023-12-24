@@ -6,10 +6,12 @@ import com.anonymous.usports.global.config.StringListConverter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -41,11 +43,11 @@ public class RecordEntity {
   @Column(name = "record_id", nullable = false)
   private Long recordId;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id", nullable = false)
   private MemberEntity member;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "sports_id", nullable = false)
   private SportsEntity sports;
 
@@ -64,9 +66,29 @@ public class RecordEntity {
   @ColumnDefault("0")
   private Long countComment;
 
+  @Column(name = "count_recordlikes", nullable = false)
+  @ColumnDefault("0")
+  private Long countRecordLikes;
+
   @Convert(converter = StringListConverter.class)
+  @Builder.Default
   @Column(name = "image_address", columnDefinition = "TEXT")
   private List<String> imageAddress = new ArrayList<>();
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    RecordEntity record = (RecordEntity) o;
+    return Objects.equals(recordId, record.recordId);
+  }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(recordId);
+  }
 }

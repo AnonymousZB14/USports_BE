@@ -23,6 +23,37 @@ services:
       - backend
     restart: always
 
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    ports:
+      - 27017:27017
+    volumes:
+      - data:/data
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=rootuser
+      - MONGO_INITDB_ROOT_PASSWORD=rootpass
+    networks:
+      - backend
+    restart: always
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq-stream
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "61613:61613"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "RabbitMQ-My-Cookies"
+      RABBITMQ_DEFAULT_USER: "rootuser"
+      RABBITMQ_DEFAULT_PASS: "rootpass"
+    restart: always
+    command: >
+      sh -c 'rabbitmq-plugins enable --offline rabbitmq_stomp rabbitmq_web_stomp && rabbitmq-server'
+
+volumes:
+  data: { }
+
 networks:
   backend:
     name: backend

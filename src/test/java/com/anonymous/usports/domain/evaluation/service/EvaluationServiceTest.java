@@ -21,7 +21,7 @@ import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
-import com.anonymous.usports.global.EvaluationException;
+import com.anonymous.usports.global.exception.EvaluationException;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.type.Gender;
@@ -72,6 +72,7 @@ class EvaluationServiceTest {
         .passionScore(0L)
         .teamworkScore(0L)
         .evaluationCount(0L)
+        .penaltyCount(0L)
         .role(Role.USER)
         .profileOpen(true)
         .build();

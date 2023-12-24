@@ -7,6 +7,7 @@ import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
 import com.anonymous.usports.domain.notification.service.NotificationService;
 import com.anonymous.usports.global.type.NotificationEntityType;
 import com.anonymous.usports.global.type.NotificationType;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+@Api(tags = "알림 SSE(Notification SSE 관련)")
 @Slf4j
 @RequiredArgsConstructor
 @RestController

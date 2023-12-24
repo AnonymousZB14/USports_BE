@@ -19,22 +19,10 @@ import org.springframework.data.domain.Page;
 @Builder
 public class ParticipantListDto {
 
-  private int currentPage;//현재 페이지
-  private int currentElements;//현재 페이지 데이터 개수
-  private int pageSize; //한 페이지의 크기
-  private int totalElement;//전체 데이터 개수
-  private int totalPages;//전체 페이지 개수
+  private int currentCount; //현재 인원
+  private int totalCount; //모집 총 인원
 
-  private List<ParticipantDto> list;
-
-  public ParticipantListDto(Page<ParticipantEntity> page) {
-    this.currentPage = page.getNumber() + 1;
-    this.currentElements = page.getNumberOfElements();
-    this.pageSize = page.getSize();
-    this.totalElement = (int) page.getTotalElements();
-    this.totalPages = page.getTotalPages();
-    this.list = page.getContent().stream().map(ParticipantDto::fromEntity)
-        .collect(Collectors.toList());
-  }
+  private List<ParticipantInfo> ingList; //신청중 리스트
+  private List<ParticipantInfo> acceptedList; //수락된 리스트
 
 }

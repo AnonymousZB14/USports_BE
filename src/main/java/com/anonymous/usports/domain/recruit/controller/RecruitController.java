@@ -5,17 +5,14 @@ import com.anonymous.usports.domain.recruit.dto.RecruitDeleteResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
-import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
-import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
-import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
+import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
 import com.anonymous.usports.global.type.Gender;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.persistence.criteria.CriteriaBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Criteria;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+
+@Api(tags = "모집 글(Recruit)")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -53,8 +52,8 @@ public class RecruitController {
 
   @ApiOperation("운동 모집 게시글 한 건 조회하기")
   @GetMapping("/recruit/{recruitId}")
-  public ResponseEntity<RecruitDto> getRecruit(@PathVariable Long recruitId) {
-    RecruitDto result = recruitService.getRecruit(recruitId);
+  public ResponseEntity<RecruitResponse> getRecruit(@PathVariable Long recruitId) {
+    RecruitResponse result = recruitService.getRecruit(recruitId);
     return ResponseEntity.ok(result);
   }
 
@@ -63,15 +62,6 @@ public class RecruitController {
   public ResponseEntity<?> updateRecruitPage(@PathVariable Long recruitId) {
     //TODO
     return ResponseEntity.ok(null);
-  }
-
-  @ApiOperation("운동 모집 게시글 수정")
-  @PutMapping("/recruit/{recruitId}")
-  public ResponseEntity<RecruitUpdate.Response> updateRecruit(@PathVariable Long recruitId,
-      @RequestBody RecruitUpdate.Request request,
-      @AuthenticationPrincipal MemberDto loginMember) {
-    RecruitDto result = recruitService.updateRecruit(request, recruitId, loginMember.getMemberId());
-    return ResponseEntity.ok(new RecruitUpdate.Response(result));
   }
 
   @ApiOperation("운동 모집 게시글 삭제")
@@ -95,7 +85,7 @@ public class RecruitController {
 
   @ApiOperation("운동 모집글 검색")
   @GetMapping("/recruits")
-  public ResponseEntity<RecruitSearchListDto> getRecruitList(
+  public ResponseEntity<RecruitListDto> getRecruitList(
       @RequestParam(required = false, defaultValue = "1") int page,
       @RequestParam(required = false) String search,
       @RequestParam(required = false) String region,
@@ -104,7 +94,7 @@ public class RecruitController {
       @RequestParam(required = false) boolean closeInclude
       ){
 
-    RecruitSearchListDto result =
+    RecruitListDto result =
         recruitService.getRecruitsByConditions(page, search, region, sports, gender, closeInclude);
 
     return ResponseEntity.ok(result);

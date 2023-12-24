@@ -1,5 +1,8 @@
 package com.anonymous.usports.domain.member.security;
 
+import com.anonymous.usports.domain.member.security.handler.CustomAccessDeniedHandler;
+import com.anonymous.usports.domain.member.security.handler.OAuth2SuccessHandler;
+import com.anonymous.usports.domain.member.service.impl.CustomOAuth2MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,18 +21,35 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter authenticationFilter;
+    private final CustomOAuth2MemberService customOAuth2MemberService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
+         http
                 .httpBasic().disable()
                 .csrf().disable()
                 .cors().and()
-                .headers().frameOptions().disable().and()
+                .headers().frameOptions().disable();
+
+         http
                 .authorizeRequests()
-                .antMatchers("/**").permitAll()
-                .and().addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                .antMatchers("/**").permitAll();
+
+         http
+                 .oauth2Login().loginPage("/login")
+                 .userInfoEndpoint().userService(customOAuth2MemberService)
+                 .and().successHandler(oAuth2SuccessHandler);
+
+         http
+                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling()
+                  .authenticationEntryPoint(customAuthenticationEntryPoint)
+                  .accessDeniedHandler(customAccessDeniedHandler);
+
+        return http.build();
     }
 
 //    @Bean
@@ -42,7 +62,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManagerBean(
             AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }
-
+    } 
 
 }

@@ -2,24 +2,27 @@ package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberDto implements UserDetails {
+public class MemberDto implements UserDetails, OAuth2User {
 
     private Long memberId;
 
@@ -37,8 +40,6 @@ public class MemberDto implements UserDetails {
 
     private Gender gender;
 
-    private String profileContent;
-
     private String profileImage;
 
     private LocalDateTime registeredAt;
@@ -47,9 +48,7 @@ public class MemberDto implements UserDetails {
 
     private LocalDateTime emailAuthAt;
 
-    private String addrCity;
-
-    private String addrDistrict;
+    private String activeRegion;
 
     private boolean profileOpen;
 
@@ -63,7 +62,13 @@ public class MemberDto implements UserDetails {
 
     private Long evaluationCount;
 
+    private Long penaltyCount;
+
     private Role role;
+
+    private LoginBy loginBy;
+
+    private Map<String, Object> attributes;
 
     public static MemberDto fromEntity(MemberEntity memberEntity){
         return MemberDto.builder()
@@ -75,21 +80,26 @@ public class MemberDto implements UserDetails {
                 .phoneNumber(memberEntity.getPhoneNumber())
                 .birthDate(memberEntity.getBirthDate())
                 .gender(memberEntity.getGender())
-                .profileContent(memberEntity.getProfileContent())
                 .profileImage(memberEntity.getProfileImage())
                 .registeredAt(memberEntity.getRegisteredAt())
                 .updatedAt(memberEntity.getUpdatedAt())
                 .emailAuthAt(memberEntity.getEmailAuthAt())
-                .addrCity(memberEntity.getAddrCity())
-                .addrDistrict(memberEntity.getAddrDistrict())
+                .activeRegion(memberEntity.getActiveRegion())
                 .profileOpen(memberEntity.isProfileOpen())
                 .mannerScore(memberEntity.getMannerScore())
                 .kindnessScore(memberEntity.getKindnessScore())
                 .passionScore(memberEntity.getPassionScore())
                 .teamworkScore(memberEntity.getTeamworkScore())
                 .evaluationCount(memberEntity.getEvaluationCount())
+                .penaltyCount(memberEntity.getPenaltyCount())
                 .role(memberEntity.getRole())
+                .loginBy(memberEntity.getLoginBy())
                 .build();
+    }
+
+    @Override
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 
     @Override

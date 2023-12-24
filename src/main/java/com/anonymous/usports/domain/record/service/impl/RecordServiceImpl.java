@@ -5,8 +5,9 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.util.IOUtils;
+import com.anonymous.usports.domain.comment.entity.CommentEntity;
+import com.anonymous.usports.domain.comment.repository.CommentRepository;
 import com.anonymous.usports.domain.follow.entity.FollowEntity;
 import com.anonymous.usports.domain.follow.repository.FollowRepository;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
@@ -24,8 +25,10 @@ import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
+import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.RecordException;
+import com.anonymous.usports.global.exception.SportsException;
 import com.anonymous.usports.global.type.FollowStatus;
 import com.anonymous.usports.global.type.RecordType;
 import java.io.ByteArrayInputStream;
@@ -45,12 +48,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,7 @@ public class RecordServiceImpl implements RecordService {
   private final SportsRepository sportsRepository;
   private final InterestedSportsRepository interestedSportsRepository;
   private final FollowRepository followRepository;
+  private final CommentRepository commentRepository;
   private final AmazonS3 amazonS3;
   @Value("${cloud.aws.s3.bucketName}")
   private String bucketName;
@@ -76,20 +78,15 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 기록 게시글 등록
-   *
-   * @param request       게시글 등록 Dto
-   * @param loginMemberId 로그인한 회원 Id
-   * @param images        등록할 images
-   * @return RecordDto 반환
    */
   @Override
   @Transactional
   public RecordDto saveRecord(Request request, Long loginMemberId,
       List<MultipartFile> images) {
     MemberEntity member = memberRepository.findById(loginMemberId)
-        .orElseThrow(() -> new RecordException(ErrorCode.MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
     SportsEntity sports = sportsRepository.findById(request.getSportsId())
-        .orElseThrow(() -> new RecordException(ErrorCode.SPORTS_NOT_FOUND));
+        .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
 
     List<String> recordImageList = saveImages(images);
 
@@ -113,12 +110,9 @@ public class RecordServiceImpl implements RecordService {
 
     try {
       for (MultipartFile image : images) {
-        if (isValidImageExtension(image.getOriginalFilename())) {
-          String storedImagePath = uploadImageToS3(image);
-          recordImages.add(storedImagePath);
-        } else {
-          throw new RecordException(ErrorCode.INVALID_IMAGE_EXTENSION);
-        }
+        isValidImageExtension(image.getOriginalFilename());
+        String storedImagePath = uploadImageToS3(image);
+        recordImages.add(storedImagePath);
       }
       return recordImages;
     } catch (RecordException e) {
@@ -140,30 +134,31 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 확장자 체크 메서드
-   *
-   * @param filename 파일 이름
-   * @return 해당 확장자들 중 하나인지 여부
    */
-  private boolean isValidImageExtension(String filename) {
+  private void isValidImageExtension(String filename) {
     int dotIndex = filename.lastIndexOf('.');
     if (dotIndex == -1) {
-      return false; // 파일에 확장자가 없는 경우
+      throw new RecordException(ErrorCode.INVALID_IMAGE_EXTENSION); // 파일에 확장자가 없는 경우
     }
 
     String extension = filename.substring(dotIndex + 1).toLowerCase();
     List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");//img 태그에서 사용할 수 있는 것들
-    return allowedExtensions.contains(extension);
+    if (!allowedExtensions.contains(extension)) {
+      throw new RecordException(ErrorCode.INVALID_IMAGE_EXTENSION); // 허용되지 않는 확장자인 경우 예외 던지기
+    }
   }
   /**
    * S3에 이미지 저장
    *
-   * @param image 저장할 image
    * @return 객체 URL을 반환
    */
   private String uploadImageToS3(MultipartFile image) throws IOException {
     // 이미지를 S3에 업로드하고 이미지의 URL을 반환
     String originName = image.getOriginalFilename(); // 원본 이미지 이름
-    String ext = originName.substring(originName.lastIndexOf(".")); // 확장자
+    String ext = null;
+    if(originName!=null){
+      ext = originName.substring(originName.lastIndexOf(".")); // 확장자
+    }
     String changedName = changedImageName(originName); // 새로 생성된 이미지 이름
     ObjectMetadata metadata = new ObjectMetadata();// 메타데이터
     metadata.setContentType("image/" + ext);
@@ -173,7 +168,7 @@ public class RecordServiceImpl implements RecordService {
     ByteArrayInputStream byteArrayIs = new ByteArrayInputStream(bytes);
 
     try {
-      PutObjectResult putObjectResult = amazonS3.putObject(new PutObjectRequest(
+      amazonS3.putObject(new PutObjectRequest(
           //bucketname, key, inputStream, metadata
           bucketName, changedName, byteArrayIs, metadata
       ).withCannedAcl(CannedAccessControlList.PublicRead));
@@ -189,9 +184,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 이름 중복 방지를 위한 UUID 생성
-   *
-   * @param originName 기존 파일명
-   * @return UUID+originName
    */
   private String changedImageName(String originName) {
     String random = UUID.randomUUID().toString();
@@ -200,8 +192,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 저장할 이미지 수 체크
-   *
-   * @param images 저장할 이미지 리스트
    */
   private void validateImageCount(List<MultipartFile> images) {
     if (images.size() > NumberConstant.MAX_IMAGE_COUNT) {
@@ -213,51 +203,54 @@ public class RecordServiceImpl implements RecordService {
    * 기록 리스트 불러오기
    *
    * @param recordType    불러올 리스트 타입 (RECOMMENDATION or FOLLOW)
-   * @param page          불러올 페이지 정보
-   * @param loginMemberId 로그인한 회원 Id
-   * @return RecordListDto 형태로 반환
    */
   @Override
   public RecordListDto getRecordsPage(RecordType recordType, int page, Long loginMemberId) {
     MemberEntity member = memberRepository.findById(loginMemberId)
-        .orElseThrow(() -> new MyException(ErrorCode.MEMBER_NOT_FOUND));
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    Page<RecordEntity> recordEntityPage;
-    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT,
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
         Sort.by(Direction.DESC, "updatedAt"));
 
+    //RecordType : RECOMMENDATION
     if (recordType == RecordType.RECOMMENDATION) {
-      List<InterestedSportsEntity> interestedSportsEntityList = interestedSportsRepository.findAllByMemberEntity(
-          member);
+      List<InterestedSportsEntity> interestedSportsEntityList =
+          interestedSportsRepository.findAllByMemberEntity(member);
+
       List<SportsEntity> sportsList = interestedSportsEntityList.stream()
           .map(InterestedSportsEntity::getSports)
           .collect(Collectors.toList());
-      List<RecordEntity> recommendationRecords = recordRepository.findAllOpenProfileRecordsBySportsIn(
-          sportsList);
-      recordEntityPage = new PageImpl<>(recommendationRecords, pageRequest,
-          recommendationRecords.size());
-    } else {
-      List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
-          FollowStatus.ACTIVE);
 
-      List<MemberEntity> followingsMembers = followings.stream()
-          .map(FollowEntity::getToMember)
-          .collect(Collectors.toList());
-      List<RecordEntity> followRecords = recordRepository.findAllByMemberIn(followingsMembers);
-      recordEntityPage = new PageImpl<>(followRecords, pageRequest, followRecords.size());
+      Page<RecordEntity> recommendationRecords =
+          recordRepository.findAllOpenProfileRecordsBySportsIn(sportsList, pageRequest);
+      return new RecordListDto(recommendationRecords);
     }
 
-    RecordListDto recordListDto = new RecordListDto(recordEntityPage);
-    return recordListDto;
+    //Record Type : FOLLOW
+    List<FollowEntity> followings = followRepository.findAllByFromMemberAndFollowStatus(member,
+        FollowStatus.ACTIVE);
+
+    List<MemberEntity> followingsMembers = followings.stream()
+        .map(FollowEntity::getToMember)
+        .collect(Collectors.toList());
+    Page<RecordEntity> followRecords = recordRepository.findAllByMemberIn(followingsMembers, pageRequest);
+
+    return new RecordListDto(followRecords);
+  }
+
+  /**
+   * 기록 수정 페이지 불러오기
+   */
+  @Override
+  public RecordDto getRecordUpdatePage(Long recordId, Long loginMemberId) {
+    RecordEntity record = recordRepository.findById(recordId)
+        .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+    validateAuthority(record, loginMemberId);
+    return RecordDto.fromEntity(record);
   }
 
   /**
    * 기록 수정 메서드
-   *
-   * @param recordId      수정할 기록 Id
-   * @param request       기록 수정할 것들(sportsId, recordContent)
-   * @param loginMemberId 로그인 회원 Id
-   * @return RecordDto 반환
    */
   @Override
   @Transactional
@@ -269,7 +262,7 @@ public class RecordServiceImpl implements RecordService {
     try{
       if (request.getSportsId() != null) {
         SportsEntity sports = sportsRepository.findById(request.getSportsId())
-            .orElseThrow(() -> new RecordException(ErrorCode.SPORTS_NOT_FOUND));
+            .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
         record.setSports(sports);
       }
       if (request.getRecordContent() != null) {
@@ -303,10 +296,6 @@ public class RecordServiceImpl implements RecordService {
 
   /**
    * 기록 게시글 삭제
-   *
-   * @param recordId      기록 게시글 번호
-   * @param loginMemberId 로그인한 회원 ID
-   * @return RecordDto 형태로 반환
    */
   @Override
   @Transactional
@@ -336,10 +325,23 @@ public class RecordServiceImpl implements RecordService {
   }
 
   /**
-   * @param recordEntity  기록 엔티티
-   * @param loginMemberId 로그인한 회원 Id
+   * 기록 상세 페이지 불러오기
+   */
+  @Override
+  public RecordDto getRecordDetail(Long recordId, int page) {
+    RecordEntity record = recordRepository.findById(recordId)
+        .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.COMMENT_PAGE_SIZE_DEFAULT);
+    Page<CommentEntity> commentList = commentRepository.findAllCommentsByRecordId(recordId,pageRequest);
+    return RecordDto.fromEntityInclueComment(record,commentList);
+  }
+
+  /**
+   * 기록과 로그인 회원 Id 검증 메서드
    */
   private void validateAuthority(RecordEntity recordEntity, Long loginMemberId) {
+    memberRepository.findById(loginMemberId)
+        .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
     if (!Objects.equals(recordEntity.getMember().getMemberId(), loginMemberId)) {
       throw new RecordException(ErrorCode.NO_AUTHORITY_ERROR); // 기록 작성자 Id와 로그인한 회원 Id 비교
     }
@@ -395,9 +397,7 @@ public class RecordServiceImpl implements RecordService {
       URL url = new URL(imageUrl);
       String Decoding = URLDecoder.decode(url.getPath(), "UTF-8"); // 파일명에 한글이 있을 경우 Decode 필요
       return Decoding.substring(1); // '/'제거
-    } catch (MalformedURLException e) {
-      throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
-    } catch (UnsupportedEncodingException e) {
+    } catch (MalformedURLException | UnsupportedEncodingException e) {
       throw new RecordException(ErrorCode.INVALID_IMAGE_URL);
     }
   }

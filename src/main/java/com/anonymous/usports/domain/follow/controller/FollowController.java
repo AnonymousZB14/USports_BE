@@ -6,6 +6,7 @@ import com.anonymous.usports.domain.follow.service.FollowService;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.global.type.FollowDecisionType;
 import com.anonymous.usports.global.type.FollowListType;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api(tags = "팔로우(Follow)")
 @RestController
 @RequiredArgsConstructor
 public class FollowController {
@@ -36,7 +38,7 @@ public class FollowController {
   @GetMapping("/follow/{type}")
   public ResponseEntity<FollowListDto> getFollowList(
       @PathVariable FollowListType type,
-      @RequestParam("page") int page,
+      @RequestParam(value = "page", defaultValue = "1") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
     FollowListDto followList = followService.getFollowPage(type, page, loginMember.getMemberId());
     return ResponseEntity.ok(followList);

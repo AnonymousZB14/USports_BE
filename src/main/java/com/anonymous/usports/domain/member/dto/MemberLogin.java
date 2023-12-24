@@ -1,6 +1,11 @@
 package com.anonymous.usports.domain.member.dto;
 
-import lombok.*;
+import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 public class MemberLogin {
 
@@ -21,5 +26,7 @@ public class MemberLogin {
     @Builder
     public static class Response {
         private TokenDto tokenDto;
+        private MemberResponse memberResponse;
+
     }
 }

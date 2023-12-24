@@ -4,13 +4,14 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.global.type.ParticipantStatus;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ParticipantRepository extends JpaRepository<ParticipantEntity, Long> {
@@ -20,8 +21,8 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
   Optional<ParticipantEntity> findByMemberAndRecruit(MemberEntity member, RecruitEntity recruit);
 
-  Page<ParticipantEntity> findAllByRecruitAndStatusOrderByParticipantId(RecruitEntity recruit,
-      ParticipantStatus status, Pageable pageable);
+  List<ParticipantEntity> findAllByRecruitAndStatusOrderByParticipantId(RecruitEntity recruit,
+      ParticipantStatus status);
 
   void deleteAllByRecruit(RecruitEntity recruit);
 
@@ -30,5 +31,13 @@ public interface ParticipantRepository extends JpaRepository<ParticipantEntity, 
 
   List<ParticipantEntity> findAllByRecruitAndStatus(RecruitEntity recruit, ParticipantStatus status);
 
-  List<ParticipantEntity> findTop10ByMemberOrderByRegisteredAtDesc(MemberEntity member);
+  Page<ParticipantEntity> findByMemberAndStatusAndMeetingDateBefore(
+      MemberEntity member,
+      ParticipantStatus participantStatus,
+      LocalDateTime localDateTime,
+      Pageable pageable);
+
+  boolean existsByStatusAndMemberAndRecruit(ParticipantStatus status, MemberEntity member, RecruitEntity recruit);
+
+  Page<ParticipantEntity> findAllByEvaluationAtIsNullAndMeetingDateBetweenOrderByMeetingDate(LocalDateTime from, LocalDateTime to, Pageable pageable);
 }

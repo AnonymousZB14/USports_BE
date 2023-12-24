@@ -4,11 +4,9 @@ package com.anonymous.usports.domain.recruit.service;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
-import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
-import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
-import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
+import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
+import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
 import com.anonymous.usports.global.type.Gender;
-import org.springframework.data.domain.Page;
 
 public interface RecruitService {
 
@@ -20,12 +18,7 @@ public interface RecruitService {
   /**
    * Recruit 조회
    */
-  RecruitDto getRecruit(Long recruitId);
-
-  /**
-   * Recruit 수정
-   */
-  RecruitDto updateRecruit(RecruitUpdate.Request request, Long recruitId, Long loginMemberId);
+  RecruitResponse getRecruit(Long recruitId);
 
   /**
    * Recruit 삭제
@@ -40,7 +33,7 @@ public interface RecruitService {
   /**
    * 여러 조건에 따른 Recruit 리스트 반환
    */
-  RecruitSearchListDto getRecruitsByConditions(
+  RecruitListDto getRecruitsByConditions(
       int page, String search, String region, String sports, Gender gender, boolean closeInclude);
 
 }

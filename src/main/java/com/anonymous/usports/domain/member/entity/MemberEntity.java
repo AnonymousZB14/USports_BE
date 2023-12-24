@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.member.entity;
 import com.anonymous.usports.domain.evaluation.dto.MannerDto;
 import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,21 +51,20 @@ public class MemberEntity {
   @Column(name = "password", nullable = false)
   private String password;
 
-  @Column(name = "phone_number", nullable = false, unique = true, length = 100)
+
+  @Column(name = "phone_number", length = 100)
   private String phoneNumber;
 
-  @Column(name = "birth_date", nullable = false)
+  @Column(name = "birth_date")
   private LocalDate birthDate;
 
-  @Column(name = "gender", nullable = false)
+  @Column(name = "gender")
   @Enumerated(EnumType.STRING)
   private Gender gender;
 
-  @Column(name = "profile_content", length = 100)
-  private String profileContent;
-
   @Column(name = "profile_image")
   private String profileImage;
+
 
   @Column(name = "registered_at", nullable = false)
   @CreatedDate
@@ -77,11 +77,8 @@ public class MemberEntity {
   @Column(name = "email_auth_at")
   private LocalDateTime emailAuthAt;
 
-  @Column(name = "address_city", length = 100)
-  private String addrCity;
-
-  @Column(name = "address_district", length = 100)
-  private String addrDistrict;
+  @Column(name = "active_region", length = 100)
+  private String activeRegion;
 
   @Column(name = "profile_open", nullable = false)
   private boolean profileOpen;
@@ -101,9 +98,16 @@ public class MemberEntity {
   @Column(name = "evaluation_count")
   private Long evaluationCount;
 
+  @Column(name = "penalty_count")
+  private Long penaltyCount;
+
   @Column(name = "role", nullable = false)
   @Enumerated(EnumType.STRING)
   private Role role;
+
+  @Column(name = "login_by", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private LoginBy loginBy;
 
 
   public void updateMember(MemberUpdate.Request request) {
@@ -118,15 +122,19 @@ public class MemberEntity {
 
     this.accountName = request.getAccountName();
     this.name = request.getName();
-    this.email = request.getEmail();
     this.phoneNumber = request.getPhoneNumber();
     this.birthDate = request.getBirthDate();
     this.gender = request.getGender();
-    this.profileContent = request.getProfileContent();
-    this.profileImage = request.getProfileImage();
-    this.addrCity = request.getAddrCity();
-    this.addrDistrict = request.getAddrDistrict();
+    this.activeRegion = request.getActiveRegion();
     this.role = Role.USER;
+  }
+
+  public void updateMemberProfileImage(String profileImageAddress) {
+    if (profileImageAddress == null) {
+      this.profileImage = null;
+    } else {
+      this.profileImage = profileImageAddress;
+    }
   }
 
   /**
@@ -137,14 +145,34 @@ public class MemberEntity {
     this.kindnessScore += mannerDto.getKindness();
     this.passionScore += mannerDto.getPassion();
     this.teamworkScore += mannerDto.getTeamwork();
-    Long currentCount = this.evaluationCount;
-
-    int total = mannerDto.getKindness() + mannerDto.getPassion() + mannerDto.getTeamwork();
-
-    this.mannerScore =
-        ((this.mannerScore * currentCount) + (double) total / 3) / (currentCount + 1);
-
     this.evaluationCount += 1;
+
+    double total =
+        (double) this.kindnessScore / 3 +
+            (double) this.passionScore / 3 +
+            (double) this.teamworkScore / 3;
+
+    double score = (total - penaltyCount * 3) / evaluationCount;
+
+    if (score < 0) {
+      this.mannerScore = 0.0;
+    } else {
+      this.mannerScore = score;
+    }
+  }
+
+  public void addPenaltyCount() {
+    this.penaltyCount += 1;
+    double total =
+        (double) this.kindnessScore / 3 +
+            (double) this.passionScore / 3 +
+            (double) this.teamworkScore / 3;
+    double score = (total - penaltyCount * 3) / evaluationCount;
+    if (score < 0) {
+      this.mannerScore = 0.0;
+    } else {
+      this.mannerScore = score;
+    }
   }
 
   @Override

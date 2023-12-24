@@ -1,12 +1,28 @@
 package com.anonymous.usports.domain.member.service;
 
-import com.anonymous.usports.domain.member.dto.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.anonymous.usports.domain.member.dto.MailResponse;
+import com.anonymous.usports.domain.member.dto.MemberDto;
+import com.anonymous.usports.domain.member.dto.MemberLogin;
+import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberUpdate;
+import com.anonymous.usports.domain.member.dto.MemberWithdraw;
+import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
+import com.anonymous.usports.domain.member.dto.PasswordUpdate;
+import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.impl.MailServiceImpl;
 import com.anonymous.usports.domain.member.service.impl.MemberServiceImpl;
+import com.anonymous.usports.domain.mypage.service.MyPageService;
+import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.MailConstant;
@@ -18,7 +34,16 @@ import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.redis.auth.repository.AuthRedisRepository;
 import com.anonymous.usports.global.redis.token.repository.TokenRepository;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -29,18 +54,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowableOfType;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -66,6 +79,8 @@ public class MemberServiceTest {
 
     @Mock
     private MailServiceImpl mailService;
+    @Mock
+    private MyPageService myPageService;
 
     @InjectMocks
     private MemberServiceImpl memberService;
@@ -73,8 +88,8 @@ public class MemberServiceTest {
     @Builder
     private static MemberEntity member(Long memberId, String accountName, String name, String email,
                                String password, String phoneNumber, LocalDate birthDate,
-                               Gender gender, String profileContent, String profileImage,
-                               LocalDateTime emailAuthAt, String addrCity, String addrDistrict,
+                               Gender gender, String profileImage,
+                               LocalDateTime emailAuthAt, String activeRegion,
                                boolean profileOpen, Role role) {
         return MemberEntity.builder()
                 .memberId(memberId)
@@ -85,11 +100,9 @@ public class MemberServiceTest {
                 .phoneNumber(phoneNumber)
                 .birthDate(birthDate)
                 .gender(gender)
-                .profileContent(profileContent)
                 .profileImage(profileImage)
                 .emailAuthAt(emailAuthAt)
-                .addrCity(addrCity)
-                .addrDistrict(addrDistrict)
+                .activeRegion(activeRegion)
                 .profileOpen(profileOpen)
                 .role(role)
                 .build();
@@ -115,6 +128,10 @@ public class MemberServiceTest {
                 .build();
     }
 
+    private SportsEntity createSports(Long id, String sportsName) {
+        return new SportsEntity(id, sportsName);
+    }
+
 
     @Nested
     @DisplayName("첫 회원가입")
@@ -128,7 +145,7 @@ public class MemberServiceTest {
             String password = passwordEncoder.encode("abcd1234!");
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", password,
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null,
                     true, Role.UNAUTH);
 
             MemberRegister.Request request = MemberRegister.Request.builder()
@@ -136,14 +153,12 @@ public class MemberServiceTest {
                     .name("Je Joon")
                     .email("joons@gmail.com")
                     .password(password)
-                    .phoneNumber("010-1234-1234")
-                    .birthDate(birthDate)
                     .gender(Gender.MALE)
                     .profileOpen("open")
                     .build();
 
             //when
-            when(memberRepository.save(MemberRegister.Request.toEntity(request)))
+            when(memberRepository.save(MemberRegister.Request.toEntity(request, LoginBy.USPORTS)))
                     .thenReturn(member);
 
             MemberRegister.Response response = memberService.registerMember(request);
@@ -166,8 +181,6 @@ public class MemberServiceTest {
                     .name("Je Joon")
                     .email("joons@gmail.com")
                     .password("Aabcd1234!")
-                    .phoneNumber("010-1234-1234")
-                    .birthDate(birthDate)
                     .gender(Gender.MALE)
                     .profileOpen("open")
                     .build();
@@ -204,8 +217,6 @@ public class MemberServiceTest {
                     .name("Je Joon")
                     .email("joons@gmail.com")
                     .password("Aabcd1234!")
-                    .phoneNumber("010-1234-1234")
-                    .birthDate(birthDate)
                     .gender(Gender.MALE)
                     .profileOpen("open")
                     .build();
@@ -223,39 +234,6 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
-
-        @Test
-        @DisplayName("회원가입 실패 - 폰번호가 이미 있음")
-        void failPhoneNumberAlreadyExist() {
-            //given
-            LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            MemberRegister.Request request = MemberRegister.Request.builder()
-                    .accountName("joons")
-                    .name("Je Joon")
-                    .email("joons@gmail.com")
-                    .password("Aabcd1234!")
-                    .phoneNumber("010-1234-1234")
-                    .birthDate(birthDate)
-                    .gender(Gender.MALE)
-                    .profileOpen("open")
-                    .build();
-
-            //when
-            when(memberRepository.existsByAccountName(request.getAccountName()))
-                    .thenReturn(false); // 이건 굳이 없어도 됨
-            when(memberRepository.existsByEmail(request.getEmail()))
-                    .thenReturn(false);
-            when(memberRepository.existsByPhoneNumber(request.getPhoneNumber()))
-                    .thenReturn(true);
-
-            MemberException exception =
-                    catchThrowableOfType(() ->
-                            memberService.registerMember(request), MemberException.class);
-
-            //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXISTS);
-        }
     }
 
     @Nested
@@ -266,7 +244,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null,
                     true, Role.UNAUTH);
 
             return member;
@@ -283,6 +261,10 @@ public class MemberServiceTest {
                     .password("abcd1234!")
                     .build();
 
+            List<SportsDto> interestedSportsList = new ArrayList<>();
+            interestedSportsList.add(new SportsDto(createSports(10L, "축구")));
+            interestedSportsList.add(new SportsDto(createSports(11L, "농구")));
+
             //when
             when(passwordEncoder.matches(request.getPassword(), member.getPassword()))
                     .thenReturn(true);
@@ -291,13 +273,16 @@ public class MemberServiceTest {
                     .thenReturn(Optional.ofNullable(member));
             log.info("{}", member.getAccountName());
 
-            MemberDto memberDto = memberService.loginMember(request);
+            when(myPageService.getInterestedSportsList(member.getMemberId()))
+                .thenReturn(interestedSportsList);
+
+            MemberResponse memberResponse = memberService.loginMember(request);
 
             //then
-            assertThat(memberDto.getMemberId()).isEqualTo(member.getMemberId());
-            assertThat(memberDto.getAccountName()).isEqualTo(member.getAccountName());
-            assertThat(memberDto.getEmail()).isEqualTo(member.getEmail());
-            assertThat(memberDto.getPhoneNumber()).isEqualTo(member.getPhoneNumber());
+            assertThat(memberResponse.getMemberId()).isEqualTo(member.getMemberId());
+            assertThat(memberResponse.getAccountName()).isEqualTo(member.getAccountName());
+            assertThat(memberResponse.getEmail()).isEqualTo(member.getEmail());
+            assertThat(memberResponse.getPhoneNumber()).isEqualTo(member.getPhoneNumber());
         }
 
         @Test
@@ -365,7 +350,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null,
                     true, Role.UNAUTH);
 
             return member;
@@ -416,7 +401,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null,
                     true, role);
 
             return member;
@@ -426,7 +411,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-12-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(10L, "ADMIN", "ADMIN LEE", "admin7@gmail.com", "admin01234!",
-                    "010-1004-1004", birthDate, Gender.FEMALE, null, null, null, null, null,
+                    "010-1004-1004", birthDate, Gender.FEMALE, null, null, null,
                     false, Role.ADMIN);
 
             return member;
@@ -681,7 +666,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null,
                     true, role);
 
             return member;
@@ -701,7 +686,7 @@ public class MemberServiceTest {
         }
 
         private MemberUpdate.Request createMemberRequest(int emailAuthNumber, String accountName, String email,
-                                                         String phoneNumber, String addrCity, String addrDistrict,
+                                                         String phoneNumber, String activeRegion,
                                                          List<Long> sports) {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
@@ -709,16 +694,12 @@ public class MemberServiceTest {
                     .emailAuthNumber(emailAuthNumber)
                     .accountName(accountName)
                     .name("joons")
-                    .email(email)
                     .phoneNumber(phoneNumber)
                     .birthDate(birthDate)
                     .gender(Gender.FEMALE)
-                    .profileContent("content")
-                    .profileImage("picture")
-                    .addrCity(addrCity)
-                    .addrDistrict(addrDistrict)
+                    .activeRegion(activeRegion)
                     .profileOpen("close")
-                    .interestedSports(sports)
+                    .interestedSportsList(sports)
                     .build();
         }
 
@@ -732,7 +713,7 @@ public class MemberServiceTest {
             MemberUpdate.Request request = createMemberRequest(
                     00000, "joons",
                     "joons@gmail.com", "010-1234-1234",
-                    "Seoul", "Naro", sports
+                    "Seoul",  sports
                     );
             MemberDto memberDto = MemberDto.fromEntity(member);
 
@@ -744,36 +725,32 @@ public class MemberServiceTest {
 
             List<InterestedSportsEntity> interestedSportsEntities = createInterestedSport(member, sportsEntities);
 
-            List<String> interestedSportResult = new ArrayList<>(Arrays.asList(new String[]{"football", "basketball"}));
+            List<SportsDto> interestedSportResult =
+                sportsEntities.stream().map(SportsDto::new).collect(Collectors.toList());
 
             //when
             when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.of(member));
 
-            for (int i = 0; i < request.getInterestedSports().size(); i++) {
-                when(sportsRepository.findById(request.getInterestedSports().get(i)))
+            for (int i = 0; i < request.getInterestedSportsList().size(); i++) {
+                when(sportsRepository.findById(request.getInterestedSportsList().get(i)))
                         .thenReturn(Optional.of(sportsEntities.get(i)));
             }
 
             when(interestedSportsRepository.saveAll(interestedSportsEntities))
                     .thenReturn(interestedSportsEntities);
 
-            when(interestedSportsRepository.findAllByMemberEntity(member))
-                    .thenReturn(interestedSportsEntities);
+            MemberResponse response = memberService.updateMember(request, memberDto, memberId);
 
-            MemberUpdate.Response response = memberService.updateMember(request, memberDto, memberId);
-
-            log.info("{} - {}", response.getInterestedSports(), interestedSportResult);
+            log.info("{} - {}", response.getInterestedSportsList(), interestedSportResult);
             log.info("{}", response.getRole());
             //then
             assertThat(response.getAccountName()).isEqualTo(request.getAccountName());
             assertThat(response.getName()).isEqualTo(request.getName());
-            assertThat(response.getEmail()).isEqualTo(request.getEmail());
             assertThat(response.getPhoneNumber()).isEqualTo(request.getPhoneNumber());
             assertThat(response.getBirthDate()).isEqualTo(request.getBirthDate());
-            assertThat(response.getAddrCity()).isEqualTo(request.getAddrCity());
-            assertThat(response.getAddrDistrict()).isEqualTo(request.getAddrDistrict());
-            assertThat(response.getInterestedSports()).isEqualTo(interestedSportResult);
+            assertThat(response.getActiveRegion()).isEqualTo(request.getActiveRegion());
+            assertThat(response.getInterestedSportsList().size()).isEqualTo(2);
             assertThat(response.getRole()).isEqualTo(Role.USER);
         }
 
@@ -788,7 +765,7 @@ public class MemberServiceTest {
             MemberUpdate.Request request = createMemberRequest(
                     00000, "joons",
                     "joons@gmail.com", "010-1234-1234",
-                    "Seoul", "Naro", sports
+                    "Seoul", sports
             );
             MemberDto memberDto = MemberDto.fromEntity(member);
 
@@ -803,13 +780,13 @@ public class MemberServiceTest {
             when(memberRepository.findById(memberDto.getMemberId()))
                     .thenReturn(Optional.of(member));
 
-            when(sportsRepository.findById(request.getInterestedSports().get(0)))
+            when(sportsRepository.findById(request.getInterestedSportsList().get(0)))
                     .thenReturn(Optional.of(sportsEntities.get(0)));
 
-            when(sportsRepository.findById(request.getInterestedSports().get(1)))
+            when(sportsRepository.findById(request.getInterestedSportsList().get(1)))
                     .thenReturn(Optional.of(sportsEntities.get(1)));
 
-            when(sportsRepository.findById(request.getInterestedSports().get(2)))
+            when(sportsRepository.findById(request.getInterestedSportsList().get(2)))
                     .thenReturn(Optional.empty());
 
 
@@ -832,7 +809,7 @@ public class MemberServiceTest {
             MemberUpdate.Request request = createMemberRequest(
                     00000, "joons",
                     "joons@gmail.com", "010-1234-1234",
-                    "Seoul", "Naro", sports
+                    "Seoul",  sports
             );
             MemberDto memberDto = MemberDto.fromEntity(member);
 
@@ -866,7 +843,7 @@ public class MemberServiceTest {
             MemberUpdate.Request request = createMemberRequest(
                     00000, "joons",
                     "joons@gmail.com", "010-1234-1234",
-                    "Seoul", "Naro", sports
+                    "Seoul",  sports
             );
             MemberDto memberDto = MemberDto.fromEntity(member);
 
@@ -884,7 +861,7 @@ public class MemberServiceTest {
             log.info("{}", memberDto.getEmailAuthAt());
             log.info("{}", memberDto.getRole());
 
-            when(authRedisRepository.getEmailAuthNumber(request.getEmail()))
+            when(authRedisRepository.getEmailAuthNumber(memberDto.getEmail()))
                     .thenReturn(12345);
 
             MemberException exception = catchThrowableOfType(
@@ -906,7 +883,7 @@ public class MemberServiceTest {
             MemberUpdate.Request request = createMemberRequest(
                     00000, "joons",
                     "joons@gmail.com", "010-1234-1234",
-                    "Seoul", "Naro", sports
+                    "Seoul",  sports
             );
             MemberDto memberDto = MemberDto.fromEntity(member);
 
@@ -936,7 +913,7 @@ public class MemberServiceTest {
             MemberUpdate.Request request = createMemberRequest(
                     00000, "jjjjj3333",
                     "joons@gmail.com", "010-1234-1234",
-                    "Seoul", "Naro", sports
+                    "Seoul", sports
             );
             MemberDto memberDto = MemberDto.fromEntity(member);
 
@@ -956,79 +933,6 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ACCOUNT_ALREADY_EXISTS);
         }
-
-        @Test
-        @DisplayName("회원, 변경할 이메일이 이미 존재함")
-        void failUpdateMemberEmailAlreadyExist() {
-            //given
-            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
-
-            MemberEntity member = createMember(Role.UNAUTH);
-
-            MemberUpdate.Request request = createMemberRequest(
-                    00000, "jjjjj3333",
-                    "joonstest4@gmail.com", "010-1234-1234",
-                    "Seoul", "Naro", sports
-            );
-            MemberDto memberDto = MemberDto.fromEntity(member);
-
-            Long memberId = 1L;
-
-            //when
-            when(memberRepository.findById(memberDto.getMemberId()))
-                    .thenReturn(Optional.of(member));
-
-            when(memberRepository.existsByAccountName(request.getAccountName()))
-                    .thenReturn(false);
-
-            when(memberRepository.existsByEmail(request.getEmail()))
-                    .thenReturn(true);
-
-            MemberException exception = catchThrowableOfType(
-                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
-            );
-
-            //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.EMAIL_ALREADY_EXISTS);
-        }
-
-        @Test
-        @DisplayName("회원, 변경할 핸드폰번호가 이미 존재함")
-        void failUpdateMemberPhoneAlreadyExist() {
-            //given
-            List<Long> sports = new ArrayList<>(Arrays.asList(new Long[]{1L, 2L}));
-
-            MemberEntity member = createMember(Role.UNAUTH);
-
-            MemberUpdate.Request request = createMemberRequest(
-                    00000, "jjjjj3333",
-                    "joonstest4@gmail.com", "010-1004-1004",
-                    "Seoul", "Naro", sports
-            );
-            MemberDto memberDto = MemberDto.fromEntity(member);
-
-            Long memberId = 1L;
-
-            //when
-            when(memberRepository.findById(memberDto.getMemberId()))
-                    .thenReturn(Optional.of(member));
-
-            when(memberRepository.existsByAccountName(request.getAccountName()))
-                    .thenReturn(false);
-
-            when(memberRepository.existsByEmail(request.getEmail()))
-                    .thenReturn(false);
-
-            when(memberRepository.existsByPhoneNumber(request.getPhoneNumber()))
-                    .thenReturn(true);
-
-            MemberException exception = catchThrowableOfType(
-                    ()-> memberService.updateMember(request, memberDto, memberId), MemberException.class
-            );
-
-            //then
-            assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PHONE_ALREADY_EXISTS);
-        }
     }
     
     @Nested
@@ -1039,7 +943,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE, null, null, null,
                     true, role);
 
             return member;
@@ -1187,7 +1091,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE,  null, null, null,
                     true, role);
 
             return member;
@@ -1304,7 +1208,7 @@ public class MemberServiceTest {
             LocalDate birthDate = LocalDate.parse("1996-02-17", DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             MemberEntity member = member(1L, "joons", "Je Joon", "joons@gmail.com", "abcd1234!",
-                    "010-1234-1234", birthDate, Gender.MALE, null, null, null, null, null,
+                    "010-1234-1234", birthDate, Gender.MALE,  null, null, null,
                     true, role);
 
             return member;

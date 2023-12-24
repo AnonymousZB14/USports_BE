@@ -7,6 +7,7 @@ import com.anonymous.usports.domain.comment.dto.CommentRegister.Response;
 import com.anonymous.usports.domain.comment.dto.CommentUpdate;
 import com.anonymous.usports.domain.comment.service.CommentService;
 import com.anonymous.usports.domain.member.dto.MemberDto;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api(tags = "댓글 (Comment)")
 @RestController
 @RequiredArgsConstructor
 public class CommentController {

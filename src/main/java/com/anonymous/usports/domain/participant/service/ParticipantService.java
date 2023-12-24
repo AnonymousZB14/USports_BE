@@ -8,9 +8,9 @@ import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 public interface ParticipantService {
 
   /**
-   * Recruit에 대한 참여 신청 진행중인 리스트 조회
+   * Recruit에 대한 참여 신청 진행중 / 수락된 인원들 리스트 조회
    */
-  ParticipantListDto getParticipants(Long recruitId, int page, Long memberId);
+  ParticipantListDto getParticipants(Long recruitId, Long memberId);
 
 
   /**

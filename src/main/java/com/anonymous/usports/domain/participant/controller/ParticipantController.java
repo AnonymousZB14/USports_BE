@@ -6,6 +6,7 @@ import com.anonymous.usports.domain.participant.dto.ParticipantManage;
 import com.anonymous.usports.domain.participant.dto.ParticipateCancel;
 import com.anonymous.usports.domain.participant.dto.ParticipateResponse;
 import com.anonymous.usports.domain.participant.service.ParticipantService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@Api(tags = "모집 신청(Participant)")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -26,13 +28,14 @@ public class ParticipantController {
 
   private final ParticipantService participantService;
 
-  @ApiOperation(value = "운동 모집 글 지원자 조회", notes = "page는 1부터 시작한다.")
+  @ApiOperation(value = "운동 모집 글 지원자 조회")
   @GetMapping("/recruit/{recruitId}/applicants")
   public ResponseEntity<ParticipantListDto> getApplicants(@PathVariable Long recruitId,
-      @RequestParam(name = "page", defaultValue = "1") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
-    ParticipantListDto result = participantService.getParticipants(recruitId, page,
-        loginMember.getMemberId());
+
+    ParticipantListDto result =
+        participantService.getParticipants(recruitId, loginMember.getMemberId());
+
     return ResponseEntity.ok(result);
   }
 

@@ -2,17 +2,20 @@ package com.anonymous.usports.domain.participant.dto;
 
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.global.type.ParticipantStatus;
+import com.anonymous.usports.global.type.SportsGrade;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Builder
 public class ParticipantDto {
 
@@ -21,6 +24,8 @@ public class ParticipantDto {
   private Long memberId;
 
   private Long recruitId;
+
+  private String sportsSkill;
 
   private LocalDateTime registeredAt;
 
@@ -37,6 +42,7 @@ public class ParticipantDto {
         .participantId(participant.getParticipantId())
         .memberId(participant.getMember().getMemberId())
         .recruitId(participant.getRecruit().getRecruitId())
+        .sportsSkill(SportsGrade.doubleToGrade(participant.getSportsSkill()).getDescription())
         .registeredAt(participant.getRegisteredAt())
         .confirmedAt(participant.getConfirmedAt())
         .status(participant.getStatus())

@@ -5,6 +5,7 @@ import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
+import com.anonymous.usports.global.type.SportsGrade;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -32,7 +33,7 @@ public class RecruitDto {
 
   private Long recruitId;
 
-  private Long sportsId;
+  private String sportsName;
 
   private Long memberId;
 
@@ -60,11 +61,11 @@ public class RecruitDto {
 
   private LocalDateTime meetingDate;
 
-  private RecruitStatus recruitStatus;
+  private String recruitStatus;
 
-  private int gradeFrom;
+  private String gradeFrom;
 
-  private int gradeTo;
+  private String gradeTo;
 
   private LocalDateTime registeredAt;
 
@@ -73,7 +74,7 @@ public class RecruitDto {
   public static RecruitDto fromEntity(RecruitEntity recruitEntity){
     return RecruitDto.builder()
         .recruitId(recruitEntity.getRecruitId())
-        .sportsId(recruitEntity.getSports().getSportsId())
+        .sportsName(recruitEntity.getSports().getSportsName())
         .memberId(recruitEntity.getMember().getMemberId())
         .title(recruitEntity.getTitle())
         .content(recruitEntity.getContent())
@@ -87,9 +88,9 @@ public class RecruitDto {
         .gender(recruitEntity.getGender())
         .recruitCount(recruitEntity.getRecruitCount())
         .meetingDate(recruitEntity.getMeetingDate())
-        .recruitStatus(recruitEntity.getRecruitStatus())
-        .gradeFrom(recruitEntity.getGradeFrom())
-        .gradeTo(recruitEntity.getGradeTo())
+        .recruitStatus(recruitEntity.getRecruitStatus().getDescription())
+        .gradeFrom(SportsGrade.intToString(recruitEntity.getGradeFrom()))
+        .gradeTo(SportsGrade.intToString(recruitEntity.getGradeTo()))
         .registeredAt(recruitEntity.getRegisteredAt())
         .updatedAt(recruitEntity.getUpdatedAt())
         .build();

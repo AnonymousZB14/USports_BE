@@ -1,9 +1,11 @@
 package com.anonymous.usports.domain.member.controller;
 
 import com.anonymous.usports.domain.member.service.MailService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+@Api(tags = "메일(Mail)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/member")
@@ -20,11 +22,9 @@ public class MailController {
     public String MailSend(
             @PathVariable("email") String email
     ){
-        int number = mailService.sendEmailAuthMail(email);
+        mailService.sendEmailAuthMail(email);;
 
-        String num = " " + number;
-
-        return num;
+        return "test sent";
     }
 
 }

@@ -1,7 +1,6 @@
 package com.anonymous.usports.domain.recruit.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
-import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.RecruitStatus;
@@ -9,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-
 import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -50,6 +48,9 @@ public class RecruitEntity {
   @JoinColumn(name = "member_id", nullable = false)
   private MemberEntity member;
 
+  @Column(name = "chatroom_id")
+  private Long chatRoomId;
+
   @Column(name = "title", nullable = false)
   private String title;
 
@@ -67,6 +68,9 @@ public class RecruitEntity {
 
   @Column(name = "street_number_addr")
   private String streetNumberAddr; // 지번 주소
+
+  @Column(name = "post_code")
+  private String postCode;
 
   @Column(name = "lat", nullable = false)
   private String lat;
@@ -108,53 +112,35 @@ public class RecruitEntity {
   @Column(name = "updated_at", nullable = false)
   private LocalDateTime updatedAt;
 
-  public void updateRecruit(RecruitUpdate.Request request, SportsEntity sports){
-    this.sports = sports;
-    this.title = request.getTitle();
-    this.content = request.getContent();
-    this.placeName = request.getPlaceName();
-    this.region = request.getRegion();
-    this.streetNameAddr = request.getStreetNameAddr();
-    this.streetNumberAddr = request.getStreetNumberAddr();
-    this.lat = request.getLat();
-    this.lnt = request.getLnt();
-    this.cost = request.getCost();
-    this.gender = request.getGender();
-    this.recruitCount = request.getRecruitCount();
-    this.meetingDate = request.getMeetingDate();
-    this.gradeFrom = request.getGradeFrom();
-    this.gradeTo = request.getGradeTo();
-  }
-
-  public void participantAdded(){
+  public void participantAdded() {
     this.currentCount = this.currentCount + 1;
-    if(this.currentCount == this.recruitCount){
+    if (this.currentCount == this.recruitCount) {
       this.recruitStatus = RecruitStatus.END;
-    }else if((double)this.currentCount / this.recruitCount >= 0.7){
+    } else if ((double) this.currentCount / this.recruitCount >= 0.7) {
       this.recruitStatus = RecruitStatus.ALMOST_END;
     }
   }
 
-  public void participantCanceled(){
-    if(this.currentCount == 0){
+  public void participantCanceled() {
+    if (this.currentCount == 0) {
       return;
     }
     this.currentCount = this.currentCount - 1;
-    if(this.recruitStatus == RecruitStatus.ALMOST_END
-        && (double)this.currentCount / this.recruitCount <= 0.7){
+    if (this.recruitStatus == RecruitStatus.ALMOST_END
+        && (double) this.currentCount / this.recruitCount <= 0.7) {
       this.recruitStatus = RecruitStatus.RECRUITING;
     }
   }
 
-  public void statusToEnd(){
+  public void statusToEnd() {
     this.recruitStatus = RecruitStatus.END;
   }
 
-  public void statusToRecruiting(){
+  public void statusToRecruiting() {
     this.recruitStatus = RecruitStatus.RECRUITING;
   }
 
-  public void statusToAlmostFinished(){
+  public void statusToAlmostFinished() {
     this.recruitStatus = RecruitStatus.ALMOST_END;
   }
 

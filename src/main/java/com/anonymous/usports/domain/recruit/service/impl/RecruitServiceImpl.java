@@ -4,11 +4,13 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
+import com.anonymous.usports.domain.recruit.api.component.AddressConverter;
+import com.anonymous.usports.domain.recruit.api.dto.AddressDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitEndResponse;
+import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 import com.anonymous.usports.domain.recruit.dto.RecruitRegister.Request;
-import com.anonymous.usports.domain.recruit.dto.RecruitSearchListDto;
-import com.anonymous.usports.domain.recruit.dto.RecruitUpdate;
+import com.anonymous.usports.domain.recruit.dto.RecruitResponse;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.recruit.service.RecruitService;
@@ -24,6 +26,7 @@ import com.anonymous.usports.global.exception.SportsException;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
+import com.anonymous.usports.global.type.SportsGrade;
 import io.jsonwebtoken.lang.Strings;
 import java.util.List;
 import java.util.Objects;
@@ -45,6 +48,7 @@ public class RecruitServiceImpl implements RecruitService {
   private final SportsRepository sportsRepository;
   private final RecruitRepository recruitRepository;
   private final ParticipantRepository participantRepository;
+  private final AddressConverter addressConverter;
 
   @Override
   @Transactional
@@ -55,38 +59,36 @@ public class RecruitServiceImpl implements RecruitService {
     SportsEntity sportsEntity = sportsRepository.findById(request.getSportsId())
         .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
 
+    AddressDto addressDto = addressConverter.roadNameAddressToLocationInfo(request.getAddress());
+
     RecruitEntity saved =
-        recruitRepository.save(Request.toEntity(request, memberEntity, sportsEntity));
+        recruitRepository.save(Request.toEntity(request, memberEntity, sportsEntity, addressDto));
+
+    //모집 생성할 때, host participant 추가
+    ParticipantEntity participantEntity = new ParticipantEntity(memberEntity, saved);
+    participantEntity.setStatus(ParticipantStatus.ACCEPTED);
+    participantRepository.save(participantEntity);
 
     return RecruitDto.fromEntity(saved);
   }
 
   @Override
   @Transactional
-  public RecruitDto getRecruit(Long recruitId) {
-    return RecruitDto.fromEntity(
-        recruitRepository.findById(recruitId)
-            .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND))
-    );
-  }
-
-  @Override
-  @Transactional
-  public RecruitDto updateRecruit(RecruitUpdate.Request request, Long recruitId, Long memberId) {
-    RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
+  public RecruitResponse getRecruit(Long recruitId) {
+    RecruitEntity recruit = recruitRepository.findById(recruitId)
         .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
-    MemberEntity memberEntity = recruitEntity.getMember(); //작성자
+    RecruitResponse response = RecruitResponse.fromEntity(recruit);
+    List<ParticipantEntity> participants = participantRepository.findAllByRecruitAndStatus(
+        recruit, ParticipantStatus.ACCEPTED);
 
-    this.validateAuthority(memberEntity, memberId);
+    double sportSkillTotal = 0.0;
+    for (ParticipantEntity participant : participants) {
+      sportSkillTotal += participant.getSportsSkill();
+    }
+    response.setParticipantSportsSkillAverage(
+        SportsGrade.doubleToGrade(sportSkillTotal / participants.size()).getDescription());
 
-    SportsEntity sportsEntity = sportsRepository.findById(request.getSportsId())
-        .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
-
-    recruitEntity.updateRecruit(request, sportsEntity);
-
-    RecruitEntity saved = recruitRepository.save(recruitEntity);
-
-    return RecruitDto.fromEntity(saved);
+    return response;
   }
 
   @Override
@@ -146,7 +148,7 @@ public class RecruitServiceImpl implements RecruitService {
 
   @Override
   @Transactional
-  public RecruitSearchListDto getRecruitsByConditions(
+  public RecruitListDto getRecruitsByConditions(
       int page, String search, String region, String sports, Gender gender, boolean closeInclude) {
 
     if (!StringUtils.hasText(search)) {
@@ -160,7 +162,7 @@ public class RecruitServiceImpl implements RecruitService {
       sportsEntity = sportsRepository.findBySportsName(sports)
           .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
     }
-    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT, Sort.by("registeredAt").descending());
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX, Sort.by("registeredAt").descending());
 
     Page<RecruitEntity> findPage = Page.empty();
 
@@ -172,7 +174,7 @@ public class RecruitServiceImpl implements RecruitService {
           search, region, sportsEntity, gender, pageRequest);
     }
 
-    return new RecruitSearchListDto(findPage);
+    return new RecruitListDto(findPage);
   }
 
   private void validateAuthority(MemberEntity member, Long memberId) {

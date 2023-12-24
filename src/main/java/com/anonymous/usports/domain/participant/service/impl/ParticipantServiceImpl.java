@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.participant.service.impl;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.participant.dto.ParticipantInfo;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage.Response;
@@ -12,7 +13,8 @@ import com.anonymous.usports.domain.participant.repository.ParticipantRepository
 import com.anonymous.usports.domain.participant.service.ParticipantService;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
-import com.anonymous.usports.global.constant.NumberConstant;
+import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
+import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
@@ -21,13 +23,12 @@ import com.anonymous.usports.global.exception.ParticipantException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,21 +40,36 @@ public class ParticipantServiceImpl implements ParticipantService {
   private final MemberRepository memberRepository;
   private final RecruitRepository recruitRepository;
   private final ParticipantRepository participantRepository;
+  private final SportsSkillRepository sportsSkillRepository;
 
   @Override
   @Transactional
-  public ParticipantListDto getParticipants(Long recruitId, int page, Long loginMemberId) {
+  public ParticipantListDto getParticipants(Long recruitId, Long loginMemberId) {
     RecruitEntity recruitEntity = recruitRepository.findById(recruitId)
         .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
 
     this.validateAuthority(recruitEntity, loginMemberId);
 
-    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
-    Page<ParticipantEntity> findPage =
-        participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
-            recruitEntity, ParticipantStatus.ING, pageRequest);
+    List<ParticipantInfo> ingList =
+        participantRepository
+            .findAllByRecruitAndStatusOrderByParticipantId(recruitEntity, ParticipantStatus.ING)
+            .stream()
+            .map(ParticipantInfo::fromEntity)
+            .collect(Collectors.toList());
 
-    return new ParticipantListDto(findPage);
+    List<ParticipantInfo> acceptedList =
+        participantRepository
+            .findAllByRecruitAndStatusOrderByParticipantId(recruitEntity, ParticipantStatus.ACCEPTED)
+            .stream()
+            .map(ParticipantInfo::fromEntity)
+            .collect(Collectors.toList());
+
+    return ParticipantListDto.builder()
+        .currentCount(recruitEntity.getCurrentCount())
+        .totalCount(recruitEntity.getRecruitCount())
+        .ingList(ingList)
+        .acceptedList(acceptedList)
+        .build();
   }
 
   @Override
@@ -80,8 +96,20 @@ public class ParticipantServiceImpl implements ParticipantService {
           ResponseConstant.JOIN_RECRUIT_ALREADY_ACCEPTED);
     }
 
+    //participant에 SportsSkill 추가하기
+    ParticipantEntity participant = new ParticipantEntity(memberEntity, recruitEntity);
+    Optional<SportsSkillEntity> optionalSportsSkill =
+        sportsSkillRepository.findByMemberAndSports(memberEntity, recruitEntity.getSports());
+
+    if (optionalSportsSkill.isPresent()) {
+      SportsSkillEntity sportsSkill = optionalSportsSkill.get();
+      participant.setSportsSkill(sportsSkill.getSportsScoreAsDouble());
+    } else {
+      participant.setSportsSkill(0.0);
+    }
+
     //신청 가능 -> 신청
-    participantRepository.save(new ParticipantEntity(memberEntity, recruitEntity));
+    participantRepository.save(participant);
 
     return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETE);
   }
