@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -128,6 +129,14 @@ public class CsServiceImpl implements CsService {
   @Override
   public CsListDto getCsListAdmin(MemberDto member, String email, String statusNum, int page) {
 
+    if (!StringUtils.hasText(email)) {
+      email = null;
+    }
+
+    if (!StringUtils.hasText(statusNum)) {
+      statusNum = null;
+    }
+
     if (!Role.ADMIN.equals(member.getRole()))
       throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
 
@@ -147,6 +156,8 @@ public class CsServiceImpl implements CsService {
         csStatus = CsStatus.ING;
       } else if (statusNum.equals("3")) {
         csStatus = CsStatus.FINISHED;
+      } else {
+        csStatus = null;
       }
     }
 

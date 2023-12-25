@@ -1,6 +1,7 @@
 package com.anonymous.usports.websocket.controller;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
+import com.anonymous.usports.websocket.dto.ChatEnterDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
@@ -24,13 +25,14 @@ public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
 
-//    @GetMapping("/{chatRoomId}")
-//    public String enterChatRoom(
-//        @PathVariable Long chatRoomId,
-//        @AuthenticationPrincipal MemberDto memberDto
-//    ) {
-//        return chatRoomService.enterChatRoom(chatRoomId, memberDto);
-//    }
+    @GetMapping("/{chatRoomId}")
+    public ChatEnterDto enterChatRoom(
+        @PathVariable Long chatRoomId,
+        @AuthenticationPrincipal MemberDto memberDto
+    ) {
+        return chatRoomService.enterChatRoom(chatRoomId, memberDto);
+    }
+
 
     @GetMapping("/list")
     public List<ChatPartakeDto>  getChatRoomList(
