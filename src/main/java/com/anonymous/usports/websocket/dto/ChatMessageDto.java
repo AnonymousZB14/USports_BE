@@ -23,12 +23,10 @@ public class ChatMessageDto {
 
     public static ChattingEntity toEntity(ChatMessageDto chatMessageDto) {
         return ChattingEntity.builder()
-            .chatRoomId(chatMessageDto.chatRoomId)
+            .chatRoomId(chatMessageDto.getChatRoomId())
             .content(chatMessageDto.getContent())
-            .createdAt(chatMessageDto.time)
-            .name(chatMessageDto.senderName)
-            .imageAddress(chatMessageDto.imageAddress)
-            .memberId(chatMessageDto.senderId)
+            .createdAt(chatMessageDto.getTime())
+            .memberId(chatMessageDto.getSenderId())
             .build();
     }
 }

@@ -2,6 +2,7 @@ package com.anonymous.usports.websocket.controller;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.websocket.dto.ChatEnterDto;
+import com.anonymous.usports.websocket.dto.ChatMessageDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
@@ -78,5 +79,13 @@ public class ChatRoomController {
     ) {
         return ResponseEntity.ok(
             chatRoomService.exitChat(chatRoomId, memberDto));
+    }
+
+    @GetMapping("/{chatRoomId}/getMessagelist")
+    public ResponseEntity<List<ChatMessageDto>> getMessageList(
+        @PathVariable Long chatRoomId,
+        @AuthenticationPrincipal MemberDto memberDto
+    ){
+        return ResponseEntity.ok(chatRoomService.getMessageList(chatRoomId,memberDto));
     }
 }

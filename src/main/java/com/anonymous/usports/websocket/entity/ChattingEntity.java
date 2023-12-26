@@ -29,10 +29,6 @@ public class ChattingEntity {
 
   private Long memberId; //회원 Id
 
-  private String name; //회원 이름
-
-  private String imageAddress;
-
   private String content; //내용
 
   private LocalDateTime createdAt; //입력 시간
