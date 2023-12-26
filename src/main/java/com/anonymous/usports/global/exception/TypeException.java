@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @Builder
@@ -20,5 +19,11 @@ public class TypeException extends RuntimeException {
     this.errorCode = errorCode;
     this.errorMessage = errorCode.getDescription();
   }
+
+  public TypeException(ErrorCode errorCode, String message) {
+    this.errorCode = errorCode;
+    this.errorMessage = message;
+  }
+
 
 }

@@ -22,13 +22,13 @@ public enum Gender {
     return Stream.of(Gender.values())
         .filter(gender -> gender.toString().equals(inputValue.toUpperCase()))
         .findFirst()
-        .orElseThrow(() -> new TypeException(ErrorCode.TYPE_INVALID_ERROR));
+        .orElseThrow(() -> new TypeException(ErrorCode.TYPE_INVALID_ERROR, inputValue+" : 잘못된 값 입니다."));
   }
 
   public static Gender of(String genderString){
     return Stream.of(Gender.values())
         .filter(g -> g.getDescription().equals(genderString))
         .findFirst()
-        .orElseThrow(() -> new TypeException(ErrorCode.TYPE_INVALID_ERROR));
+        .orElseThrow(() -> new TypeException(ErrorCode.TYPE_INVALID_ERROR, genderString + " : 성별 텍스트가 잘못된 값입니다."));
   }
 }
