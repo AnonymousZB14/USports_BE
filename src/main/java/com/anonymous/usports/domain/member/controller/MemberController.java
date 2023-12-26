@@ -124,12 +124,13 @@ public class MemberController {
   @PostMapping("/{memberId}/withdraw")
   @ApiOperation(value = "회원 탈퇴하기", notes = "회원 삭제하기. ADMIN은 아무나 삭제가 가능해서 URI에 pathVariable로 memberId 넣기")
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
-  public MemberWithdraw.Response deleteMember(
+  public ResponseEntity<MemberWithdraw.Response> deleteMember(
       @PathVariable("memberId") Long id,
       @AuthenticationPrincipal MemberDto memberDto,
       @RequestBody MemberWithdraw.Request request
   ) {
-    return memberService.deleteMember(memberDto, request, id);
+    return ResponseEntity.ok(
+        memberService.deleteMember(memberDto, request, id));
   }
 
   /**
@@ -138,12 +139,13 @@ public class MemberController {
   @PutMapping("/{memberId}")
   @ApiOperation(value = "회원 정보 수정하기", notes = "ADMIN은 아무나 삭제가 가능해서 URI에 pathVariable로 memberId 넣기")
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
-  public MemberResponse updateMember(
+  public ResponseEntity<MemberResponse> updateMember(
       @PathVariable("memberId") Long id,
       @RequestBody @Valid MemberUpdate.Request request,
       @AuthenticationPrincipal MemberDto memberDto
   ) {
-    return memberService.updateMember(request, memberDto, id);
+    return ResponseEntity.ok(
+        memberService.updateMember(request, memberDto, id));
   }
 
   /**
@@ -152,11 +154,12 @@ public class MemberController {
   @PutMapping("/{memberId}/profile-image")
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
   @ApiOperation(value = "프로필 이미지 변경, 삭제", notes = "회원 정보 수정과 별개로 프로필 이미지만 변경 및 삭제")
-  public MemberResponse updateMemberProfileImage(
+  public ResponseEntity<MemberResponse> updateMemberProfileImage(
       @PathVariable("memberId") Long id,
       @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
       @AuthenticationPrincipal MemberDto memberDto) {
-    return memberService.updateMemberProfileImage(profileImage, memberDto, id);
+    return ResponseEntity.ok(
+        memberService.updateMemberProfileImage(profileImage, memberDto, id));
   }
 
   /**
@@ -165,12 +168,13 @@ public class MemberController {
   @PutMapping("/{memberId}/edit-password")
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_USER')")
   @ApiOperation(value = "회원 비밀번호 수정", notes = "회원 기존 비밀번호를 입력하고, 새로운 비밀번호와 그 비밀번호와 일치하는지 확인을 한다")
-  public PasswordUpdate.Response changePassword(
+  public ResponseEntity<PasswordUpdate.Response> changePassword(
       @RequestBody @Valid PasswordUpdate.Request request,
       @PathVariable("memberId") Long id,
       @AuthenticationPrincipal MemberDto memberDto
   ) {
-    return memberService.updatePassword(request, id, memberDto);
+    return ResponseEntity.ok(
+        memberService.updatePassword(request, id, memberDto));
   }
 
   /**
@@ -178,10 +182,11 @@ public class MemberController {
    */
   @PostMapping("/password-lost")
   @ApiOperation(value = "비밀번호를 잃어버렸을 경우", notes = "이메일과 핸드폰번호를 확인한 후, 이메일로 임시비밀번호를 보내준다")
-  public PasswordLostResponse.Response passwordLost(
+  public ResponseEntity<PasswordLostResponse.Response> passwordLost(
       @RequestBody PasswordLostResponse.Request request
   ) {
-    return memberService.lostPassword(request);
+    return ResponseEntity.ok(
+        memberService.lostPassword(request));
   }
 
   /**
@@ -190,10 +195,11 @@ public class MemberController {
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH')")
   @GetMapping("/{memberId}/resend-email-auth")
   @ApiOperation(value = "회원 인증 번호 재전송", notes = "이메일 인증이 만료 되었을 때 회원 인증 번호 재전송")
-  public MailResponse resendEmailAuth(
+  public ResponseEntity<MailResponse> resendEmailAuth(
       @PathVariable("memberId") Long id,
       @AuthenticationPrincipal MemberDto memberDto
   ) {
-    return memberService.resendEmailAuth(memberDto, id);
+    return ResponseEntity.ok(
+        memberService.resendEmailAuth(memberDto, id));
   }
 }

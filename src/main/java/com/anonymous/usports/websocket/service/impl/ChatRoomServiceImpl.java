@@ -65,7 +65,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         List<ChatPartakeEntity> chatPartakeEntityList = chatPartakeRepository.findAllByMemberEntity(member);
 
-        return chatPartakeEntityList.stream().map(chatPartake -> ChatPartakeDto.fromEntity(chatPartake))
+        return chatPartakeEntityList.stream().map(ChatPartakeDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -120,7 +120,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public CreateDMDto.Response createChatRoom(CreateDMDto.Request request, MemberDto memberDto) {
 
-        if (memberDto.getMemberId() == request.getMemberId())
+        if (Objects.equals(memberDto.getMemberId(), request.getMemberId()))
             throw new ChatException(ErrorCode.CANNOT_CREATE_CHAT_WITH_SAME_USER);
 
         MemberEntity memberOne = memberRepository.findById(memberDto.getMemberId())
