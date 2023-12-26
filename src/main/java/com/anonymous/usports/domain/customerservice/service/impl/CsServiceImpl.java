@@ -150,14 +150,16 @@ public class CsServiceImpl implements CsService {
     CsStatus csStatus = null;
 
     if (statusNum != null) {
-      if (statusNum.equals("1")) {
-        csStatus = CsStatus.REGISTERED;
-      } else if (statusNum.equals("2")) {
-        csStatus = CsStatus.ING;
-      } else if (statusNum.equals("3")) {
-        csStatus = CsStatus.FINISHED;
-      } else {
-        csStatus = null;
+      switch (statusNum) {
+        case "1":
+          csStatus = CsStatus.REGISTERED;
+          break;
+        case "2":
+          csStatus = CsStatus.ING;
+          break;
+        case "3":
+          csStatus = CsStatus.FINISHED;
+          break;
       }
     }
 
