@@ -28,8 +28,10 @@ import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.SportsGrade;
 import io.jsonwebtoken.lang.Strings;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -87,6 +89,17 @@ public class RecruitServiceImpl implements RecruitService {
     }
     response.setParticipantSportsSkillAverage(
         SportsGrade.doubleToGrade(sportSkillTotal / participants.size()).getDescription());
+
+    //MeetingDate가 지난 Recruit 일 때, 참여자 ID List 반환
+    if (recruit.getMeetingDate().isBefore(LocalDateTime.now())) {
+      response.setParticipantList(
+          participantRepository
+              .findAllByRecruitAndStatusOrderByParticipantId(recruit, ParticipantStatus.ACCEPTED)
+              .stream()
+              .map(p -> p.getMember().getMemberId())
+              .collect(Collectors.toList())
+      );
+    }
 
     return response;
   }
@@ -162,14 +175,15 @@ public class RecruitServiceImpl implements RecruitService {
       sportsEntity = sportsRepository.findBySportsName(sports)
           .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
     }
-    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX, Sort.by("registeredAt").descending());
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
+        Sort.by("registeredAt").descending());
 
     Page<RecruitEntity> findPage = Page.empty();
 
-    if(closeInclude){
+    if (closeInclude) {
       findPage = recruitRepository.findAllByConditionIncludeEND(
           search, region, sportsEntity, gender, pageRequest);
-    }else{
+    } else {
       findPage = recruitRepository.findAllByConditionNotIncludeEND(
           search, region, sportsEntity, gender, pageRequest);
     }

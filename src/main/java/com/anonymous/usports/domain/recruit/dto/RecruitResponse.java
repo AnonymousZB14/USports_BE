@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 /**
  * FE에서 사용하는 값으로 반환하는 RecruitResponse
  */
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -63,6 +65,8 @@ public class RecruitResponse {
 
   private String participantSportsSkillAverage;
 
+  private List<Long> participantList;
+
   public static RecruitResponse fromEntity(RecruitEntity recruit){
     return RecruitResponse.builder()
         .recruitId(recruit.getRecruitId())
@@ -86,6 +90,7 @@ public class RecruitResponse {
         .gradeTo(SportsGrade.intToGrade(recruit.getGradeTo()).getDescription())
         .registeredAt(recruit.getRegisteredAt())
         .updatedAt(recruit.getUpdatedAt())
+        .participantList(new ArrayList<>())
         .build();
   }
 }
