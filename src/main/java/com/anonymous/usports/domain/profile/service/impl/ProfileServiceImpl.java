@@ -42,10 +42,10 @@ public class ProfileServiceImpl implements ProfileService {
   private final FollowRepository followRepository;
 
   @Override
-  public MemberProfile profileMember(String accountName, MemberDto loginMember) {
+  public MemberProfile profileMember(String accountName, Long loginMemberId) {
     MemberEntity member = memberRepository.findByAccountName(accountName)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
-    MemberEntity loginMemberEntity = memberRepository.findById(loginMember.getMemberId())
+    MemberEntity loginMemberEntity = memberRepository.findById(loginMemberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
     FollowEntity follow = followRepository.findByFromMemberAndToMember(loginMemberEntity,member)
         .orElse(null);

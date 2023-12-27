@@ -30,7 +30,7 @@ public class ProfileController {
       @PathVariable String accountName,
       @AuthenticationPrincipal MemberDto loginMember) {
 
-    MemberProfile memberProfile = profileService.profileMember(accountName, loginMember);
+    MemberProfile memberProfile = profileService.profileMember(accountName, loginMember.getMemberId());
 
     return ResponseEntity.ok(memberProfile);
   }
