@@ -70,7 +70,9 @@
 
     function subscribeToRoom() {
       stomp.subscribe("/exchange/chat.exchange/room." + roomId, function (chat) {
+        console.log(chat);
         var content = JSON.parse(chat.body);
+        console.log(content);
         showMessage(content.sender, content.content);
       });
     }
