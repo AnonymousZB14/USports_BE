@@ -106,6 +106,7 @@
 <br>
 
 <h3>채팅 API By Je Joon & Mun Jin</h3>
+<img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/16f8b617-1c68-481c-a406-f8bf10e6e02c"/>
 <p><b>WebSocket</b>을 활용하여 실시간 채팅을 구현했습니다.</p>
 <p><b>STOMP</b>를 사용하여, 채팅방을 구현했습니다.</p>
 <p><b>STOMP</b>를 통해 구독과 발행 기능을 구현 하였고, 1대1 채팅과 운동 모임 그룹 채팅을 구현했습니다.</p>
@@ -119,7 +120,6 @@
 <br>
 
 <h3>신고/문의 API By Je Joon</h3>
-<img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/16f8b617-1c68-481c-a406-f8bf10e6e02c"/>
 <p>코드 상으로 해결하는 것이 어려운 것들을 해결하여, 어플리케이션에 대한 유저들의 신뢰도를 높이려는 기능이다.</p>
 <p>유저들이 어드민에게 문의 또는 신고를 할 것들이 있을 때를 위해 만든 API다.</p>
 <p>이 API를 통해 유저들은, 부적절한 내용을 발견하거나, 운동 모임에서 나쁜 일을 겪으면, 신고 또는 문의를 할 수 있다.</p>
