@@ -4,16 +4,14 @@
 
 
 <h2 align=center>🧑‍💻 BackEnd Members</h2>
-<div>
-  <div align=center width=30%>
-    <h4>김문진</h4>
-  </div>
-  <div align=center width=30%>
-    <h4>류현식</h4>
-  </div>
-  <div align=center width=30%>
-    <h4>이제준</h4>
-  </div>
+
+
+<div align=center>
+	
+| **김문진** | **류현식** | **이제준** |
+| :------: |  :------: | :------: |
+| [<img src="https://avatars.githubusercontent.com/u/115455126?v=4" height=150 width=150> <br/> @KimMunjin](https://github.com/KimMunjin) | [<img src="https://avatars.githubusercontent.com/u/123939272?v=4" height=150 width=150> <br/> @HSRyuuu](https://github.com/HSRyuuu) | [<img src="https://avatars.githubusercontent.com/u/108650920?v=4" height=150 width=150> <br/> @jejoonlee](https://github.com/jejoonlee) |
+	
 </div>
 <br>
 <br>
