@@ -1,5 +1,8 @@
 package com.anonymous.usports.domain.profile.service.impl;
 
+import com.anonymous.usports.domain.follow.entity.FollowEntity;
+import com.anonymous.usports.domain.follow.repository.FollowRepository;
+import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.mypage.service.MyPageService;
@@ -15,6 +18,7 @@ import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
+import com.anonymous.usports.global.type.FollowStatus;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,15 +39,26 @@ public class ProfileServiceImpl implements ProfileService {
   private final MemberRepository memberRepository;
   private final RecordRepository recordRepository;
   private final ParticipantRepository participantRepository;
+  private final FollowRepository followRepository;
 
   @Override
-  public MemberProfile profileMember(String accountName) {
+  public MemberProfile profileMember(String accountName, MemberDto loginMember) {
     MemberEntity member = memberRepository.findByAccountName(accountName)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+    MemberEntity loginMemberEntity = memberRepository.findById(loginMember.getMemberId())
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+    FollowEntity follow = followRepository.findByFromMemberAndToMember(loginMemberEntity,member)
+        .orElse(null);
+
+    FollowStatus checkFollow = null;
+    if (follow != null) {
+      checkFollow = follow.getFollowStatus();
+    }
 
     return MemberProfile.builder()
         .memberInfo(myPageService.getMemberInfo(member.getMemberId()))
         .sportsSkills(myPageService.getSportsSkills(member.getMemberId()))
+        .followStatus(checkFollow)
         .build();
   }
 
