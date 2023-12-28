@@ -27,8 +27,6 @@ public class ChatMessageDto {
             .chatRoomId(chatMessageDto.getChatRoomId())
             .content(chatMessageDto.getContent())
             .createdAt(chatMessageDto.getTime())
-            .name(chatMessageDto.getUser())
-            .imageAddress(chatMessageDto.getImageAddress())
             .memberId(chatMessageDto.getUserId())
             .build();
     }

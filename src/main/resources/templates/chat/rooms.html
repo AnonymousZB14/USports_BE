@@ -12,7 +12,10 @@
   <div class="container">
     <div>
       <ul th:each="room : ${list}">
-        <li><a th:href="@{/chat/room(roomId=${room.chatRoomId})}">[[${room.chatRoomName}]]</a></li>
+        <li>
+          <a th:href="@{/chat/room(roomId=${room.chatRoomId})}">[[${room.chatRoomName}]]</a>
+          <span th:if="${room.unreadChatCount > 0}" th:text="${room.unreadChatCount + ' unread'}"></span>
+        </li>
       </ul>
     </div>
   </div>

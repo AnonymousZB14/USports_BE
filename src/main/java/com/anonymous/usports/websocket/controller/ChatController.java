@@ -26,8 +26,6 @@ public class ChatController {
   @MessageMapping("chat/enter/{chatRoomId}")
   public void enterUser(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
 
-    //TODO 채팅방에 유저 추가하는 메서드 동작
-
     ChatMessageDto chatMessageDto = chatService.assembleEnterChat(chat);
     rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chatMessageDto);
   }
@@ -36,7 +34,7 @@ public class ChatController {
   public void sendMessage(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
 
     ChatMessageDto chatMessageDto = chatService.assembleMessage(chat);
-    rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chat);
+    rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chatMessageDto);
   }
 
   // 기본적으로 chat.queue가 exchange에 바인딩 되어있기 때문에 모든 메시지 처리

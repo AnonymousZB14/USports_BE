@@ -22,32 +22,28 @@ public class ChatServiceImpl implements ChatService {
   private final ChattingRepository chattingRepository;
 
   @Override
-  public ChatMessageDto assembleEnterChat(ChatMessageDto chat, MemberDto loginMember) {
-
-    MemberEntity member = memberRepository.findById(loginMember.getMemberId())
-            .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+  public ChatMessageDto assembleEnterChat(ChatMessageDto chat) {
 
     return ChatMessageDto.builder()
-        .senderId(member.getMemberId())
-        .senderName(member.getName())
-        .imageAddress(member.getProfileImage())
+        .chatRoomId(chat.getChatRoomId())
+        .userId(chat.getUserId())
+        .user(chat.getUser())
+        .imageAddress(chat.getImageAddress())
         .time(LocalDateTime.now())
         .type(MessageType.JOIN)
-        .content(member.getName() + "님이 입장하셨습니다.")
+        .content(chat.getUser() + "님이 입장하셨습니다.")
         .build();
 
   }
 
   @Override
-  public ChatMessageDto assembleMessage(ChatMessageDto chat, MemberDto loginMember) {
-
-    MemberEntity member = memberRepository.findById(loginMember.getMemberId())
-        .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+  public ChatMessageDto assembleMessage(ChatMessageDto chat) {
 
     return ChatMessageDto.builder()
-        .senderId(member.getMemberId())
-        .senderName(member.getName())
-        .imageAddress(member.getProfileImage())
+        .chatRoomId(chat.getChatRoomId())
+        .userId(chat.getUserId())
+        .user(chat.getUser())
+        .imageAddress(chat.getImageAddress())
         .time(LocalDateTime.now())
         .type(MessageType.CHAT)
         .content(chat.getContent())
@@ -58,7 +54,7 @@ public class ChatServiceImpl implements ChatService {
   @Override
   public void receiveMessage(ChatMessageDto chatDto) {
 
-    memberRepository.findById(chatDto.getSenderId())
+    memberRepository.findById(chatDto.getUserId())
         .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     ChattingEntity chatting = ChatMessageDto.toEntity(chatDto);

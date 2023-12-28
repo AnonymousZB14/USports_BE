@@ -5,9 +5,9 @@ import com.anonymous.usports.websocket.dto.ChatMessageDto;
 
 public interface ChatService {
 
-  ChatMessageDto assembleEnterChat(ChatMessageDto chat, MemberDto loginMember);
+  ChatMessageDto assembleEnterChat(ChatMessageDto chat);
 
-  ChatMessageDto assembleMessage(ChatMessageDto chat, MemberDto loginMember);
+  ChatMessageDto assembleMessage(ChatMessageDto chat);
 
   void receiveMessage(ChatMessageDto chatDto);
 }

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,7 +23,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class ChattingEntity {
 
   @Id//Id 자동 생성
-  private String id;
+  private ObjectId id;
 
   @Indexed//해당 컬럼으로 인덱싱 -> 이 컬럼으로 검색 속도 빨라짐
   private Long chatRoomId;

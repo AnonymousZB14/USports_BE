@@ -33,11 +33,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
@@ -78,13 +81,24 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         List<ChatPartakeEntity> chatPartakeEntityList = chatPartakeRepository.findAllByMemberEntity(member);
 
-        return chatPartakeEntityList.stream().map(ChatPartakeDto::fromEntity)
-                .collect(Collectors.toList());
+        return chatPartakeEntityList.stream().
+            map(chatPartakeEntity -> {
+                long unreadChatCount
+                    = getUnreadChatCount(chatPartakeEntity.getChatRoomEntity().getChatRoomId(), chatPartakeEntity.getLastReadChatId());
+                return ChatPartakeDto.fromEntityWithUnreadCount(chatPartakeEntity, unreadChatCount);
+            })
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<ChatPartakeDto> getChatRoomList(MemberDto memberDto) {
         return findChatRoomListByDto(memberDto);
+    }
+
+    // 방 별로 읽지 않은 채팅 수 체크
+    public long getUnreadChatCount(Long chatRoomId, String lastReadChatId) {
+        ObjectId objectId = (lastReadChatId != null) ? new ObjectId(lastReadChatId) : null;
+        return chattingRepository.countAllByChatRoomIdAndIdGreaterThan(chatRoomId, objectId);
     }
 
     private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo){
