@@ -8,7 +8,7 @@ import com.anonymous.usports.domain.recruit.dto.RecruitListDto;
 
 public interface ProfileService {
 
-  MemberProfile profileMember(String accountName, MemberDto loginMember);
+  MemberProfile profileMember(String accountName, Long loginMemberId);
 
   RecordListDto profileRecords(String accountName, Integer page);
 

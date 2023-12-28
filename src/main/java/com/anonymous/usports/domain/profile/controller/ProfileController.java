@@ -26,11 +26,11 @@ public class ProfileController {
 
   @ApiOperation("프로필 - 회원 정보")
   @GetMapping("/profile/{accountName}")
-  public ResponseEntity<MemberProfile> profileRecruits(
+  public ResponseEntity<MemberProfile> profileMember(
       @PathVariable String accountName,
       @AuthenticationPrincipal MemberDto loginMember) {
 
-    MemberProfile memberProfile = profileService.profileMember(accountName, loginMember);
+    MemberProfile memberProfile = profileService.profileMember(accountName, loginMember.getMemberId());
 
     return ResponseEntity.ok(memberProfile);
   }
