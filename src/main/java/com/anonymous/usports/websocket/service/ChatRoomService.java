@@ -1,17 +1,16 @@
 package com.anonymous.usports.websocket.service;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
-import com.anonymous.usports.websocket.dto.ChatEnterDto;
+import com.anonymous.usports.websocket.dto.ChatMessageDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateRecruitChat;
-
 import java.util.List;
 
 public interface ChatRoomService {
 
-    ChatEnterDto enterChatRoom(Long chatRoomId, MemberDto memberDto);
+    ChatMessageDto enterChatRoom(Long chatRoomId, MemberDto memberDto);
 
     List<ChatPartakeDto> getChatRoomList(MemberDto memberDto);
 

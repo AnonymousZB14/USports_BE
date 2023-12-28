@@ -15,8 +15,9 @@ public class ChatMessageDto {
 
     private String content; // 내용
     private Long chatRoomId;
-    private String sender;
-    private Long senderId;
+    private String chatRoomName;
+    private String user;
+    private Long userId;
     private LocalDateTime time;
     private MessageType type;
     private String imageAddress;
@@ -26,9 +27,9 @@ public class ChatMessageDto {
             .chatRoomId(chatMessageDto.chatRoomId)
             .content(chatMessageDto.getContent())
             .createdAt(chatMessageDto.time)
-            .name(chatMessageDto.sender)
+            .name(chatMessageDto.user)
             .imageAddress(chatMessageDto.imageAddress)
-            .memberId(chatMessageDto.senderId)
+            .memberId(chatMessageDto.userId)
             .build();
     }
 }

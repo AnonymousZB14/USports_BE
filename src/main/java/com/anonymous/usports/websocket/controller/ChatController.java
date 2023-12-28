@@ -32,7 +32,7 @@ public class ChatController {
     //TODO 채팅방에 유저 추가하는 메서드 동작
 
     chat.setTime(LocalDateTime.now());
-    chat.setContent(chat.getSender() + "님이 입장하셨습니다.");
+    chat.setContent(chat.getUser() + "님이 입장하셨습니다.");
     chat.setType(MessageType.JOIN);
     rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chat);
   }
@@ -40,6 +40,12 @@ public class ChatController {
   @MessageMapping("chat/message/{chatRoomId}")
   public void sendMessage(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
     log.info("CHAT ()", chat);
+
+    chat.setUser(chat.getUser());
+    chat.setUserId(chat.getUserId());
+    chat.setImageAddress(chat.getImageAddress());
+    chat.setChatRoomId(chat.getChatRoomId());
+    chat.setChatRoomName(chat.getChatRoomName());
     chat.setTime(LocalDateTime.now());
     chat.setContent(chat.getContent()); //TODO 이게 왜 필요한거지?
     chat.setType(MessageType.CHAT);
