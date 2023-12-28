@@ -41,16 +41,17 @@
 
 <h2 align=center>🎯 Skill Sets</h2>
 <div align=center>
-  <img src="https://img.shields.io/badge/SpringBoot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white" />
+	<img src="https://img.shields.io/badge/SpringBoot-6DB33F?style=for-the-badge&logo=SpringBoot&logoColor=white" />
 	<img src="https://img.shields.io/badge/SpringSecurity-6DB33F?style=for-the-badge&logo=SpringSecurity&logoColor=white" />
+	<img src="https://img.shields.io/badge/Spring JPA-6DB33F?&logo=Spring JPA&logoColor=white">
   <br>
-  <img src="https://img.shields.io/badge/JWT-0e093d?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/OAuth2-000000?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/SSE-160b7a?style=for-the-badge" />
-  <br>
-  <img src="https://img.shields.io/badge/Websocket-cc8812?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/STOMP-d10606?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/RabbitMQ-ff6a00?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/JWT-0e093d?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/OAuth2-000000?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/SSE-160b7a?style=for-the-badge" />
+ <br>
+	<img src="https://img.shields.io/badge/Websocket-cc8812?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/STOMP-d10606?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/RabbitMQ-ff6a00?style=for-the-badge&logo=rabbitmq&logoColor=white" />
 </div>
 <br>
 
@@ -71,6 +72,7 @@
 <div align=center>
   <img src="https://img.shields.io/badge/Slack-e827f2?style=for-the-badge" />
   <img src="https://img.shields.io/badge/ZEP-a127f2?style=for-the-badge" />
+	<img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white">
 </div>
 <br>
 
