@@ -52,8 +52,7 @@ public enum SportsGrade {
     }
 
     if (score > 10) {
-      log.error("SportsGrade over 10!!!");
-      return PRO;
+      throw new TypeException(ErrorCode.SPORTS_GRADE_INVALID, "score가 10보다 클 수 없습니다.");
     }
     return ROOKIE;
   }
@@ -83,7 +82,7 @@ public enum SportsGrade {
       default:
         break;
     }
-    log.error("Sports Grade Invalid");
+
     throw new SportsException(ErrorCode.SPORTS_GRADE_INVALID);
   }
 

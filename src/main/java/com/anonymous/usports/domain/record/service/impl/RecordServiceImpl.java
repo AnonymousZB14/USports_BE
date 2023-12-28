@@ -21,6 +21,7 @@ import com.anonymous.usports.domain.record.dto.RecordUpdate;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
 import com.anonymous.usports.domain.record.repository.RecordRepository;
 import com.anonymous.usports.domain.record.service.RecordService;
+import com.anonymous.usports.domain.recordlike.repository.RecordLikeRepository;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
@@ -70,6 +71,7 @@ public class RecordServiceImpl implements RecordService {
   private final InterestedSportsRepository interestedSportsRepository;
   private final FollowRepository followRepository;
   private final CommentRepository commentRepository;
+  private final RecordLikeRepository recordLikeRepository;
   private final AmazonS3 amazonS3;
   @Value("${cloud.aws.s3.bucketName}")
   private String bucketName;
@@ -312,8 +314,13 @@ public class RecordServiceImpl implements RecordService {
         redisTemplate.opsForList()
             .rightPush(URLS_TO_DELETE, recordImageAddress); //redis에 제거할 imageUrl 넣기
       }
+
+      commentRepository.deleteAllByRecord(recordEntity); //댓글 제거
+      recordLikeRepository.deleteAllByRecord(recordEntity); // 좋아요 제거
       recordRepository.delete(recordEntity);// 기록 제거
+
       return RecordDto.fromEntity(recordEntity);
+
     } catch (RecordException e) {
       rollbackUrls(removeImageAddress); //redis에 넣은 제거할 url들을 제거
       throw new RecordException(e.getErrorCode(),e.getErrorMessage());

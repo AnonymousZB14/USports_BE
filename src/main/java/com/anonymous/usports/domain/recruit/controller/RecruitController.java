@@ -33,13 +33,6 @@ public class RecruitController {
 
   private final RecruitService recruitService;
 
-  @ApiOperation("운동 모집 게시글 등록 페이지")
-  @GetMapping("/recruit")
-  public ResponseEntity<?> registerRecruitPage() {
-    //TODO
-    return ResponseEntity.ok(null);
-  }
-
   @ApiOperation("운동 모집 게시글 등록하기")
   @PostMapping("/recruit")
   public ResponseEntity<RecruitRegister.Response> registerRecruit(@RequestBody RecruitRegister.Request request,
@@ -55,13 +48,6 @@ public class RecruitController {
   public ResponseEntity<RecruitResponse> getRecruit(@PathVariable Long recruitId) {
     RecruitResponse result = recruitService.getRecruit(recruitId);
     return ResponseEntity.ok(result);
-  }
-
-  @ApiOperation("운동 모집 게시글 수정 페이지")
-  @GetMapping("/recruit/{recruitId}/update")
-  public ResponseEntity<?> updateRecruitPage(@PathVariable Long recruitId) {
-    //TODO
-    return ResponseEntity.ok(null);
   }
 
   @ApiOperation("운동 모집 게시글 삭제")

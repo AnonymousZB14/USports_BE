@@ -17,11 +17,13 @@ import lombok.Setter;
 public class MyPageParticipant {
 
   private String sportsName;
+  private Long recruitId;
   private String recruitTile;
   private ParticipantStatus status;
 
   public MyPageParticipant(ParticipantEntity participant) {
     this.sportsName = participant.getRecruit().getSports().getSportsName();
+    this.recruitId = participant.getRecruit().getRecruitId();
     this.recruitTile = participant.getRecruit().getTitle();
     this.status = participant.getStatus();
   }
