@@ -13,7 +13,7 @@ import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.ParticipantStatus;
-import com.anonymous.usports.websocket.dto.ChatEnterDto;
+import com.anonymous.usports.websocket.dto.ChatMessageDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
@@ -23,12 +23,16 @@ import com.anonymous.usports.websocket.entity.ChatRoomEntity;
 import com.anonymous.usports.websocket.repository.ChatPartakeRepository;
 import com.anonymous.usports.websocket.repository.ChatRoomRepository;
 import com.anonymous.usports.websocket.service.ChatRoomService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +46,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     @Override
-    public ChatEnterDto enterChatRoom(Long chatRoomId, MemberDto memberDto) {
+    public ChatMessageDto enterChatRoom(Long chatRoomId, MemberDto memberDto) {
 
 
         ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
@@ -55,7 +59,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             throw new ChatException(ErrorCode.USER_NOT_IN_THE_CHAT);
         }
 
-        return new ChatEnterDto(chatRoomId, chatRoom.getChatRoomName(), member.getAccountName());
+        return ChatMessageDto.builder()
+            .chatRoomId(chatRoomId)
+            .chatRoomName(chatRoom.getChatRoomName())
+            .user(member.getAccountName())
+            .userId(member.getMemberId())
+            .imageAddress(member.getProfileImage())
+            .build();
     }
 
     private List<ChatPartakeDto> findChatRoomListByDto(MemberDto memberDto) {
