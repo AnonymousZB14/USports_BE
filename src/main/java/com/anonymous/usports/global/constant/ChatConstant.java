@@ -16,4 +16,6 @@ public class ChatConstant {
     public static final String CHAT_EXCHANGE_NAME = "chat.exchange";
 
     public static final String ROUTING_KEY = "room.*";
+
+    public static final String MARK_READ_CHAT = "읽은 채팅을 체크했습니다.";
 }

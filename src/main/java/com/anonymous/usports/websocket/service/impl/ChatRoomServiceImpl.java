@@ -20,8 +20,10 @@ import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateRecruitChat;
 import com.anonymous.usports.websocket.entity.ChatPartakeEntity;
 import com.anonymous.usports.websocket.entity.ChatRoomEntity;
+import com.anonymous.usports.websocket.entity.ChattingEntity;
 import com.anonymous.usports.websocket.repository.ChatPartakeRepository;
 import com.anonymous.usports.websocket.repository.ChatRoomRepository;
+import com.anonymous.usports.websocket.repository.ChattingRepository;
 import com.anonymous.usports.websocket.service.ChatRoomService;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,11 +33,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
@@ -43,6 +48,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final MemberRepository memberRepository;
     private final ParticipantRepository participantRepository;
     private final RecruitRepository recruitRepository;
+    private final ChattingRepository chattingRepository;
 
 
     @Override
@@ -59,13 +65,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             throw new ChatException(ErrorCode.USER_NOT_IN_THE_CHAT);
         }
 
-        return ChatMessageDto.builder()
-            .chatRoomId(chatRoomId)
-            .chatRoomName(chatRoom.getChatRoomName())
-            .user(member.getAccountName())
-            .userId(member.getMemberId())
-            .imageAddress(member.getProfileImage())
-            .build();
+      return ChatMessageDto.builder()
+          .chatRoomId(chatRoomId)
+          .chatRoomName(chatRoom.getChatRoomName())
+          .user(member.getAccountName())
+          .userId(member.getMemberId())
+          .imageAddress(member.getProfileImage())
+          .build();
     }
 
     private List<ChatPartakeDto> findChatRoomListByDto(MemberDto memberDto) {
@@ -75,13 +81,24 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         List<ChatPartakeEntity> chatPartakeEntityList = chatPartakeRepository.findAllByMemberEntity(member);
 
-        return chatPartakeEntityList.stream().map(ChatPartakeDto::fromEntity)
-                .collect(Collectors.toList());
+        return chatPartakeEntityList.stream().
+            map(chatPartakeEntity -> {
+                long unreadChatCount
+                    = getUnreadChatCount(chatPartakeEntity.getChatRoomEntity().getChatRoomId(), chatPartakeEntity.getLastReadChatId());
+                return ChatPartakeDto.fromEntityWithUnreadCount(chatPartakeEntity, unreadChatCount);
+            })
+            .collect(Collectors.toList());
     }
 
     @Override
     public List<ChatPartakeDto> getChatRoomList(MemberDto memberDto) {
         return findChatRoomListByDto(memberDto);
+    }
+
+    // 방 별로 읽지 않은 채팅 수 체크
+    public long getUnreadChatCount(Long chatRoomId, String lastReadChatId) {
+        ObjectId objectId = (lastReadChatId != null) ? new ObjectId(lastReadChatId) : null;
+        return chattingRepository.countAllByChatRoomIdAndIdGreaterThan(chatRoomId, objectId);
     }
 
     private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo){
@@ -289,4 +306,39 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         return ChatConstant.EXIT_CHAT;
     }
+
+  @Override
+  public List<ChatMessageDto> getMessageList(Long chatRoomId, MemberDto memberDto) {
+    ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
+        .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+    MemberEntity member = memberRepository.findById(memberDto.getMemberId())
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    /** 개인 입장 시간 기록 후 그 이후 채팅만 불러올 경우 필요. ChatPartake에 입장시간이 있으니
+     ChatPartakeEntity chatPartake
+     = chatPartakeRepository.findByChatRoomEntityAndMemberEntity(chatRoom,member)
+     .orElseThrow(()->new ChatException(ErrorCode.USER_NOT_IN_THE_CHAT));
+     */
+
+    List<ChattingEntity> chats = chattingRepository.findAllByChatRoomId(chatRoomId);
+    return chats.stream()
+        .map(chattingEntity -> toChatMessageDto(chattingEntity))
+        .collect(Collectors.toList());
+  }
+
+  private ChatMessageDto toChatMessageDto(ChattingEntity chattingEntity) {
+    MemberEntity senderMember = memberRepository.findById(chattingEntity.getMemberId())
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    return ChatMessageDto.builder()
+        .chatRoomId(chattingEntity.getChatRoomId())
+        .userId(chattingEntity.getMemberId())
+        .user(senderMember.getName())
+        .time(chattingEntity.getCreatedAt())
+        .imageAddress(senderMember.getProfileImage())
+        .content(chattingEntity.getContent())
+        .type(chattingEntity.getType())
+        .build();
+  }
 }

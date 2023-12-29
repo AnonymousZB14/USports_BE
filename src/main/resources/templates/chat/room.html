@@ -130,7 +130,35 @@
     $("#button-send").on("click", function (e) {
       sendMessage();
     });
+    // leaveChatRoom 함수 추가
+    function leaveChatRoom() {
+      // 서버에 읽지 않은 상태를 업데이트하는 요청 보내기
+      fetch('/markChat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chatRoomId: roomId,
+          userId: userId,
+        }),
+      })
+      // .then(response => {
+      //   // 응답 처리...
+      // })
+      .catch(error => {
+        console.error('Error marking chat as read:', error);
+      });
+    }
+
+    // beforeunload 이벤트 등록
+    $(window).on('beforeunload', function() {
+      leaveChatRoom();
+      return "나가?"
+    });
   });
+
+
 </script>
 </body>
 </html>
