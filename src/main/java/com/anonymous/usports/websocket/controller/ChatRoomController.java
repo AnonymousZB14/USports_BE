@@ -84,4 +84,12 @@ public class ChatRoomController {
         return ResponseEntity.ok(
             chatRoomService.exitChat(chatRoomId, memberDto));
     }
+
+  @GetMapping("/{chatRoomId}/getMessagelist")
+  public ResponseEntity<List<ChatMessageDto>> getMessageList(
+      @PathVariable Long chatRoomId,
+      @AuthenticationPrincipal MemberDto memberDto
+  ){
+    return ResponseEntity.ok(chatRoomService.getMessageList(chatRoomId,memberDto));
+  }
 }

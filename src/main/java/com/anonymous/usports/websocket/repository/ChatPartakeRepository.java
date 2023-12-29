@@ -3,11 +3,10 @@ package com.anonymous.usports.websocket.repository;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.websocket.entity.ChatPartakeEntity;
 import com.anonymous.usports.websocket.entity.ChatRoomEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChatPartakeRepository extends JpaRepository<ChatPartakeEntity, Long> {

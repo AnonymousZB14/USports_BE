@@ -1,10 +1,20 @@
 package com.anonymous.usports.websocket.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
-import lombok.*;
-
-import javax.persistence.*;
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity(name = "chat_partake")
 @AllArgsConstructor
@@ -28,6 +38,9 @@ public class ChatPartakeEntity {
 
     @Column(name = "recruit_id")
     private Long recruitId;
+
+    @Column(name = "lastReadChatId")
+    private String lastReadChatId;
 
     @Override
     public boolean equals(Object o) {

@@ -25,4 +25,7 @@ public interface ChatRoomService {
 
     // DM에서는 한명이라도 채팅방을 나가게 되면, 채팅방은 사라진다
     String exitChat(Long chatRoomId, MemberDto memberDto);
+
+  // 채팅방에서 채팅 내역 가져오기
+  List<ChatMessageDto> getMessageList(Long chatRoomId, MemberDto memberDto);
 }
