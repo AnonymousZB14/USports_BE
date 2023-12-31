@@ -157,11 +157,14 @@ public class RecordServiceImpl implements RecordService {
   private String uploadImageToS3(MultipartFile image) throws IOException {
     // 이미지를 S3에 업로드하고 이미지의 URL을 반환
     String originName = image.getOriginalFilename(); // 원본 이미지 이름
+
     String ext = null;
     if(originName!=null){
       ext = originName.substring(originName.lastIndexOf(".")); // 확장자
     }
+
     String changedName = changedImageName(originName); // 새로 생성된 이미지 이름
+
     ObjectMetadata metadata = new ObjectMetadata();// 메타데이터
     metadata.setContentType("image/" + ext);
     InputStream imageInput = image.getInputStream();
@@ -247,7 +250,9 @@ public class RecordServiceImpl implements RecordService {
   public RecordDto getRecordUpdatePage(Long recordId, Long loginMemberId) {
     RecordEntity record = recordRepository.findById(recordId)
         .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+
     validateAuthority(record, loginMemberId);
+
     return RecordDto.fromEntity(record);
   }
 
@@ -259,7 +264,9 @@ public class RecordServiceImpl implements RecordService {
   public RecordDto updateRecord(Long recordId, RecordUpdate.Request request, Long loginMemberId) {
     RecordEntity record = recordRepository.findById(recordId)
         .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+
     validateAuthority(record, loginMemberId);
+
     List<String> removeImageUrls = new ArrayList<>();
     try{
       if (request.getSportsId() != null) {
@@ -283,7 +290,9 @@ public class RecordServiceImpl implements RecordService {
           redisTemplate.opsForList().rightPush(URLS_TO_DELETE, imageUrl); //제거한 Url을 redis에 insert
         }
       }
+
       RecordEntity recordEntity = recordRepository.save(record);
+
       return RecordDto.fromEntity(recordEntity);
     } catch (RecordException e) {
       rollbackUrls(removeImageUrls); //에러 발생 시 redis에 넣은 값 제거
@@ -338,7 +347,9 @@ public class RecordServiceImpl implements RecordService {
   public RecordDto getRecordDetail(Long recordId, int page) {
     RecordEntity record = recordRepository.findById(recordId)
         .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.COMMENT_PAGE_SIZE_DEFAULT);
+
     Page<CommentEntity> commentList = commentRepository.findAllCommentsByRecordId(recordId,pageRequest);
     return RecordDto.fromEntityIncludeComment(record,commentList);
   }
@@ -349,6 +360,7 @@ public class RecordServiceImpl implements RecordService {
   private void validateAuthority(RecordEntity recordEntity, Long loginMemberId) {
     memberRepository.findById(loginMemberId)
         .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
     if (!Objects.equals(recordEntity.getMember().getMemberId(), loginMemberId)) {
       throw new RecordException(ErrorCode.NO_AUTHORITY_ERROR); // 기록 작성자 Id와 로그인한 회원 Id 비교
     }
