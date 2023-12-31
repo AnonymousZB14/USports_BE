@@ -32,6 +32,7 @@ import com.anonymous.usports.websocket.entity.ChatPartakeEntity;
 import com.anonymous.usports.websocket.entity.ChatRoomEntity;
 import com.anonymous.usports.websocket.repository.ChatPartakeRepository;
 import com.anonymous.usports.websocket.repository.ChatRoomRepository;
+import com.anonymous.usports.websocket.repository.ChattingRepository;
 import com.anonymous.usports.websocket.service.impl.ChatRoomServiceImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,6 +68,9 @@ public class ChatRoomServiceImplTest {
 
     @Mock
     private RecruitRepository recruitRepository;
+
+    @Mock
+    private ChattingRepository chattingRepository;
 
     @InjectMocks
     private ChatRoomServiceImpl chatRoomService;
@@ -883,6 +887,11 @@ public class ChatRoomServiceImplTest {
             //when
             when(memberRepository.findById(1L)).thenReturn(Optional.ofNullable(member));
             when(chatPartakeRepository.findAllByMemberEntity(member)).thenReturn(chatPartakeList);
+            when(chattingRepository.countAllByChatRoomIdAndIdGreaterThan(3L,null)).thenReturn(0L);
+            when(chattingRepository.countAllByChatRoomIdAndIdGreaterThan(33L,null)).thenReturn(0L);
+            when(chattingRepository.countAllByChatRoomIdAndIdGreaterThan(333L,null)).thenReturn(0L);
+            when(chattingRepository.countAllByChatRoomIdAndIdGreaterThan(3333L,null)).thenReturn(0L);
+
 
             List<ChatPartakeDto> chatPartakes = chatRoomService.getChatRoomList(MemberDto.fromEntity(member));
 

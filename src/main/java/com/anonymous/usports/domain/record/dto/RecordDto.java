@@ -44,6 +44,8 @@ public class RecordDto {
 
   private List<CommentDto> commentList;
 
+  private Long countRecordLike;
+
 
   public static RecordDto fromEntity(RecordEntity recordEntity) {
     return RecordDto.builder()
@@ -58,10 +60,11 @@ public class RecordDto {
         .updatedAt(recordEntity.getUpdatedAt())
         .countComment(recordEntity.getCountComment())
         .imageAddressList(recordEntity.getImageAddress())
+        .countRecordLike(recordEntity.getCountRecordLikes())
         .build();
   }
 
-  public static RecordDto fromEntityInclueComment(RecordEntity recordEntity, Page<CommentEntity> commentList) {
+  public static RecordDto fromEntityIncludeComment(RecordEntity recordEntity, Page<CommentEntity> commentList) {
     return RecordDto.builder()
         .recordId(recordEntity.getRecordId())
         .memberId(recordEntity.getMember().getMemberId())
@@ -76,6 +79,7 @@ public class RecordDto {
         .imageAddressList(recordEntity.getImageAddress())
         .commentList(commentList.getContent().stream().map(CommentDto::fromEntity).collect(
             Collectors.toList()))
+        .countRecordLike(recordEntity.getCountRecordLikes())
         .build();
   }
 }

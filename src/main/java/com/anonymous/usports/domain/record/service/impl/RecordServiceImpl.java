@@ -340,7 +340,7 @@ public class RecordServiceImpl implements RecordService {
         .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.COMMENT_PAGE_SIZE_DEFAULT);
     Page<CommentEntity> commentList = commentRepository.findAllCommentsByRecordId(recordId,pageRequest);
-    return RecordDto.fromEntityInclueComment(record,commentList);
+    return RecordDto.fromEntityIncludeComment(record,commentList);
   }
 
   /**
