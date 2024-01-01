@@ -1,10 +1,12 @@
 package com.anonymous.usports.domain.member.controller;
 
-import com.anonymous.usports.domain.member.dto.MemberLogin;
-import com.anonymous.usports.domain.member.service.impl.CustomOAuth2MemberService;
+import com.anonymous.usports.domain.member.dto.MemberDto;
+import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
+import com.anonymous.usports.domain.member.service.impl.MemberServiceImpl;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,25 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class OAuthController {
 
-    private final CustomOAuth2MemberService customOAuth2MemberService;
+    private final MemberServiceImpl memberService;
 
-    /**
-     * 테스트 용
-     */
     @GetMapping("/success")
-    public MemberLogin.Response loginSuccess(){
-        return MemberLogin.Response.builder()
-            .tokenDto()
-            .memberResponse()
-            .build();
+    public MemberResponse oauthLogin(
+        @AuthenticationPrincipal MemberDto memberDto
+    ) {
+        return memberService.oauthLogin(memberDto.getMemberId());
     }
-//    @GetMapping("/code/{registrationId}")
-//    public String login(
-//        @RequestParam String code,
-//        @RequestParam String state,
-//        @PathVariable String registrationId
-//    ){
-//
-//        return code;
-//    }
+
 }

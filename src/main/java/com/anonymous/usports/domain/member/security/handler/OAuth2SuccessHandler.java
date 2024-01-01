@@ -26,7 +26,7 @@ public class OAuth2SuccessHandler  extends SimpleUrlAuthenticationSuccessHandler
 
         TokenDto token = tokenProvider.saveTokenInRedis(memberDto.getEmail());
 
-        log.info("OAuth2 인증 성공");
+        response.addHeader("Authorization", token.getAccessToken());
 
         getRedirectStrategy().sendRedirect(request, response, "http://localhost:8080/oauth2/login/success");
 
