@@ -25,7 +25,6 @@ import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.MailConstant;
-import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
@@ -281,10 +280,6 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
       throw new MemberException(ErrorCode.IMAGE_SAVE_ERROR);
     }
 
-    if (profileImage.getSize() > NumberConstant.MAX_PROFILE_IMAGE_COUNT) {
-      throw new MemberException(ErrorCode.TOO_MANY_IMAGES);
-    }
-
     String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
     if (memberEntity.getProfileImage() != null) {
       deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
@@ -297,6 +292,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
   // 프로필 이미지 삭제
   @Override
+  @Transactional
   public MemberResponse deleteMemberProfileImage(MemberDto memberDto, Long memberId) {
 
     if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
