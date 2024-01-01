@@ -25,6 +25,7 @@ import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.MailConstant;
+import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
@@ -261,7 +262,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             .collect(Collectors.toList()));
   }
 
-  // 프로필 이미지만 등록 / 변경 / 삭제
+  // 프로필 이미지만 등록 / 변경
   @Override
   @Transactional
   public MemberResponse updateMemberProfileImage(MultipartFile profileImage,
@@ -276,17 +277,33 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     List<SportsDto> interestedSportsList = interestSportsList(memberEntity);
 
-    if (!profileImage.isEmpty()) { // 파일 업로드 있을 때 -> 프로필 이미지 등록 및 변경
-      String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
-      if (memberEntity.getProfileImage() != null) {
-        deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
-      }
-      memberEntity.updateMemberProfileImage(profileImageAddress);//DB에 새로운 프로필 이미지 업데이트
-
-      return MemberResponse.fromDto(MemberDto.fromEntity(memberEntity), interestedSportsList);
+    if(profileImage.isEmpty()) {
+      throw new MemberException(ErrorCode.IMAGE_SAVE_ERROR);
     }
 
-    //profileImage에 null 값 들어올 때 -> 프로필 이미지 제거
+    if (profileImage.getSize() > NumberConstant.MAX_PROFILE_IMAGE_COUNT) {
+      throw new MemberException(ErrorCode.TOO_MANY_IMAGES);
+    }
+
+    String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
+    if (memberEntity.getProfileImage() != null) {
+      deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
+    }
+    memberEntity.updateMemberProfileImage(profileImageAddress);//DB에 새로운 프로필 이미지 업데이트
+
+    return MemberResponse.fromDto(MemberDto.fromEntity(memberEntity), interestedSportsList);
+
+  }
+
+  // 프로필 이미지 삭제
+  @Override
+  public MemberResponse deleteMemberProfileImage(MemberDto memberDto, Long id) {
+
+    MemberEntity memberEntity = memberRepository.findById(memberDto.getMemberId())
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    List<SportsDto> interestedSportsList = interestSportsList(memberEntity);
+
     if (memberEntity.getProfileImage() != null) {
       deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
     }
