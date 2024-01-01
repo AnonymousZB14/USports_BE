@@ -54,7 +54,7 @@ public interface MemberService {
     /**
      * 프로필 이미지 삭제
      */
-    MemberResponse deleteMemberProfileImage(MemberDto memberDto, Long id);
+    MemberResponse deleteMemberProfileImage(MemberDto memberDto, Long memberId);
 
     /**
      * 회원 비밀번호 수정

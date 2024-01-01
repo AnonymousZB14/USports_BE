@@ -297,7 +297,11 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
   // 프로필 이미지 삭제
   @Override
-  public MemberResponse deleteMemberProfileImage(MemberDto memberDto, Long id) {
+  public MemberResponse deleteMemberProfileImage(MemberDto memberDto, Long memberId) {
+
+    if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
+      throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
+    }
 
     MemberEntity memberEntity = memberRepository.findById(memberDto.getMemberId())
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
