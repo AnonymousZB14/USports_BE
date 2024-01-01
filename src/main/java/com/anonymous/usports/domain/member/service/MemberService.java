@@ -26,6 +26,11 @@ public interface MemberService {
     MemberResponse loginMember(MemberLogin.Request request);
 
     /**
+     * 간편 로그인
+     */
+    MemberResponse oauthLogin(Long memberId);
+
+    /**
      * 회원 로그아웃
      */
     String logoutMember(String accessToken, String email);

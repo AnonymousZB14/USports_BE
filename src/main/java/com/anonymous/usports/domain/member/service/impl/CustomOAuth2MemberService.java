@@ -105,4 +105,6 @@ public class CustomOAuth2MemberService extends DefaultOAuth2UserService {
 
         return memberInfo;
     }
+
+
 }

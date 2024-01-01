@@ -100,6 +100,16 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     );
   }
 
+  private List<SportsDto> interestSportsList(MemberEntity member) {
+    List<InterestedSportsEntity> interestedSportsEntityList =
+        interestedSportsRepository.findAllByMemberEntity(member);
+
+    return interestedSportsEntityList.stream()
+        .map(InterestedSportsEntity::getSports)
+        .map(SportsDto::new)
+        .collect(Collectors.toList());
+  }
+
   @Override
   public MemberRegister.Response registerMember(MemberRegister.Request request) {
 
@@ -119,6 +129,16 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     return MemberResponse.fromDto(memberDto,
         myPageService.getInterestedSportsList(memberDto.getMemberId()));
+  }
+
+  @Override
+  public MemberResponse oauthLogin(Long memberId) {
+
+    MemberEntity member = memberRepository.findById(memberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    return MemberResponse.fromDto(MemberDto.fromEntity(member),
+        interestSportsList(member));
   }
 
   @Override
@@ -254,7 +274,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     MemberEntity memberEntity = memberRepository.findById(memberDto.getMemberId())
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    List<SportsDto> interestedSportsList = myPageService.getInterestedSportsList(memberId);
+    List<SportsDto> interestedSportsList = interestSportsList(memberEntity);
 
     if (!profileImage.isEmpty()) { // 파일 업로드 있을 때 -> 프로필 이미지 등록 및 변경
       String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
