@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ParticipantStatus {
   ACCEPTED("수락"),
-  REFUSED("거절"),
+  REFUSED("거절됨"),
   ING("신청중");
 
   private final String description;
