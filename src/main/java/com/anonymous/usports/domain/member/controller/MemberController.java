@@ -149,17 +149,30 @@ public class MemberController {
   }
 
   /**
-   * 프로필 이미지 등록 / 변경 / 삭제 http://localhost:8080/member/{memberId}/profile-image
+   * 프로필 이미지 등록 / 변경 http://localhost:8080/member/{memberId}/profile-image
    */
   @PutMapping("/{memberId}/profile-image")
   @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
-  @ApiOperation(value = "프로필 이미지 변경, 삭제", notes = "회원 정보 수정과 별개로 프로필 이미지만 변경 및 삭제")
+  @ApiOperation(value = "프로필 이미지 변경", notes = "회원 정보 수정과 별개로 프로필 이미지만 변경")
   public ResponseEntity<MemberResponse> updateMemberProfileImage(
       @PathVariable("memberId") Long id,
       @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
       @AuthenticationPrincipal MemberDto memberDto) {
     return ResponseEntity.ok(
         memberService.updateMemberProfileImage(profileImage, memberDto, id));
+  }
+
+  /**
+   * 프로필 이미지 삭제 http://localhost:8080/member/{memberId}/profile-image/remove
+   */
+  @PutMapping("/{memberId}/profile-image/remove")
+  @PreAuthorize("hasAnyRole('ROLE_UNAUTH', 'ROLE_ADMIN', 'ROLE_USER')")
+  @ApiOperation(value = "프로필 이미지 삭제", notes = "회원 정보 수정과 별개로 프로필 이미지만 삭제")
+  public ResponseEntity<MemberResponse> deleteMemberProfileImage(
+      @PathVariable("memberId") Long id,
+      @AuthenticationPrincipal MemberDto memberDto) {
+    return ResponseEntity.ok(
+        memberService.deleteMemberProfileImage(memberDto, id));
   }
 
   /**
