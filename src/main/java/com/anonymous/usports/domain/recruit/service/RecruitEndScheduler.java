@@ -19,7 +19,7 @@ public class RecruitEndScheduler {
 
   private final RecruitRepository recruitRepository;
 
-  @Scheduled(cron = "0 0 0/3 * * *") //3시간마다 실행
+  @Scheduled(cron = "0 15 * * * *") //매시 15분에 실행
   @Transactional
   public void penaltySchedule() {
     log.info("[Change status to END on finished Recruit] Time : {}", LocalDateTime.now());
