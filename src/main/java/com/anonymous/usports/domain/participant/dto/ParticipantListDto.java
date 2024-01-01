@@ -1,6 +1,7 @@
 package com.anonymous.usports.domain.participant.dto;
 
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
+import com.anonymous.usports.global.type.RecruitStatus;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ public class ParticipantListDto {
 
   private int currentCount; //현재 인원
   private int totalCount; //모집 총 인원
+  private RecruitStatus status;
 
   private List<ParticipantInfo> ingList; //신청중 리스트
   private List<ParticipantInfo> acceptedList; //수락된 리스트

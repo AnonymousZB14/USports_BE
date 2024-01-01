@@ -67,6 +67,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     return ParticipantListDto.builder()
         .currentCount(recruitEntity.getCurrentCount())
         .totalCount(recruitEntity.getRecruitCount())
+        .status(recruitEntity.getRecruitStatus())
         .ingList(ingList)
         .acceptedList(acceptedList)
         .build();
