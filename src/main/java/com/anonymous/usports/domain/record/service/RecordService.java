@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.record.service;
 
+import com.anonymous.usports.domain.record.dto.RecordDetail;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister;
@@ -39,5 +40,5 @@ public interface RecordService {
   /**
    * 기록 게시글 상세 페이지
    */
-  RecordDto getRecordDetail(Long recordId, int page);
+  RecordDetail getRecordDetail(Long recordId, int page, Long loginMemberId);
 }

@@ -14,6 +14,7 @@ import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.record.dto.RecordDetail;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister.Request;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -344,14 +346,20 @@ public class RecordServiceImpl implements RecordService {
    * 기록 상세 페이지 불러오기
    */
   @Override
-  public RecordDto getRecordDetail(Long recordId, int page) {
+  public RecordDetail getRecordDetail(Long recordId, int page, Long loginMemberId) {
     RecordEntity record = recordRepository.findById(recordId)
         .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+    MemberEntity member = memberRepository.findById(loginMemberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.COMMENT_PAGE_SIZE_DEFAULT);
 
     Page<CommentEntity> commentList = commentRepository.findAllCommentsByRecordId(recordId,pageRequest);
-    return RecordDto.fromEntityIncludeComment(record,commentList);
+
+    //현재 로그인 유저가 좋아요를 누른 상태인지 여부
+    boolean currentUserLikes = recordLikeRepository.existsByRecordAndMember(record, member);
+
+    return RecordDetail.fromEntityIncludeComment(record,commentList, currentUserLikes);
   }
 
   /**
