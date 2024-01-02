@@ -44,6 +44,17 @@ public class NotificationCreateDto {
         NotificationConstant.PARTICIPATE_REQUEST);
   }
 
+  /**
+   * 패널티 부여 시
+   */
+  public NotificationCreateDto(RecruitEntity recruit) {
+    this.type = NotificationType.ALERT;
+    this.entityType = NotificationEntityType.RECRUIT;
+    this.targetEntityId = recruit.getRecruitId();
+    this.message = this.getNotificationString(recruit.getTitle(), NotificationConstant.IMPOSE_PENALTY);
+    this.url = "/recruit/"+ recruit.getRecruitId();
+  }
+
   public static NotificationEntity toEntity(NotificationCreateDto createDto, MemberEntity member){
     return NotificationEntity.builder()
         .member(member)
