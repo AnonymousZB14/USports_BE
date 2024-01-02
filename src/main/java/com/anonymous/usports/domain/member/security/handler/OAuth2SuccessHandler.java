@@ -3,6 +3,7 @@ package com.anonymous.usports.domain.member.security.handler;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.TokenDto;
 import com.anonymous.usports.domain.member.security.TokenProvider;
+import com.anonymous.usports.global.constant.UrlConstant;
 import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -28,7 +29,7 @@ public class OAuth2SuccessHandler  extends SimpleUrlAuthenticationSuccessHandler
 
         response.addHeader("Authorization", token.getAccessToken());
 
-        getRedirectStrategy().sendRedirect(request, response, "http://localhost:8080/oauth2/login/success");
+        getRedirectStrategy().sendRedirect(request, response, UrlConstant.USPORTS_URL + "/oauth2/login/success");
 
     }
 }
