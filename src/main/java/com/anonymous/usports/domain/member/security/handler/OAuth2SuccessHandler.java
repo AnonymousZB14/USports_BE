@@ -1,8 +1,5 @@
 package com.anonymous.usports.domain.member.security.handler;
 
-import com.anonymous.usports.domain.member.dto.MemberDto;
-import com.anonymous.usports.domain.member.dto.TokenDto;
-import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.global.constant.UrlConstant;
 import java.io.IOException;
 import javax.servlet.ServletException;
@@ -17,19 +14,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class OAuth2SuccessHandler  extends SimpleUrlAuthenticationSuccessHandler {
+public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final TokenProvider tokenProvider;
+  @Override
+  public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+      Authentication authentication) throws IOException, ServletException {
 
-    @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        MemberDto memberDto = (MemberDto) authentication.getPrincipal();
-
-        TokenDto token = tokenProvider.saveTokenInRedis(memberDto.getEmail());
-
-        response.addHeader("Authorization", token.getAccessToken());
-
-        getRedirectStrategy().sendRedirect(request, response, UrlConstant.USPORTS_URL + "/oauth2/login/success");
-
-    }
+    getRedirectStrategy().sendRedirect(request, response,
+        UrlConstant.USPORTS_URL + "/oauth2/login/success");
+  }
 }

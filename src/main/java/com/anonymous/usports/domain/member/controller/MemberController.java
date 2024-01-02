@@ -13,7 +13,6 @@ import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.CookieService;
 import com.anonymous.usports.domain.member.service.MemberService;
-import com.anonymous.usports.domain.mypage.service.MyPageService;
 import com.anonymous.usports.domain.notification.service.NotificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,13 +39,13 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/member")
 @RequiredArgsConstructor
+@Slf4j
 public class MemberController {
 
   private final MemberService memberService;
   private final TokenProvider tokenProvider;
   private final NotificationService notificationService;
   private final CookieService cookieService;
-  private final MyPageService myPageService;
 
   /**
    * 회원 가입 http://localhost:8080/member/register
@@ -57,7 +57,6 @@ public class MemberController {
   ) {
     return ResponseEntity.ok(memberService.registerMember(request));
   }
-
 
   /**
    * 로그인 http://localhost:8080/member/login
@@ -78,7 +77,7 @@ public class MemberController {
     cookieService.setCookieForLogin(httpServletResponse, tokenDto.getAccessToken());
 
     return ResponseEntity.ok(MemberLogin.Response.builder()
-        .memberResponse(member) // todo
+        .memberResponse(member)
         .tokenDto(tokenDto)
         .build());
   }

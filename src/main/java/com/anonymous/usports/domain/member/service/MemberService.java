@@ -28,7 +28,7 @@ public interface MemberService {
     /**
      * 간편 로그인
      */
-    MemberResponse oauthLogin(Long memberId);
+    MemberResponse oauthLogin(String email);
 
     /**
      * 회원 로그아웃

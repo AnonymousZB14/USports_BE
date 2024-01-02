@@ -15,7 +15,6 @@ public class TokenConstant {
     public static final String EMAIL = "email";
 
     //1시간  1 * 60 * 60 * 1000L
-
     public static final Long ACCESS_TOKEN_VALID_TIME = 60 *60 * 60 * 1000L;
 
     //3일 3 * 24 * 60 * 60L

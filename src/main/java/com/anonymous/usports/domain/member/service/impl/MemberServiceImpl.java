@@ -132,13 +132,13 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
   }
 
   @Override
-  public MemberResponse oauthLogin(Long memberId) {
+  public MemberResponse oauthLogin(String email) {
 
-    MemberEntity member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+    MemberDto memberDto = (MemberDto) loadUserByUsername(email);
 
-    return MemberResponse.fromDto(MemberDto.fromEntity(member),
-        interestSportsList(member));
+    return MemberResponse.fromDto(memberDto,
+        interestSportsList(memberRepository.findById(memberDto.getMemberId())
+            .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND))));
   }
 
   @Override

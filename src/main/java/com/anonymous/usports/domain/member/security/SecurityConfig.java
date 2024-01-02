@@ -41,7 +41,7 @@ public class SecurityConfig {
     http
         .oauth2Login()
         .userInfoEndpoint().userService(customOAuth2MemberService)
-        .and().defaultSuccessUrl("/oauth/login/success").successHandler(oAuth2SuccessHandler);
+        .and().successHandler(oAuth2SuccessHandler);
 
     http
         .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
