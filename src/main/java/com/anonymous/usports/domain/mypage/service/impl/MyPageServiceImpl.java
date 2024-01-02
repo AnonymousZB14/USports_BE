@@ -166,12 +166,10 @@ public class MyPageServiceImpl implements MyPageService {
     for (ParticipantEntity participant :
         participantRepository.findAllByMemberAndMeetingDateIsAfter(member, LocalDateTime.now())) {
 
-      //내 Recruit에 내가 신청한 Participant entity의 경우 제외한다.
-      if(Objects.equals(memberId, participant.getRecruit().getMember().getMemberId())){
-        continue;
+      //내 Recruit에 내가 신청한 Participant entity의 경우 제외하고 list에 추가한다.
+      if(!Objects.equals(memberId, participant.getRecruit().getMember().getMemberId())){
+        list.add(new MyPageParticipant(participant));
       }
-
-      list.add(new MyPageParticipant(participant));
     }
     return list;
   }
