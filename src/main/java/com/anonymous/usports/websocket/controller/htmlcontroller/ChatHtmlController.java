@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.websocket.service.ChatRoomService;
 import io.swagger.annotations.Api;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -46,7 +47,7 @@ public class ChatHtmlController {
         log.info("{}", roomId.getClass());
 
         Long[] memberNum = new Long[]{4L, 5L, 6L, 7L, 8L, 9L};
-        log.info("{}", memberNum);
+        log.info("{}", Arrays.toString(memberNum));
 
         MemberDto memberDto = MemberDto.fromEntity(memberRepository.findById(memberNum[(int) Math.round(Math.random() * (memberNum.length - 1))])
                 .orElseThrow(() -> new RuntimeException("no member")));
