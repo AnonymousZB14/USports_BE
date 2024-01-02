@@ -47,7 +47,7 @@ public class RefreshTokenRepository implements TokenRepository {
         ValueOperations<String, String> values = redisTemplate.opsForValue();
         values.set(TokenConstant.ACCESS_TOKEN_PREFIX + accessToken,
                 TokenConstant.BLACK_LIST,
-                TokenConstant.ACCESS_TOKEN_VALID_TIME);
+                Duration.ofMillis(TokenConstant.ACCESS_TOKEN_VALID_TIME));
     }
 
     /**
