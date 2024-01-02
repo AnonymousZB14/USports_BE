@@ -20,11 +20,13 @@ import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.record.dto.RecordDetail;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister.Request;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
 import com.anonymous.usports.domain.record.repository.RecordRepository;
+import com.anonymous.usports.domain.recordlike.repository.RecordLikeRepository;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
@@ -78,6 +80,8 @@ class RecordServiceImplTest {
   private FollowRepository followRepository;
   @Mock
   private CommentRepository commentRepository;
+  @Mock
+  private RecordLikeRepository recordLikeRepository;
   @Mock
   private AmazonS3 amazonS3;
   @Mock
@@ -494,10 +498,13 @@ class RecordServiceImplTest {
       List<CommentEntity> paginatedCommentEntities = comments.subList(start, end);
       when(recordRepository.findById(100L))
           .thenReturn(Optional.of(record));
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(member));
       when(commentRepository.findAllCommentsByRecordId(100L, pageRequest))
           .thenReturn(new PageImpl<>(paginatedCommentEntities, pageRequest, comments.size()));
-
-      RecordDto result = recordService.getRecordDetail(100L, 1);
+      when(recordLikeRepository.existsByRecordAndMember(record, member))
+          .thenReturn(false);
+      RecordDetail result = recordService.getRecordDetail(100L, 1, 1L);
 
       assertEquals(record.getRecordId(), result.getRecordId());
       assertEquals(result.getCommentList().size(), 9);
@@ -519,7 +526,7 @@ class RecordServiceImplTest {
       int page = 1;
       when(recordRepository.findById(100L)).thenReturn(Optional.empty());
       RecordException exception = assertThrows(RecordException.class,
-          () -> recordService.getRecordDetail(100L, 1));
+          () -> recordService.getRecordDetail(100L, 1, 1L));
 
       assertEquals(exception.getErrorCode(), ErrorCode.RECORD_NOT_FOUND);
     }
