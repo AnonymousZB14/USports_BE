@@ -146,6 +146,9 @@ public class ParticipantServiceImpl implements ParticipantService {
     if (!request.isAccept()) {
       participantEntity.setStatus(ParticipantStatus.REFUSED);
       participantRepository.save(participantEntity);
+
+      notificationService.notify(
+          participantEntity.getMember(), new NotificationCreateDto(recruitEntity, ParticipantStatus.REFUSED));
       return new ParticipantManage.Response(recruitId, applicant.getMemberId(), false);
     }
 
@@ -157,6 +160,9 @@ public class ParticipantServiceImpl implements ParticipantService {
     recruitEntity.participantAdded();//Recruit의 currentCount + 1
 
     recruitRepository.save(recruitEntity);
+
+    notificationService.notify(
+        participantEntity.getMember(), new NotificationCreateDto(recruitEntity, ParticipantStatus.ACCEPTED));
 
     return new ParticipantManage.Response(recruitId, applicant.getMemberId(), true);
   }

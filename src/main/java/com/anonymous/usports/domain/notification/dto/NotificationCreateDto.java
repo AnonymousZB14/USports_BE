@@ -7,6 +7,7 @@ import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.global.constant.NotificationConstant;
 import com.anonymous.usports.global.type.NotificationEntityType;
 import com.anonymous.usports.global.type.NotificationType;
+import com.anonymous.usports.global.type.ParticipantStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -53,6 +54,20 @@ public class NotificationCreateDto {
     this.targetEntityId = recruit.getRecruitId();
     this.message = this.getNotificationString(recruit.getTitle(), NotificationConstant.IMPOSE_PENALTY);
     this.url = "/recruit/"+ recruit.getRecruitId();
+  }
+
+  /**
+   * RECRUIT 참여 수락 / 거절 시
+   */
+  public NotificationCreateDto(RecruitEntity recruit, ParticipantStatus participantStatus) {
+    if(participantStatus.equals(ParticipantStatus.REFUSED)){
+      this.message = this.getNotificationString(recruit.getTitle(), NotificationConstant.PARTICIPATE_REFUSED);
+    }else{
+      this.message = this.getNotificationString(recruit.getTitle(), NotificationConstant.PARTICIPATE_ACCEPTED);
+    }
+    this.type = NotificationType.NOTICE;
+    this.entityType = NotificationEntityType.RECRUIT;
+    this.targetEntityId = recruit.getRecruitId();
   }
 
   public static NotificationEntity toEntity(NotificationCreateDto createDto, MemberEntity member){
