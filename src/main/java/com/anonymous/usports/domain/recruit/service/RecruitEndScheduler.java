@@ -2,7 +2,6 @@ package com.anonymous.usports.domain.recruit.service;
 
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
-import com.anonymous.usports.global.constant.NumberConstant;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,7 +24,7 @@ public class RecruitEndScheduler {
     log.info("[Change status to END on finished Recruit] Time : {}", LocalDateTime.now());
 
     List<RecruitEntity> recruitingList =
-        recruitRepository.findAllByRecruitStatusAndMeetingDateIsAfter(
+        recruitRepository.findAllByRecruitStatusAndMeetingDateIsBefore(
             RecruitStatus.RECRUITING, LocalDateTime.now());
 
     for (RecruitEntity recruitEntity : recruitingList) {
@@ -34,7 +33,7 @@ public class RecruitEndScheduler {
     recruitRepository.saveAll(recruitingList);
 
     List<RecruitEntity> almostEndList =
-        recruitRepository.findAllByRecruitStatusAndMeetingDateIsAfter(
+        recruitRepository.findAllByRecruitStatusAndMeetingDateIsBefore(
             RecruitStatus.ALMOST_END, LocalDateTime.now());
 
     for (RecruitEntity recruitEntity : almostEndList) {

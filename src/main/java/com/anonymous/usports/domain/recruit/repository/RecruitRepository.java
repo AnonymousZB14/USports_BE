@@ -45,6 +45,6 @@ public interface RecruitRepository extends JpaRepository<RecruitEntity, Long>{
 
   List<RecruitEntity> findAllByMemberAndMeetingDateIsAfter(MemberEntity member, LocalDateTime time);
 
-  List<RecruitEntity> findAllByRecruitStatusAndMeetingDateIsAfter(RecruitStatus status, LocalDateTime time);
+  List<RecruitEntity> findAllByRecruitStatusAndMeetingDateIsBefore(RecruitStatus status, LocalDateTime time);
 
 }
