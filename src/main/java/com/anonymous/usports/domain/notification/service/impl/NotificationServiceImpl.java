@@ -54,6 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
         .collect(Collectors.toList());
   }
 
+
   /**
    * 클라이언트가 구독을 위해 호출하는 메서드
    */
@@ -71,7 +72,7 @@ public class NotificationServiceImpl implements NotificationService {
     NotificationEntity saved =
         notificationRepository.save(NotificationCreateDto.toEntity(notificationCreateDto, member));
 
-    this.sendToClient(member.getMemberId(), notificationCreateDto.getEvent());
+    this.sendToClient(member.getMemberId(), notificationCreateDto.getMessage());
 
     return NotificationDto.fromEntity(saved);
   }

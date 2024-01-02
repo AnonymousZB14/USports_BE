@@ -1,7 +1,6 @@
 package com.anonymous.usports.domain.participant.service;
 
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.mockito.Mockito.any;
@@ -12,7 +11,8 @@ import static org.mockito.Mockito.when;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
-import com.anonymous.usports.domain.participant.dto.ParticipantDto;
+import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
+import com.anonymous.usports.domain.notification.service.NotificationService;
 import com.anonymous.usports.domain.participant.dto.ParticipantInfo;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
@@ -64,6 +64,8 @@ class ParticipantServiceTest {
   private ParticipantRepository participantRepository;
   @Mock
   private SportsSkillRepository sportsSkillRepository;
+  @Mock
+  private NotificationService notificationService;
 
   @InjectMocks
   private ParticipantServiceImpl participantService;
@@ -143,7 +145,7 @@ class ParticipantServiceTest {
       when(recruitRepository.findById(10L))
           .thenReturn(Optional.of(recruit));
       when(participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
-              recruit, ParticipantStatus.ING)
+          recruit, ParticipantStatus.ING)
       ).thenReturn(ingList);
       when(participantRepository.findAllByRecruitAndStatusOrderByParticipantId(
           recruit, ParticipantStatus.ACCEPTED)
@@ -218,6 +220,10 @@ class ParticipantServiceTest {
       MemberEntity member = createMember(1L);
       RecruitEntity recruit = createRecruit(10L, member);
       SportsSkillEntity sportsSkill = new SportsSkillEntity(member, recruit.getSports(), 5);
+      ParticipantEntity participantEntity = new ParticipantEntity(member, recruit);
+      ParticipantEntity saved = new ParticipantEntity(member, recruit);
+      saved.setParticipantId(100L);
+
       //given
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
@@ -231,6 +237,12 @@ class ParticipantServiceTest {
           .thenReturn(Optional.empty());
       when(sportsSkillRepository.findByMemberAndSports(member, recruit.getSports()))
           .thenReturn(Optional.of(sportsSkill));
+      when(participantRepository.save(participantEntity))
+          .thenReturn(saved);
+      when(notificationService.notify(recruit.getMember(),
+          new NotificationCreateDto(saved, recruit)))
+          .thenReturn(any());
+
       //when
       ParticipateResponse response =
           participantService.joinRecruit(member.getMemberId(), recruit.getRecruitId());
@@ -249,6 +261,9 @@ class ParticipantServiceTest {
     void joinRecruit_JOIN_RECRUIT_COMPLETED_SPORTS_SKILL_IS_ROOKIE() {
       MemberEntity member = createMember(1L);
       RecruitEntity recruit = createRecruit(10L, member);
+      ParticipantEntity participantEntity = new ParticipantEntity(member, recruit);
+      ParticipantEntity saved = new ParticipantEntity(member, recruit);
+      saved.setParticipantId(100L);
 
       //given
       when(memberRepository.findById(1L))
@@ -263,6 +278,11 @@ class ParticipantServiceTest {
           .thenReturn(Optional.empty());
       when(sportsSkillRepository.findByMemberAndSports(member, recruit.getSports()))
           .thenReturn(Optional.empty());
+      when(participantRepository.save(participantEntity))
+          .thenReturn(saved);
+      when(notificationService.notify(recruit.getMember(),
+          new NotificationCreateDto(saved, recruit)))
+          .thenReturn(any());
 
       //when
       ParticipateResponse response =
