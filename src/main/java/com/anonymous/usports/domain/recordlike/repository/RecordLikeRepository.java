@@ -14,4 +14,6 @@ public interface RecordLikeRepository extends JpaRepository<RecordLikeEntity, Lo
 
   void deleteAllByRecord(RecordEntity recordEntity);
 
+  boolean existsByRecordAndMember(RecordEntity record, MemberEntity loginMember);
+
 }
