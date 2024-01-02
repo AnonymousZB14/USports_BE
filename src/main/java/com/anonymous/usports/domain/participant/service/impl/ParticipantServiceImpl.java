@@ -2,6 +2,8 @@ package com.anonymous.usports.domain.participant.service.impl;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
+import com.anonymous.usports.domain.notification.service.NotificationService;
 import com.anonymous.usports.domain.participant.dto.ParticipantInfo;
 import com.anonymous.usports.domain.participant.dto.ParticipantListDto;
 import com.anonymous.usports.domain.participant.dto.ParticipantManage;
@@ -15,12 +17,15 @@ import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
+import com.anonymous.usports.global.constant.NotificationConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.ParticipantException;
 import com.anonymous.usports.global.exception.RecruitException;
+import com.anonymous.usports.global.type.NotificationEntityType;
+import com.anonymous.usports.global.type.NotificationType;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.util.List;
@@ -41,6 +46,7 @@ public class ParticipantServiceImpl implements ParticipantService {
   private final RecruitRepository recruitRepository;
   private final ParticipantRepository participantRepository;
   private final SportsSkillRepository sportsSkillRepository;
+  private final NotificationService notificationService;
 
   @Override
   @Transactional
@@ -110,7 +116,9 @@ public class ParticipantServiceImpl implements ParticipantService {
     }
 
     //신청 가능 -> 신청
-    participantRepository.save(participant);
+    ParticipantEntity saved = participantRepository.save(participant);
+
+    notificationService.notify(recruitEntity.getMember(), new NotificationCreateDto(saved, recruitEntity));
 
     return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETE);
   }
