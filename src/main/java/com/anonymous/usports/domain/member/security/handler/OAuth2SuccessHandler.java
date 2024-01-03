@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.member.security.handler;
 
+import com.anonymous.usports.global.constant.UrlConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import java.io.IOException;
@@ -23,7 +24,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     if (authentication.isAuthenticated()) {
       getRedirectStrategy().sendRedirect(request, response,
-          "https://usports.vercel.app/home");
+          UrlConstant.USPORTS_URL + "/oauth2/login/success");
     } else {
       throw new MemberException(ErrorCode.NO_AUTHORITY_ERROR);
     }
