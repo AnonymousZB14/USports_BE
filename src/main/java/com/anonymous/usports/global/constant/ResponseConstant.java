@@ -33,6 +33,7 @@ public class ResponseConstant {
   //팔로우 관련
   public static final String REGISTER_FOLLOW = "팔로우를 신청했습니다.";
   public static final String DELETE_FOLLOW = "팔로우를 삭제했습니다.";
+  public static final String CANCEL_FOLLOW_REQUEST = "팔로우 신청을 취소했습니다.";
   public static final String ACCEPT_FOLLOW = "팔로우를 수락했습니다.";
   public static final String REFUSE_FOLLOW = "팔로우를 거절했습니다.";
 
