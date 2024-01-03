@@ -13,11 +13,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FollowRepository extends JpaRepository<FollowEntity, Long> {
 
-
-
-  Optional<FollowEntity> findByFromMemberAndToMemberAndFollowStatus(MemberEntity fromMember,
-      MemberEntity toMemberId, FollowStatus followStatus);
-
   Page<FollowEntity> findAllByFromMemberAndFollowStatusOrderByFollowDateDesc(MemberEntity member, FollowStatus followStatus, Pageable pageable);
 
   Page<FollowEntity> findAllByToMemberAndFollowStatusOrderByFollowDateDesc(MemberEntity member, FollowStatus followStatus, Pageable pageable);
