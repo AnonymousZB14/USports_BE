@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,6 +57,17 @@ public class MemberController {
       @RequestBody @Valid MemberRegister.Request request
   ) {
     return ResponseEntity.ok(memberService.registerMember(request));
+  }
+
+  /**
+   * 회원 계정 이름 확인 http://localhost:8080/check?accountName=
+   */
+  @GetMapping("/check")
+  @ApiOperation(value="사용 가능한 accountName인지 확인", notes="회원 계정 이름은 중복되면 안 됨")
+  public ResponseEntity<String> checkAccountName(
+      @RequestParam String accountName
+  ) {
+    return ResponseEntity.ok(memberService.checkAccountName(accountName));
   }
 
   /**

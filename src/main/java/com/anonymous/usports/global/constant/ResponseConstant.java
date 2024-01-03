@@ -22,6 +22,7 @@ public class ResponseConstant {
 
   // 맴버 관련
   public static final String MEMBER_DELETE_SUCCESS = "회원 탈퇴를 성공적으로 했습니다";
+  public static final String ACCOUNT_CAN_BE_USED = "회원 계정 이름을 사용할 수 있습니다";
 
   public static final String PASSWORD_CHANGE_SUCCESS = "비밀번호를 성공적으로 변경했습니다";
 

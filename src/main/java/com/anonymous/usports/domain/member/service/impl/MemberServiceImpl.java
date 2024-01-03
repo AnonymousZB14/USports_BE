@@ -119,6 +119,16 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
   }
 
   @Override
+  public String checkAccountName(String accountName) {
+
+    if (memberRepository.existsByAccountName(accountName)) {
+      throw new MemberException(ErrorCode.ACCOUNT_ALREADY_EXISTS);
+    } else {
+      return ResponseConstant.ACCOUNT_CAN_BE_USED;
+    }
+  }
+
+  @Override
   public MemberResponse loginMember(MemberLogin.Request request) {
 
     MemberDto memberDto = (MemberDto) loadUserByUsername(request.getEmail());
