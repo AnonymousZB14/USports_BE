@@ -35,14 +35,21 @@
 <script th:inline="javascript">
   $(document).ready(function () {
 
-    var roomName = [[${room.chatRoomName}]];
     var roomId = [[${room.chatRoomId}]];
-    var username = [[${room.username}]];
+    var username = [[${room.user}]];
+    var userId = [[${room.userId}]];
+    var userImage = [[${room.imageAddress}]];
     var timeNow = new Date();
     var firstEnter = true;
     let stomp = Stomp.over(new SockJS("/ws/chat"));
     stomp.heartbeat.outgoing = 10000;
     stomp.heartbeat.incoming = 10000;
+
+    console.log(roomId);
+    console.log(username);
+    console.log(userId);
+    console.log(userImage);
+
 
     function connectToChat() {
       stomp.connect({}, function () {
@@ -70,19 +77,33 @@
 
     function subscribeToRoom() {
       stomp.subscribe("/exchange/chat.exchange/room." + roomId, function (chat) {
+        console.log(chat);
         var content = JSON.parse(chat.body);
-        showMessage(content.sender, content.content);
+        console.log(content);
+        showMessage(content.user, content.content);
       });
     }
 
     function sendEnterMessage() {
-      stomp.send('/pub/chat/enter/'+roomId, {}, JSON.stringify({ chatRoomId: roomId, sender: username, time: timeNow }));
+      stomp.send('/pub/chat/enter/'+roomId, {}, JSON.stringify({
+        content : "입장했습니다",
+        chatRoomId: roomId,
+        user: username,
+        userId: userId,
+        imageAddress: userImage,
+        time: timeNow }));
     }
 
     function sendMessage() {
       var msg = document.getElementById("msg");
       console.log(username + ":" + msg.value);
-      stomp.send('/pub/chat/message/'+roomId, {}, JSON.stringify({ chatRoomId: roomId, content: msg.value, sender: username }));
+      stomp.send('/pub/chat/message/'+roomId, {}, JSON.stringify({
+        chatRoomId: roomId,
+        user: username,
+        userId: userId,
+        imageAddress: userImage,
+        content: msg.value,
+        time: timeNow}));
       msg.value = '';
     }
 
@@ -109,7 +130,35 @@
     $("#button-send").on("click", function (e) {
       sendMessage();
     });
+    // leaveChatRoom 함수 추가
+    function leaveChatRoom() {
+      // 서버에 읽지 않은 상태를 업데이트하는 요청 보내기
+      fetch('/markChat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chatRoomId: roomId,
+          userId: userId,
+        }),
+      })
+      // .then(response => {
+      //   // 응답 처리...
+      // })
+      .catch(error => {
+        console.error('Error marking chat as read:', error);
+      });
+    }
+
+    // beforeunload 이벤트 등록
+    $(window).on('beforeunload', function() {
+      leaveChatRoom();
+      return "나가?"
+    });
   });
+
+
 </script>
 </body>
 </html>

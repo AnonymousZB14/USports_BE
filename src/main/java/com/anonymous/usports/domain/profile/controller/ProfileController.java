@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.profile.controller;
 
+import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.profile.dto.MemberProfile;
 import com.anonymous.usports.domain.profile.service.ProfileService;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,10 +26,11 @@ public class ProfileController {
 
   @ApiOperation("프로필 - 회원 정보")
   @GetMapping("/profile/{accountName}")
-  public ResponseEntity<MemberProfile> profileRecruits(
-      @PathVariable String accountName) {
+  public ResponseEntity<MemberProfile> profileMember(
+      @PathVariable String accountName,
+      @AuthenticationPrincipal MemberDto loginMember) {
 
-    MemberProfile memberProfile = profileService.profileMember(accountName);
+    MemberProfile memberProfile = profileService.profileMember(accountName, loginMember.getMemberId());
 
     return ResponseEntity.ok(memberProfile);
   }

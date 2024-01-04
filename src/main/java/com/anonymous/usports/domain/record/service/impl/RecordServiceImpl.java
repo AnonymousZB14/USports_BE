@@ -14,6 +14,7 @@ import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.record.dto.RecordDetail;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister.Request;
@@ -21,6 +22,7 @@ import com.anonymous.usports.domain.record.dto.RecordUpdate;
 import com.anonymous.usports.domain.record.entity.RecordEntity;
 import com.anonymous.usports.domain.record.repository.RecordRepository;
 import com.anonymous.usports.domain.record.service.RecordService;
+import com.anonymous.usports.domain.recordlike.repository.RecordLikeRepository;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.domain.sports.repository.SportsRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +73,7 @@ public class RecordServiceImpl implements RecordService {
   private final InterestedSportsRepository interestedSportsRepository;
   private final FollowRepository followRepository;
   private final CommentRepository commentRepository;
+  private final RecordLikeRepository recordLikeRepository;
   private final AmazonS3 amazonS3;
   @Value("${cloud.aws.s3.bucketName}")
   private String bucketName;
@@ -155,11 +159,14 @@ public class RecordServiceImpl implements RecordService {
   private String uploadImageToS3(MultipartFile image) throws IOException {
     // 이미지를 S3에 업로드하고 이미지의 URL을 반환
     String originName = image.getOriginalFilename(); // 원본 이미지 이름
+
     String ext = null;
     if(originName!=null){
       ext = originName.substring(originName.lastIndexOf(".")); // 확장자
     }
+
     String changedName = changedImageName(originName); // 새로 생성된 이미지 이름
+
     ObjectMetadata metadata = new ObjectMetadata();// 메타데이터
     metadata.setContentType("image/" + ext);
     InputStream imageInput = image.getInputStream();
@@ -210,7 +217,7 @@ public class RecordServiceImpl implements RecordService {
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
-        Sort.by(Direction.DESC, "updatedAt"));
+        Sort.by(Direction.DESC, "registeredAt"));
 
     //RecordType : RECOMMENDATION
     if (recordType == RecordType.RECOMMENDATION) {
@@ -245,7 +252,9 @@ public class RecordServiceImpl implements RecordService {
   public RecordDto getRecordUpdatePage(Long recordId, Long loginMemberId) {
     RecordEntity record = recordRepository.findById(recordId)
         .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+
     validateAuthority(record, loginMemberId);
+
     return RecordDto.fromEntity(record);
   }
 
@@ -257,7 +266,9 @@ public class RecordServiceImpl implements RecordService {
   public RecordDto updateRecord(Long recordId, RecordUpdate.Request request, Long loginMemberId) {
     RecordEntity record = recordRepository.findById(recordId)
         .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+
     validateAuthority(record, loginMemberId);
+
     List<String> removeImageUrls = new ArrayList<>();
     try{
       if (request.getSportsId() != null) {
@@ -281,7 +292,9 @@ public class RecordServiceImpl implements RecordService {
           redisTemplate.opsForList().rightPush(URLS_TO_DELETE, imageUrl); //제거한 Url을 redis에 insert
         }
       }
+
       RecordEntity recordEntity = recordRepository.save(record);
+
       return RecordDto.fromEntity(recordEntity);
     } catch (RecordException e) {
       rollbackUrls(removeImageUrls); //에러 발생 시 redis에 넣은 값 제거
@@ -312,8 +325,13 @@ public class RecordServiceImpl implements RecordService {
         redisTemplate.opsForList()
             .rightPush(URLS_TO_DELETE, recordImageAddress); //redis에 제거할 imageUrl 넣기
       }
+
+      commentRepository.deleteAllByRecord(recordEntity); //댓글 제거
+      recordLikeRepository.deleteAllByRecord(recordEntity); // 좋아요 제거
       recordRepository.delete(recordEntity);// 기록 제거
+
       return RecordDto.fromEntity(recordEntity);
+
     } catch (RecordException e) {
       rollbackUrls(removeImageAddress); //redis에 넣은 제거할 url들을 제거
       throw new RecordException(e.getErrorCode(),e.getErrorMessage());
@@ -328,12 +346,20 @@ public class RecordServiceImpl implements RecordService {
    * 기록 상세 페이지 불러오기
    */
   @Override
-  public RecordDto getRecordDetail(Long recordId, int page) {
+  public RecordDetail getRecordDetail(Long recordId, int page, Long loginMemberId) {
     RecordEntity record = recordRepository.findById(recordId)
         .orElseThrow(() -> new RecordException(ErrorCode.RECORD_NOT_FOUND));
+    MemberEntity member = memberRepository.findById(loginMemberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.COMMENT_PAGE_SIZE_DEFAULT);
+
     Page<CommentEntity> commentList = commentRepository.findAllCommentsByRecordId(recordId,pageRequest);
-    return RecordDto.fromEntityInclueComment(record,commentList);
+
+    //현재 로그인 유저가 좋아요를 누른 상태인지 여부
+    boolean currentUserLikes = recordLikeRepository.existsByRecordAndMember(record, member);
+
+    return RecordDetail.fromEntityIncludeComment(record,commentList, currentUserLikes);
   }
 
   /**
@@ -342,6 +368,7 @@ public class RecordServiceImpl implements RecordService {
   private void validateAuthority(RecordEntity recordEntity, Long loginMemberId) {
     memberRepository.findById(loginMemberId)
         .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
     if (!Objects.equals(recordEntity.getMember().getMemberId(), loginMemberId)) {
       throw new RecordException(ErrorCode.NO_AUTHORITY_ERROR); // 기록 작성자 Id와 로그인한 회원 Id 비교
     }

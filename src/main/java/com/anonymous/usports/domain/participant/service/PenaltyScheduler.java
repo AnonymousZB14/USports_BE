@@ -2,6 +2,8 @@ package com.anonymous.usports.domain.participant.service;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
+import com.anonymous.usports.domain.notification.service.NotificationService;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.global.constant.NumberConstant;
@@ -23,6 +25,7 @@ public class PenaltyScheduler {
 
   private final ParticipantRepository participantRepository;
   private final MemberRepository memberRepository;
+  private final NotificationService notificationService;
 
   @Scheduled(cron = "0 0 3 * * *")
   @Transactional
@@ -52,6 +55,7 @@ public class PenaltyScheduler {
       MemberEntity member = participantEntity.getMember();
       member.addPenaltyCount();
       memberRepository.save(member);
+      notificationService.notify(member, new NotificationCreateDto(participantEntity.getRecruit()));
     }
 
     return findAll.getNumberOfElements();

@@ -1,6 +1,5 @@
 package com.anonymous.usports.domain.member.dto;
 
-import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.global.type.Gender;
 import java.time.LocalDate;
 import java.util.List;

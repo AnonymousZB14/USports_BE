@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RecordRepository extends JpaRepository<RecordEntity, Long> {
 
-  @Query("SELECT r FROM record r JOIN r.member m where m.profileOpen = true and r.sports IN :sportsList order by r.updatedAt DESC")
+  @Query("SELECT r FROM record r JOIN r.member m where m.profileOpen = true and r.sports IN :sportsList order by r.registeredAt DESC")
   Page<RecordEntity> findAllOpenProfileRecordsBySportsIn(
       @Param("sportsList") List<SportsEntity> sportsList, Pageable pageable);
 

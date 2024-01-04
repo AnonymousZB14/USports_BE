@@ -15,20 +15,19 @@ public class ChatMessageDto {
 
     private String content; // 내용
     private Long chatRoomId;
-    private String senderName;
-    private Long senderId;
+    private String chatRoomName;
+    private String user;
+    private Long userId;
     private LocalDateTime time;
     private MessageType type;
     private String imageAddress;
 
     public static ChattingEntity toEntity(ChatMessageDto chatMessageDto) {
         return ChattingEntity.builder()
-            .chatRoomId(chatMessageDto.chatRoomId)
+            .chatRoomId(chatMessageDto.getChatRoomId())
             .content(chatMessageDto.getContent())
-            .createdAt(chatMessageDto.time)
-            .name(chatMessageDto.senderName)
-            .imageAddress(chatMessageDto.imageAddress)
-            .memberId(chatMessageDto.senderId)
+            .createdAt(chatMessageDto.getTime())
+            .memberId(chatMessageDto.getUserId())
             .build();
     }
 }

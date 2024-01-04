@@ -18,7 +18,7 @@ import org.springframework.data.domain.Page;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RecordDto {
+public class RecordDetail {
 
   private Long recordId;
 
@@ -46,26 +46,13 @@ public class RecordDto {
 
   private Long countRecordLike;
 
+  private boolean currentUserLikes;
 
-  public static RecordDto fromEntity(RecordEntity recordEntity) {
-    return RecordDto.builder()
-        .recordId(recordEntity.getRecordId())
-        .memberId(recordEntity.getMember().getMemberId())
-        .sportsId(recordEntity.getSports().getSportsId())
-        .accountName(recordEntity.getMember().getAccountName())
-        .name(recordEntity.getMember().getName())
-        .profileImage(recordEntity.getMember().getProfileImage())
-        .recordContent(recordEntity.getRecordContent())
-        .registeredAt(recordEntity.getRegisteredAt())
-        .updatedAt(recordEntity.getUpdatedAt())
-        .countComment(recordEntity.getCountComment())
-        .imageAddressList(recordEntity.getImageAddress())
-        .countRecordLike(recordEntity.getCountRecordLikes())
-        .build();
-  }
-
-  public static RecordDto fromEntityIncludeComment(RecordEntity recordEntity, Page<CommentEntity> commentList) {
-    return RecordDto.builder()
+  public static RecordDetail fromEntityIncludeComment(
+      RecordEntity recordEntity,
+      Page<CommentEntity> commentList,
+      boolean currentUserLikes) {
+    return RecordDetail.builder()
         .recordId(recordEntity.getRecordId())
         .memberId(recordEntity.getMember().getMemberId())
         .sportsId(recordEntity.getSports().getSportsId())
@@ -80,6 +67,8 @@ public class RecordDto {
         .commentList(commentList.getContent().stream().map(CommentDto::fromEntity).collect(
             Collectors.toList()))
         .countRecordLike(recordEntity.getCountRecordLikes())
+        .currentUserLikes(currentUserLikes)
         .build();
   }
+
 }

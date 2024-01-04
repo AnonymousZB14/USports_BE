@@ -21,6 +21,8 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
       "ORDER BY COALESCE(c.parentId, c.commentId), c.registeredAt ASC")
   Page<CommentEntity> findAllCommentsByRecordId(@Param("recordId") Long recordId, Pageable pageable);
 
+  void deleteAllByRecord(RecordEntity recordEntity);
+
 
 
 

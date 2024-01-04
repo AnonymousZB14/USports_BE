@@ -20,37 +20,37 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter authenticationFilter;
-    private final CustomOAuth2MemberService customOAuth2MemberService;
-    private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+  private final JwtAuthenticationFilter authenticationFilter;
+  private final CustomOAuth2MemberService customOAuth2MemberService;
+  private final OAuth2SuccessHandler oAuth2SuccessHandler;
+  private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+  private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-         http
-                .httpBasic().disable()
-                .csrf().disable()
-                .cors().and()
-                .headers().frameOptions().disable();
+  @Bean
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .httpBasic().disable()
+        .csrf().disable()
+        .cors().and()
+        .headers().frameOptions().disable();
 
-         http
-                .authorizeRequests()
-                .antMatchers("/**").permitAll();
+    http
+        .authorizeRequests()
+        .antMatchers("/**").permitAll();
 
-         http
-                 .oauth2Login().loginPage("/login")
-                 .userInfoEndpoint().userService(customOAuth2MemberService)
-                 .and().successHandler(oAuth2SuccessHandler);
+    http
+        .oauth2Login()
+        .userInfoEndpoint().userService(customOAuth2MemberService)
+        .and().successHandler(oAuth2SuccessHandler);
 
-         http
-                .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling()
-                  .authenticationEntryPoint(customAuthenticationEntryPoint)
-                  .accessDeniedHandler(customAccessDeniedHandler);
+    http
+        .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)
+        .exceptionHandling()
+        .authenticationEntryPoint(customAuthenticationEntryPoint)
+        .accessDeniedHandler(customAccessDeniedHandler);
 
-        return http.build();
-    }
+    return http.build();
+  }
 
 //    @Bean
 //    public WebSecurityCustomizer webSecurityCustomizer() {
@@ -58,10 +58,10 @@ public class SecurityConfig {
 //    }
 
 
-    @Bean
-    public AuthenticationManager authenticationManagerBean(
-            AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    } 
+  @Bean
+  public AuthenticationManager authenticationManagerBean(
+      AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    return authenticationConfiguration.getAuthenticationManager();
+  }
 
 }

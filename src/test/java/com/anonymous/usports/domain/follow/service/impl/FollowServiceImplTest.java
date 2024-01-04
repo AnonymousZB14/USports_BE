@@ -92,8 +92,7 @@ class FollowServiceImplTest {
           .thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L))
           .thenReturn(Optional.of(toMember));
-      when(followRepository.findByFromMemberAndToMemberAndFollowStatus(fromMember, toMember,
-          FollowStatus.ACTIVE)).thenReturn(Optional.empty());
+      when(followRepository.findByFromMemberAndToMember(fromMember, toMember)).thenReturn(Optional.empty());
 
       FollowResponse response = followService.changeFollow(fromMember.getMemberId(),
           toMember.getMemberId());
@@ -104,8 +103,8 @@ class FollowServiceImplTest {
     }
 
     @Test
-    @DisplayName("성공 - 기존 Follow가 존재할 때 Follow 취소")
-    void success_DeleteFollow() {
+    @DisplayName("성공 - 기존 FollowActive가 존재할 때 Follow 취소")
+    void success_DeleteFollowActive() {
       MemberEntity fromMember = createMember(1L);
       MemberEntity toMember = createMember(2L);
       toMember.setProfileOpen(false);
@@ -115,8 +114,7 @@ class FollowServiceImplTest {
           .thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L))
           .thenReturn(Optional.of(toMember));
-      when(followRepository.findByFromMemberAndToMemberAndFollowStatus(fromMember, toMember,
-          FollowStatus.ACTIVE)).thenReturn(Optional.of(follow));
+      when(followRepository.findByFromMemberAndToMember(fromMember, toMember)).thenReturn(Optional.of(follow));
 
       FollowResponse response = followService.changeFollow(fromMember.getMemberId(),
           toMember.getMemberId());
@@ -124,6 +122,30 @@ class FollowServiceImplTest {
       verify(followRepository, times(1)).delete(follow);
 
       assertEquals(response.getMessage(), ResponseConstant.DELETE_FOLLOW);
+    }
+
+
+    @Test
+    @DisplayName("성공 - 기존 FollowWaiting이 존재할 때 Follow 취소")
+    void success_DeleteFollowWaiting() {
+      MemberEntity fromMember = createMember(1L);
+      MemberEntity toMember = createMember(2L);
+      toMember.setProfileOpen(false);
+      FollowEntity follow = createFollow(10L, fromMember, toMember);
+      follow.setFollowStatus(FollowStatus.WAITING);
+
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.of(fromMember));
+      when(memberRepository.findById(2L))
+          .thenReturn(Optional.of(toMember));
+      when(followRepository.findByFromMemberAndToMember(fromMember, toMember)).thenReturn(Optional.of(follow));
+
+      FollowResponse response = followService.changeFollow(fromMember.getMemberId(),
+          toMember.getMemberId());
+
+      verify(followRepository, times(1)).delete(follow);
+
+      assertEquals(response.getMessage(), ResponseConstant.CANCEL_FOLLOW_REQUEST);
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.sports.entity.SportsEntity;
 import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.RecruitStatus;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -43,4 +44,7 @@ public interface RecruitRepository extends JpaRepository<RecruitEntity, Long>{
       Pageable pageable);
 
   List<RecruitEntity> findAllByMemberAndMeetingDateIsAfter(MemberEntity member, LocalDateTime time);
+
+  List<RecruitEntity> findAllByRecruitStatusAndMeetingDateIsBefore(RecruitStatus status, LocalDateTime time);
+
 }

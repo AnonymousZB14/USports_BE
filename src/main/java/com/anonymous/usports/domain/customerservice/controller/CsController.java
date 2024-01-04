@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -98,14 +97,6 @@ public class CsController {
       @RequestParam(required = false) String statusNum,
       @AuthenticationPrincipal MemberDto memberDto
   ) {
-
-    if (!StringUtils.hasText(email)) {
-      email = null;
-    }
-
-    if (!StringUtils.hasText(statusNum)) {
-      statusNum = null;
-    }
 
     return csService.getCsListAdmin(memberDto, email, statusNum, page);
   }

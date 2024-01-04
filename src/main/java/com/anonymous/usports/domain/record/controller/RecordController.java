@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.record.controller;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.record.dto.RecordDelete;
+import com.anonymous.usports.domain.record.dto.RecordDetail;
 import com.anonymous.usports.domain.record.dto.RecordDto;
 import com.anonymous.usports.domain.record.dto.RecordListDto;
 import com.anonymous.usports.domain.record.dto.RecordRegister;
@@ -88,9 +89,10 @@ public class RecordController {
 
   @ApiOperation("기록 상세 페이지")
   @GetMapping("/record/{recordId}")
-  public ResponseEntity<RecordDto> getRecordDetail(@PathVariable Long recordId,
-      @RequestParam(value = "page",defaultValue = "1") int page) {
-    RecordDto recordDetail = recordService.getRecordDetail(recordId, page);
+  public ResponseEntity<RecordDetail> getRecordDetail(@PathVariable Long recordId,
+      @RequestParam(value = "page",defaultValue = "1") int page,
+      @AuthenticationPrincipal MemberDto loginMember) {
+    RecordDetail recordDetail = recordService.getRecordDetail(recordId, page, loginMember.getMemberId());
     return ResponseEntity.ok(recordDetail);
   }
 

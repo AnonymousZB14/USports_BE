@@ -52,7 +52,7 @@ public class NotificationSseController {
         .type(NotificationType.NOTICE)
         .entityType(NotificationEntityType.PARTICIPANT)
         .targetEntityId(5L)
-        .event(d)
+        .message(d)
         .build();
     notificationService.notify(member, req);
     notificationService.setUnreadNotificationSession(httpServletRequest, true);

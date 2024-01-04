@@ -100,12 +100,32 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     );
   }
 
+  private List<SportsDto> interestSportsList(MemberEntity member) {
+    List<InterestedSportsEntity> interestedSportsEntityList =
+        interestedSportsRepository.findAllByMemberEntity(member);
+
+    return interestedSportsEntityList.stream()
+        .map(InterestedSportsEntity::getSports)
+        .map(SportsDto::new)
+        .collect(Collectors.toList());
+  }
+
   @Override
   public MemberRegister.Response registerMember(MemberRegister.Request request) {
 
     checkDuplication(request.getAccountName(), request.getEmail());
 
     return saveMember(request);
+  }
+
+  @Override
+  public String checkAccountName(String accountName) {
+
+    if (memberRepository.existsByAccountName(accountName)) {
+      throw new MemberException(ErrorCode.ACCOUNT_ALREADY_EXISTS);
+    } else {
+      return ResponseConstant.ACCOUNT_CAN_BE_USED;
+    }
   }
 
   @Override
@@ -119,6 +139,16 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
     return MemberResponse.fromDto(memberDto,
         myPageService.getInterestedSportsList(memberDto.getMemberId()));
+  }
+
+  @Override
+  public MemberResponse oauthLogin(String email) {
+
+    MemberDto memberDto = (MemberDto) loadUserByUsername(email);
+
+    return MemberResponse.fromDto(memberDto,
+        interestSportsList(memberRepository.findById(memberDto.getMemberId())
+            .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND))));
   }
 
   @Override
@@ -241,7 +271,7 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
             .collect(Collectors.toList()));
   }
 
-  // 프로필 이미지만 등록 / 변경 / 삭제
+  // 프로필 이미지만 등록 / 변경
   @Override
   @Transactional
   public MemberResponse updateMemberProfileImage(MultipartFile profileImage,
@@ -254,19 +284,36 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     MemberEntity memberEntity = memberRepository.findById(memberDto.getMemberId())
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    List<SportsDto> interestedSportsList = myPageService.getInterestedSportsList(memberId);
+    List<SportsDto> interestedSportsList = interestSportsList(memberEntity);
 
-    if (!profileImage.isEmpty()) { // 파일 업로드 있을 때 -> 프로필 이미지 등록 및 변경
-      String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
-      if (memberEntity.getProfileImage() != null) {
-        deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
-      }
-      memberEntity.updateMemberProfileImage(profileImageAddress);//DB에 새로운 프로필 이미지 업데이트
-
-      return MemberResponse.fromDto(MemberDto.fromEntity(memberEntity), interestedSportsList);
+    if(profileImage.isEmpty()) {
+      throw new MemberException(ErrorCode.IMAGE_SAVE_ERROR);
     }
 
-    //profileImage에 null 값 들어올 때 -> 프로필 이미지 제거
+    String profileImageAddress = saveImage(profileImage); // 프로필 이미지 S3에 저장
+    if (memberEntity.getProfileImage() != null) {
+      deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
+    }
+    memberEntity.updateMemberProfileImage(profileImageAddress);//DB에 새로운 프로필 이미지 업데이트
+
+    return MemberResponse.fromDto(MemberDto.fromEntity(memberEntity), interestedSportsList);
+
+  }
+
+  // 프로필 이미지 삭제
+  @Override
+  @Transactional
+  public MemberResponse deleteMemberProfileImage(MemberDto memberDto, Long memberId) {
+
+    if (memberDto.getRole() != Role.ADMIN && memberDto.getMemberId() != memberId) {
+      throw new MemberException(ErrorCode.MEMBER_ID_UNMATCH);
+    }
+
+    MemberEntity memberEntity = memberRepository.findById(memberDto.getMemberId())
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    List<SportsDto> interestedSportsList = interestSportsList(memberEntity);
+
     if (memberEntity.getProfileImage() != null) {
       deleteImageFromS3(memberEntity.getProfileImage()); // S3에 저장된 기존 프로필 이미지 제거
     }

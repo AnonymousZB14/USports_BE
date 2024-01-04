@@ -2,6 +2,7 @@ package com.anonymous.usports.domain.profile.dto;
 
 import com.anonymous.usports.domain.mypage.dto.MemberInfo;
 import com.anonymous.usports.domain.sportsskill.dto.SportsSkillDto;
+import com.anonymous.usports.global.type.FollowStatus;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -20,4 +21,6 @@ public class MemberProfile {
   private MemberInfo memberInfo;
 
   private List<SportsSkillDto> sportsSkills;
+
+  private FollowStatus followStatus;
 }

@@ -23,7 +23,7 @@ import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import com.anonymous.usports.global.type.Role;
-import com.anonymous.usports.websocket.dto.ChatEnterDto;
+import com.anonymous.usports.websocket.dto.ChatMessageDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
 import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
@@ -32,6 +32,7 @@ import com.anonymous.usports.websocket.entity.ChatPartakeEntity;
 import com.anonymous.usports.websocket.entity.ChatRoomEntity;
 import com.anonymous.usports.websocket.repository.ChatPartakeRepository;
 import com.anonymous.usports.websocket.repository.ChatRoomRepository;
+import com.anonymous.usports.websocket.repository.ChattingRepository;
 import com.anonymous.usports.websocket.service.impl.ChatRoomServiceImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,6 +68,9 @@ public class ChatRoomServiceImplTest {
 
     @Mock
     private RecruitRepository recruitRepository;
+
+    @Mock
+    private ChattingRepository chattingRepository;
 
     @InjectMocks
     private ChatRoomServiceImpl chatRoomService;
@@ -796,12 +800,12 @@ public class ChatRoomServiceImplTest {
             when(chatPartakeRepository.existsByChatRoomEntityAndMemberEntity(chatRoom, member))
                 .thenReturn(true);
 
-            ChatEnterDto chatEnter = chatRoomService.enterChatRoom(11L, MemberDto.fromEntity(member));
+            ChatMessageDto chatEnter = chatRoomService.enterChatRoom(11L, MemberDto.fromEntity(member));
 
             //then
             assertThat(chatEnter.getChatRoomId()).isEqualTo(chatRoom.getChatRoomId());
             assertThat(chatEnter.getChatRoomName()).isEqualTo(chatRoom.getChatRoomName());
-            assertThat(chatEnter.getUsername()).isEqualTo(member.getAccountName());
+            assertThat(chatEnter.getUser()).isEqualTo(member.getAccountName());
         }
 
         @Test
@@ -883,6 +887,11 @@ public class ChatRoomServiceImplTest {
             //when
             when(memberRepository.findById(1L)).thenReturn(Optional.ofNullable(member));
             when(chatPartakeRepository.findAllByMemberEntity(member)).thenReturn(chatPartakeList);
+            when(chattingRepository.countAllByChatRoomIdAndIdGreaterThan(3L,null)).thenReturn(0L);
+            when(chattingRepository.countAllByChatRoomIdAndIdGreaterThan(33L,null)).thenReturn(0L);
+            when(chattingRepository.countAllByChatRoomIdAndIdGreaterThan(333L,null)).thenReturn(0L);
+            when(chattingRepository.countAllByChatRoomIdAndIdGreaterThan(3333L,null)).thenReturn(0L);
+
 
             List<ChatPartakeDto> chatPartakes = chatRoomService.getChatRoomList(MemberDto.fromEntity(member));
 

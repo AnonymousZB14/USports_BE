@@ -29,6 +29,8 @@ public class MemberInfo {
 
   private List<SportsDto> interestSportsList;
 
+  private boolean profileOpen;
+
 
   public MemberInfo(MemberEntity memberEntity, List<SportsDto> interestSportsList){
     this.profileImage = memberEntity.getProfileImage();
@@ -38,6 +40,7 @@ public class MemberInfo {
     this.email = memberEntity.getEmail();
     this.mannerScore = memberEntity.getMannerScore();
     this.interestSportsList = interestSportsList;
+    this.profileOpen = memberEntity.isProfileOpen();
   }
 
 }
