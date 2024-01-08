@@ -1302,7 +1302,7 @@ public class MemberServiceTest {
 
         String search = "test";
 
-        when(memberRepository.findAllByAccountNameContainingOrderByAccountNameAsc(search))
+        when(memberRepository.findAllByAccountNameContaining(search))
             .thenReturn(memberList);
 
         //when

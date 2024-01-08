@@ -18,7 +18,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
 
     Optional<MemberEntity> findByAccountName(String accountName);
 
-    List<MemberEntity> findAllByAccountNameContainingOrderByAccountNameAsc(String accountName);
+    List<MemberEntity> findAllByAccountNameContaining(String accountName);
 
 
 }

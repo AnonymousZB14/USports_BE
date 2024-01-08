@@ -461,9 +461,10 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
 
   @Override
   public List<MemberSearchResponse> searchMember(String accountName) {
-        return memberRepository.findAllByAccountNameContainingOrderByAccountNameAsc(accountName)
+        return memberRepository.findAllByAccountNameContaining(accountName)
             .stream()
             .map(MemberSearchResponse::fromEntity)
+            .sorted((m1, m2)-> m1.getAccountName().length() - m2.getAccountName().length())
             .collect(Collectors.toList());
   }
 
