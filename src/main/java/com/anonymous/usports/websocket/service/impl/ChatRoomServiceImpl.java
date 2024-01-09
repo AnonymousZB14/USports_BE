@@ -179,7 +179,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     if (chatRoomId != 0L) {
       return new CreateDMDto.Response(
           chatRoomId,
-          ChatConstant.CHAT_ROOM_CREATED
+          ChatConstant.CHAT_ALREADY_EXIST
       );
     }
 
@@ -198,14 +198,16 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
   }
 
-  private Long createNewRecruitChatRoom(Long recruitId, MemberDto memberDto) {
+  private CreateRecruitChat.Response createNewRecruitChatRoom(Long recruitId, MemberDto memberDto) {
 
     RecruitEntity recruit = recruitRepository.findById(recruitId)
         .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
 
     // 이미 있으면 채팅방 ID를 리턴한다
     if (recruit.getChatRoomId() != null) {
-      return recruit.getChatRoomId();
+      return new CreateRecruitChat.Response(
+          recruit.getChatRoomId(),
+          ChatConstant.CHAT_ALREADY_EXIST);
     }
 
     // 운동 모집 작성자인지 확인
@@ -236,7 +238,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     recruit.setChatRoomId(chatRoom.getChatRoomId());
     recruitRepository.save(recruit);
 
-    return chatRoom.getChatRoomId();
+    return new CreateRecruitChat.Response(
+        chatRoom.getChatRoomId(),
+        ChatConstant.CHAT_ROOM_CREATED);
   }
 
   @Override
@@ -244,14 +248,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
   public CreateRecruitChat.Response createRecruitChat(CreateRecruitChat.Request request,
       MemberDto memberDto) {
 
-    return new CreateRecruitChat.Response(
-        // 채팅방이 없다는 것을 이미 검증 한 후
-        createNewRecruitChatRoom(request.getRecruitId(), memberDto),
-        ChatConstant.CHAT_ROOM_CREATED);
+    return createNewRecruitChatRoom(request.getRecruitId(), memberDto);
   }
 
 
-  private Long inviteNewMemberToRecruitChat(Long inviteMemberId, Long recruitId,
+  private ChatInviteDto.Response inviteNewMemberToRecruitChat(Long inviteMemberId, Long recruitId,
       MemberDto memberDto) {
 
     RecruitEntity recruit = recruitRepository.findById(recruitId)
@@ -270,7 +271,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     if (chatPartakeRepository.existsByRecruitIdAndChatRoomEntityAndMemberEntity(
         recruitId, chatRoom, member
     )) {
-      return chatRoom.getChatRoomId();
+      return new ChatInviteDto.Response(
+          chatRoom.getChatRoomId(),
+          ChatConstant.CHAT_ALREADY_INVITED);
     }
 
     // 모집에 등록이 되어 있고, 승락이 되어 있는 상태
@@ -291,16 +294,16 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     chatRoomRepository.save(chatRoom);
 
-    return chatRoom.getChatRoomId();
+    return new ChatInviteDto.Response(
+        chatRoom.getChatRoomId(),
+        ChatConstant.CHAT_INVITE);
   }
 
   @Override
   @Transactional
   public ChatInviteDto.Response inviteMemberToRecruitChat(ChatInviteDto.Request request,
       MemberDto memberDto) {
-    return new ChatInviteDto.Response(
-        inviteNewMemberToRecruitChat(request.getMemberId(), request.getRecruitId(), memberDto),
-        ChatConstant.CHAT_INVITE);
+    return inviteNewMemberToRecruitChat(request.getMemberId(), request.getRecruitId(), memberDto);
   }
 
 

@@ -5,6 +5,10 @@ public class ChatConstant {
 
     public static final String CHAT_INVITE = "채팅방에 초대가 되었습니다";
 
+    public static final String CHAT_ALREADY_EXIST = "채팅방이 이미 존재합니다";
+
+    public static final String CHAT_ALREADY_INVITED = "채팅방에 이미 초대가 되어 있습니다";
+
     public static final String EXIT_CHAT = "채팅방을 나갔습니다";
 
     public static final String EXIT_AND_DELETE_CHAT = "채팅방을 나가시고, 해당 채팅방은 삭제되었습니다";
