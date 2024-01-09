@@ -115,19 +115,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     return chattingRepository.countAllByChatRoomIdAndIdGreaterThan(chatRoomId, objectId);
   }
 
-  private void chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo) {
+  private Long chatRoomExist(MemberEntity memberOne, MemberEntity memberTwo) {
 
     List<ChatPartakeEntity> existingChatRooms = chatPartakeRepository
         .findAllByMemberEntityInAndRecruitIdIsNull(Arrays.asList(memberOne, memberTwo));
 
     Set<ChatRoomEntity> chatRooms = new HashSet<>();
 
-    // todo : throw를 하지 말고, 그 방으로 들어갈 수 있도록 하기
     for (ChatPartakeEntity chatPartake : existingChatRooms) {
       if (!chatRooms.add(chatPartake.getChatRoomEntity())) {
-        throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
+       return chatPartake.getChatRoomEntity().getChatRoomId();
       }
     }
+
+    return 0L;
   }
 
   private Long createNewDMWithMember(MemberEntity memberOne, MemberEntity memberTwo) {
@@ -173,7 +174,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     //채팅방이 있는지 없는지 확인
-    chatRoomExist(memberOne, memberTwo);
+    Long chatRoomId = chatRoomExist(memberOne, memberTwo);
+
+    if (chatRoomId != 0L) {
+      return new CreateDMDto.Response(
+          chatRoomId,
+          ChatConstant.CHAT_ROOM_CREATED
+      );
+    }
 
     return new CreateDMDto.Response(
         createNewDMWithMember(memberOne, memberTwo),
