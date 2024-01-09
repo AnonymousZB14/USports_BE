@@ -235,14 +235,15 @@ public class ChatRoomServiceImplTest {
           Arrays.asList(loggedInMember, otherMember)
       )).thenReturn(partakeList);
 
-      ChatException exception =
-          catchThrowableOfType(() ->
-              chatRoomService.createChatRoom(CreateDMDto.Request.builder()
-                      .memberId(otherMember.getMemberId()).build(),
-                  MemberDto.fromEntity(loggedInMember)), ChatException.class);
+
+      CreateDMDto.Response response = chatRoomService.createChatRoom(
+          CreateDMDto.Request.builder().memberId(otherMember.getMemberId()).build(),
+          MemberDto.fromEntity(loggedInMember)
+      );
 
       //then
-      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ALREADY_EXIST);
+      assertThat(response.getMessage()).isEqualTo(ChatConstant.CHAT_ALREADY_EXIST);
+      assertThat(response.getChatRoomId()).isEqualTo(chatRoom.getChatRoomId());
     }
 
     @Test
@@ -330,6 +331,7 @@ public class ChatRoomServiceImplTest {
 
       //then
       assertThat(response.getMessage()).isEqualTo(ChatConstant.CHAT_ROOM_CREATED);
+      assertThat(response.getChatRoomId()).isEqualTo(chatRoom.getChatRoomId());
     }
 
     @Test
@@ -372,17 +374,19 @@ public class ChatRoomServiceImplTest {
 
       RecruitEntity recruit = createRecruit(27L, memberHost, 3L);
 
+      ChatRoomEntity chatRoom = createChatRoom(3L, 3L);
+
       //when
       when(recruitRepository.findById(27L))
           .thenReturn(Optional.ofNullable(recruit));
 
-      ChatException exception = catchThrowableOfType(() ->
-          chatRoomService.createRecruitChat(
-              new CreateRecruitChat.Request(27L), MemberDto.fromEntity(memberHost)
-          ), ChatException.class);
+      CreateRecruitChat.Response response = chatRoomService.createRecruitChat(
+          new CreateRecruitChat.Request(27L), MemberDto.fromEntity(memberHost)
+      );
 
       //then
-      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ALREADY_EXIST);
+      assertThat(response.getMessage()).isEqualTo(ChatConstant.CHAT_ALREADY_EXIST);
+      assertThat(response.getChatRoomId()).isEqualTo(chatRoom.getChatRoomId());
     }
 
     @Test
@@ -458,6 +462,8 @@ public class ChatRoomServiceImplTest {
       //then
 
       assertThat(response.getMessage()).isEqualTo(ChatConstant.CHAT_INVITE);
+      assertThat(response.getChatRoomId()).isEqualTo(chatRoom.getChatRoomId());
+
     }
 
     @Test
@@ -525,13 +531,13 @@ public class ChatRoomServiceImplTest {
           2L, chatRoom, memberGuest
       )).thenReturn(true);
 
-      ChatException exception = catchThrowableOfType(() ->
-              chatRoomService.inviteMemberToRecruitChat(request, MemberDto.fromEntity(memberHost)),
-          ChatException.class
-      );
+      ChatInviteDto.Response response =
+          chatRoomService.inviteMemberToRecruitChat(request, MemberDto.fromEntity(memberHost));
 
       //then
-      assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CHAT_ALREADY_EXIST);
+
+      assertThat(response.getMessage()).isEqualTo(ChatConstant.CHAT_ALREADY_INVITED);
+      assertThat(response.getChatRoomId()).isEqualTo(chatRoom.getChatRoomId());
     }
 
     @Test
