@@ -414,8 +414,7 @@ public class RecordServiceImpl implements RecordService {
   /**
    * 새벽 3시에 모아놓은 Url에 해당하는 S3 객체들을 제거
    */
-//  @Scheduled(cron = "0 0 3 * * ?")
-  @Scheduled(cron = "0 * * * * ?")
+  @Scheduled(cron = "0 0 3 * * ?")
   public void deleteRedisUrlFromS3() {
     List<String> urlsToDelete = redisTemplate.opsForList().range(URLS_TO_DELETE, 0, -1);
     if (urlsToDelete != null) {
