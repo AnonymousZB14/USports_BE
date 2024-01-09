@@ -203,8 +203,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     RecruitEntity recruit = recruitRepository.findById(recruitId)
         .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
 
+    // 이미 있으면 채팅방 ID를 리턴한다
     if (recruit.getChatRoomId() != null) {
-      throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
+      return recruit.getChatRoomId();
     }
 
     // 운동 모집 작성자인지 확인
@@ -269,7 +270,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     if (chatPartakeRepository.existsByRecruitIdAndChatRoomEntityAndMemberEntity(
         recruitId, chatRoom, member
     )) {
-      throw new ChatException(ErrorCode.CHAT_ALREADY_EXIST);
+      return chatRoom.getChatRoomId();
     }
 
     // 모집에 등록이 되어 있고, 승락이 되어 있는 상태
