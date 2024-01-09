@@ -80,6 +80,8 @@ public class RecordServiceImpl implements RecordService {
   private final RedisTemplate<String, String> redisTemplate;
   public static final String URLS_TO_DELETE = "urlsToDelete";
 
+  private static final String THUMBNAIL_BUCKET_NAME = "usportsbucket-resized";
+
   /**
    * 기록 게시글 등록
    */
@@ -92,12 +94,31 @@ public class RecordServiceImpl implements RecordService {
     SportsEntity sports = sportsRepository.findById(request.getSportsId())
         .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
 
-    List<String> recordImageList = saveImages(images);
+
+    SaveImagesResult imagesResult = saveImages(images);
 
     RecordEntity recordEntity = recordRepository.save(
-        Request.toEntity(request, member, sports, recordImageList));
+        Request.toEntity(request, member, sports, imagesResult.getRecordImageList(), imagesResult.getThumbnailImageList()));
 
     return RecordDto.fromEntity(recordEntity);
+  }
+
+  private static class SaveImagesResult {
+    private final List<String> recordImageList;
+    private final List<String> thumbnailImageList;
+
+    public SaveImagesResult(List<String> recordImageList, List<String> thumbnailImageList) {
+      this.recordImageList = recordImageList;
+      this.thumbnailImageList = thumbnailImageList;
+    }
+
+    public List<String> getRecordImageList() {
+      return recordImageList;
+    }
+
+    public List<String> getThumbnailImageList() {
+      return thumbnailImageList;
+    }
   }
 
   /**
@@ -106,19 +127,22 @@ public class RecordServiceImpl implements RecordService {
    * @param images 저장할 Images
    * @return 저장한 List<String> 이미지 주소 반환
    */
-  private List<String> saveImages(List<MultipartFile> images) {
+  private SaveImagesResult  saveImages(List<MultipartFile> images) {
     // 이미지 수 체크
     validateImageCount(images);
 
     List<String> recordImages = new ArrayList<>();
+    List<String> thumbnailImages = new ArrayList<>();
 
     try {
       for (MultipartFile image : images) {
         isValidImageExtension(image.getOriginalFilename());
         String storedImagePath = uploadImageToS3(image);
         recordImages.add(storedImagePath);
+        String storedThumbnailPath = storedImagePath.replaceFirst(bucketName, THUMBNAIL_BUCKET_NAME);
+        thumbnailImages.add(storedThumbnailPath);
       }
-      return recordImages;
+      return new SaveImagesResult(recordImages, thumbnailImages);
     } catch (RecordException e) {
       if(!recordImages.isEmpty()){
         for (String imageAddress : recordImages) {
@@ -289,6 +313,8 @@ public class RecordServiceImpl implements RecordService {
             throw new RecordException(ErrorCode.INVALID_IMAGE_URL); //만약 지우려한 Url이 DB에 없는 경우 에러 발생
           }
           record.getImageAddress().remove(imageUrl); //record의 imageAdress 리스트에서 해당 url 제거
+          String thImageUrl = imageUrl.replaceFirst(bucketName, THUMBNAIL_BUCKET_NAME);
+          record.getThImageAddress().remove(thImageUrl);
           redisTemplate.opsForList().rightPush(URLS_TO_DELETE, imageUrl); //제거한 Url을 redis에 insert
         }
       }
@@ -388,7 +414,8 @@ public class RecordServiceImpl implements RecordService {
   /**
    * 새벽 3시에 모아놓은 Url에 해당하는 S3 객체들을 제거
    */
-  @Scheduled(cron = "0 0 3 * * ?")
+//  @Scheduled(cron = "0 0 3 * * ?")
+  @Scheduled(cron = "0 * * * * ?")
   public void deleteRedisUrlFromS3() {
     List<String> urlsToDelete = redisTemplate.opsForList().range(URLS_TO_DELETE, 0, -1);
     if (urlsToDelete != null) {

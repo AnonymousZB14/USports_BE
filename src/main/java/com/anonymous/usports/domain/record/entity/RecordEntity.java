@@ -75,6 +75,11 @@ public class RecordEntity {
   @Column(name = "image_address", columnDefinition = "TEXT")
   private List<String> imageAddress = new ArrayList<>();
 
+  @Convert(converter = StringListConverter.class)
+  @Builder.Default
+  @Column(name = "th_image_address", columnDefinition = "TEXT")
+  private List<String> thImageAddress = new ArrayList<>();
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {

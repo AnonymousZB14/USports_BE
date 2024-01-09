@@ -1,7 +1,7 @@
 package com.anonymous.usports.websocket.service;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
-import com.anonymous.usports.websocket.dto.ChatMessageDto;
+import com.anonymous.usports.websocket.dto.ChatMessageListDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.ChatResponses.ChatEnterDto;
 import com.anonymous.usports.websocket.dto.ChatResponses.ChatInviteDto;
@@ -28,5 +28,5 @@ public interface ChatRoomService {
     String exitChat(Long chatRoomId, MemberDto memberDto);
 
   // 채팅방에서 채팅 내역 가져오기
-  List<ChatMessageDto> getMessageList(Long chatRoomId, MemberDto memberDto);
+  ChatMessageListDto getMessageList(Long chatRoomId, MemberDto memberDto, int page);
 }
