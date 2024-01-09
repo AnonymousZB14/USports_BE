@@ -87,7 +87,7 @@ public class ChatRoomController {
             chatRoomService.exitChat(chatRoomId, memberDto));
     }
 
-    @GetMapping("/{chatRoomId}/getMessagelist")
+    @GetMapping("/{chatRoomId}/message-list")
     public ResponseEntity<ChatMessageListDto> getMessageList(
         @PathVariable Long chatRoomId,
         @RequestParam(value = "page",defaultValue = "1") int page,

@@ -17,7 +17,7 @@ public class ChatPartakeController {
   private final ChatPartakeService chatPartakeService;
 
   // 웹 소켓 연결이 끊어질 때 해당 api를 호출해서 마지막 읽은 chatId를 등록한다.
-  @PostMapping("/markChat")
+  @PostMapping("/markchat")
   public ResponseEntity<MarkAsReadRequestDto.Response> markChatAsRead(
       @RequestBody MarkAsReadRequestDto.Request request
   ) {
