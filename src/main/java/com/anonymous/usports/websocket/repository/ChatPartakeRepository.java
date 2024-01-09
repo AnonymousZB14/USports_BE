@@ -13,6 +13,8 @@ public interface ChatPartakeRepository extends JpaRepository<ChatPartakeEntity, 
 
     List<ChatPartakeEntity> findAllByMemberEntityInAndRecruitIdIsNull(List<MemberEntity> member);
 
+    List<ChatPartakeEntity> findAllByChatRoomEntity(ChatRoomEntity chatRoom);
+
     Optional<ChatPartakeEntity> findByChatRoomEntityAndMemberEntity(ChatRoomEntity chatRoom, MemberEntity member);
 
     List<ChatPartakeEntity> findAllByMemberEntity(MemberEntity member);
