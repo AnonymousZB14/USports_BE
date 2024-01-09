@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.member.dto.MailResponse;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberLogin;
 import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberSearchResponse;
 import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
@@ -16,6 +17,7 @@ import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.notification.service.NotificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,6 +59,17 @@ public class MemberController {
       @RequestBody @Valid MemberRegister.Request request
   ) {
     return ResponseEntity.ok(memberService.registerMember(request));
+  }
+
+  /**
+   * 회원 계정 이름 확인 http://localhost:8080/check?accountName=
+   */
+  @GetMapping("/check")
+  @ApiOperation(value="사용 가능한 accountName인지 확인", notes="회원 계정 이름은 중복되면 안 됨")
+  public ResponseEntity<String> checkAccountName(
+      @RequestParam String accountName
+  ) {
+    return ResponseEntity.ok(memberService.checkAccountName(accountName));
   }
 
   /**
@@ -214,4 +228,15 @@ public class MemberController {
     return ResponseEntity.ok(
         memberService.resendEmailAuth(memberDto, id));
   }
+
+  @PreAuthorize("hasAnyRole('ROLE_USER')")
+  @GetMapping("/search")
+  @ApiOperation("회원 검색")
+  public ResponseEntity<List<MemberSearchResponse>> searchMember(@RequestParam String accountName){
+
+    List<MemberSearchResponse> result = memberService.searchMember(accountName);
+
+    return ResponseEntity.ok(result);
+  }
+
 }

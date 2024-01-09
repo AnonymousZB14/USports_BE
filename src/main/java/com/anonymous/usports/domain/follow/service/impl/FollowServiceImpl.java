@@ -44,24 +44,33 @@ public class FollowServiceImpl implements FollowService {
       throw new FollowException(ErrorCode.SELF_FOLLOW_NOT_ALLOWED);
     }
 
-    Optional<FollowEntity> existingFollow = followRepository.findByFromMemberAndToMemberAndFollowStatus(
-        loginMember, toMember, FollowStatus.ACTIVE);
+    Optional<FollowEntity> existingFollow = followRepository.findByFromMemberAndToMember(
+        loginMember, toMember);
 
-    if (existingFollow.isPresent()) {
+    if (existingFollow.isPresent()&&existingFollow.get().getFollowStatus()==FollowStatus.ACTIVE) {
       followRepository.delete(existingFollow.get());
       return FollowResponse.Response(null, ResponseConstant.DELETE_FOLLOW);
     }
+
+    if (existingFollow.isPresent()&&existingFollow.get().getFollowStatus()==FollowStatus.WAITING) {
+      followRepository.delete(existingFollow.get());
+      return FollowResponse.Response(null, ResponseConstant.CANCEL_FOLLOW_REQUEST);
+    }
+
     FollowEntity follow = FollowEntity.builder()
         .fromMember(loginMember)
         .toMember(toMember)
         .build();
+
     if (toMember.isProfileOpen()) {
       follow.setFollowStatus(FollowStatus.ACTIVE);
       follow.setFollowDate(LocalDateTime.now());
     } else {
       follow.setFollowStatus(FollowStatus.WAITING);
     }
+
     followRepository.save(follow);
+
     return FollowResponse.Response(follow.getFollowId(), ResponseConstant.REGISTER_FOLLOW);
   }
 
