@@ -1,24 +1,25 @@
-package com.anonymous.usports.websocket.dto.httpbody;
+package com.anonymous.usports.websocket.dto.ChatResponses;
 
 import lombok.*;
 
-public class CreateRecruitChat {
+public class CreateDMDto {
 
-    @Getter
     @Setter
-    @Builder
+    @Getter
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class Request {
-        private Long recruitId;
+        private Long memberId;
     }
 
-    @Getter
     @Setter
-    @Builder
+    @Getter
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class Response {
+        private Long chatRoomId;
         private String message;
     }
 }
