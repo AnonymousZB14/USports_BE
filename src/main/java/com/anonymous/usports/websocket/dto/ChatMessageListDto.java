@@ -26,27 +26,35 @@ public class ChatMessageListDto {
 
   private List<ChatMessageDto> list;
 
-  public ChatMessageListDto(Page<ChattingEntity> chattingEntityPage, MemberEntity member) {
+  public ChatMessageListDto(Page<ChattingEntity> chattingEntityPage , List<MemberEntity> participantList) {
     this.currentPage = chattingEntityPage.getNumber()+1;
     this.currentElements = chattingEntityPage.getNumberOfElements();
     this.pageSize = chattingEntityPage.getSize();
     this.totalPages = chattingEntityPage.getTotalPages();
     this.totalElements = (int) chattingEntityPage.getTotalElements();
     this.list = chattingEntityPage.getContent().stream()
-        .map(chattingEntity -> toChatMessageDto(chattingEntity, member))
+        .map(chattingEntity -> toChatMessageDto(chattingEntity,participantList))
         .collect(Collectors.toList());
   }
-  private ChatMessageDto toChatMessageDto(ChattingEntity chattingEntity, MemberEntity senderMember) {
+
+  public ChatMessageDto toChatMessageDto(ChattingEntity chattingEntity, List<MemberEntity> participantList) {
+    MemberEntity member = findMemberById(chattingEntity.getMemberId(), participantList);
+
     return ChatMessageDto.builder()
         .chatRoomId(chattingEntity.getChatRoomId())
-        .userId(chattingEntity.getMemberId())
-        .user(senderMember.getName())
+        .userId(member.getMemberId())
+        .user(member.getAccountName())
         .time(chattingEntity.getCreatedAt())
-        .imageAddress(senderMember.getProfileImage())
+        .imageAddress(member.getProfileImage())
         .content(chattingEntity.getContent())
         .type(chattingEntity.getType())
         .build();
   }
-
+  private MemberEntity findMemberById(Long memberId, List<MemberEntity> participantList) {
+    return participantList.stream()
+        .filter(member -> memberId.equals(member.getMemberId()))
+        .findFirst()
+        .orElse(null);
+  }
 
 }

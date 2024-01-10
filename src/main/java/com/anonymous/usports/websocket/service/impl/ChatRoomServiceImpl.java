@@ -365,6 +365,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
      .orElseThrow(()->new ChatException(ErrorCode.USER_NOT_IN_THE_CHAT));
      */
     Page<ChattingEntity> chatsPage = chattingRepository.findAllByChatRoomId(chatRoomId, pageable);
-    return new ChatMessageListDto(chatsPage, member);
+    List<ChatPartakeEntity> chatPartakeEntities = chatPartakeRepository.findAllByChatRoomEntity(chatRoom);
+    List<MemberEntity> participantList = chatPartakeEntities.stream()
+        .map(ChatPartakeEntity::getMemberEntity)
+        .collect(Collectors.toList());
+    return new ChatMessageListDto(chatsPage, participantList);
   }
 }
