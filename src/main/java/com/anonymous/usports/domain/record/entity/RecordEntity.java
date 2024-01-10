@@ -77,8 +77,8 @@ public class RecordEntity {
 
   @Convert(converter = StringListConverter.class)
   @Builder.Default
-  @Column(name = "th_image_address", columnDefinition = "TEXT")
-  private List<String> thImageAddress = new ArrayList<>();
+  @Column(name = "thumbnail_image_address", columnDefinition = "TEXT")
+  private List<String> thumbnailAddress = new ArrayList<>();
 
   @Override
   public boolean equals(Object o) {

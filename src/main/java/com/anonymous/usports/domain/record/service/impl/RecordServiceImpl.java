@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -314,7 +313,7 @@ public class RecordServiceImpl implements RecordService {
           }
           record.getImageAddress().remove(imageUrl); //record의 imageAdress 리스트에서 해당 url 제거
           String thImageUrl = imageUrl.replaceFirst(bucketName, THUMBNAIL_BUCKET_NAME);
-          record.getThImageAddress().remove(thImageUrl);
+          record.getThumbnailAddress().remove(thImageUrl);
           redisTemplate.opsForList().rightPush(URLS_TO_DELETE, imageUrl); //제거한 Url을 redis에 insert
         }
       }

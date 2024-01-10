@@ -30,7 +30,7 @@ public class RecordRegister {
           .sports(sports)
           .recordContent(request.getContent())
           .imageAddress(recordImageList)
-          .thImageAddress(thumbnailImageList)
+          .thumbnailAddress(thumbnailImageList)
           .build();
     }
   }
