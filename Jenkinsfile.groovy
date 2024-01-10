@@ -26,7 +26,7 @@ pipeline {
         stage('Build') {\
             agent any
             steps {
-                sh 'clean build -x test'
+                sh './gradlew clean build -x test'
             }
             post{
                 failure{
