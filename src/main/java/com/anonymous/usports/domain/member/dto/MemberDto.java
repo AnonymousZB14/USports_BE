@@ -97,11 +97,6 @@ public class MemberDto implements UserDetails {
     }
 
     @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
-    @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         List<GrantedAuthority> auth = new ArrayList<>();

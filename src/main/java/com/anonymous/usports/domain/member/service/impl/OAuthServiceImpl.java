@@ -1,20 +1,25 @@
 package com.anonymous.usports.domain.member.service.impl;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
-import com.anonymous.usports.domain.member.dto.MemberLogin;
+import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.domain.member.dto.kakao.KakaoToken;
 import com.anonymous.usports.domain.member.dto.kakao.KakaoUserInfo;
+import com.anonymous.usports.domain.member.entity.InterestedSportsEntity;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.domain.member.repository.InterestedSportsRepository;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.OAuthService;
+import com.anonymous.usports.domain.sports.dto.SportsDto;
 import com.anonymous.usports.global.type.Gender;
 import com.anonymous.usports.global.type.LoginBy;
 import com.anonymous.usports.global.type.Role;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +38,7 @@ public class OAuthServiceImpl implements OAuthService {
 
   private final MemberRepository memberRepository;
   private final PasswordEncoder passwordEncoder;
+  private final InterestedSportsRepository interestedSportsRepository;
 
   @Value("${kakao.client-id}")
   private String CLIENT_ID;
@@ -117,8 +123,18 @@ public class OAuthServiceImpl implements OAuthService {
     return kakaoUserInfo;
   }
 
+  private List<SportsDto> interestSportsList(MemberEntity member) {
+    List<InterestedSportsEntity> interestedSportsEntityList =
+        interestedSportsRepository.findAllByMemberEntity(member);
+
+    return interestedSportsEntityList.stream()
+        .map(InterestedSportsEntity::getSports)
+        .map(SportsDto::new)
+        .collect(Collectors.toList());
+  }
+
   @Override
-  public MemberDto kakaoLogin(KakaoToken kakaoToken) {
+  public MemberResponse kakaoLogin(KakaoToken kakaoToken) {
 
     KakaoUserInfo userInfo = getProfile(kakaoToken);
 
@@ -166,6 +182,7 @@ public class OAuthServiceImpl implements OAuthService {
       }
     }
 
-    return MemberDto.fromEntity(memberEntity);
+    return MemberResponse.fromDto(MemberDto.fromEntity(memberEntity),
+        interestSportsList(memberEntity));
   }
 }
