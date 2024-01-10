@@ -24,13 +24,12 @@ public class RecordRegister {
     private String content;
 
     public static RecordEntity toEntity(RecordRegister.Request request, MemberEntity member,
-        SportsEntity sports, List<String> recordImageList, List<String> thumbnailImageList) {
+        SportsEntity sports, List<String> recordImageList) {
       return RecordEntity.builder()
           .member(member)
           .sports(sports)
           .recordContent(request.getContent())
           .imageAddress(recordImageList)
-          .thumbnailAddress(thumbnailImageList)
           .build();
     }
   }
