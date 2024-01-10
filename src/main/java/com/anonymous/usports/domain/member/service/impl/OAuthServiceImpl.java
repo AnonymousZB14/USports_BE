@@ -1,14 +1,25 @@
 package com.anonymous.usports.domain.member.service.impl;
 
+import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberLogin;
 import com.anonymous.usports.domain.member.dto.kakao.KakaoToken;
 import com.anonymous.usports.domain.member.dto.kakao.KakaoUserInfo;
+import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.member.service.OAuthService;
+import com.anonymous.usports.global.type.Gender;
+import com.anonymous.usports.global.type.LoginBy;
+import com.anonymous.usports.global.type.Role;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -16,8 +27,12 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
+@RequiredArgsConstructor
 @Slf4j
 public class OAuthServiceImpl implements OAuthService {
+
+  private final MemberRepository memberRepository;
+  private final PasswordEncoder passwordEncoder;
 
   @Value("${kakao.client-id}")
   private String CLIENT_ID;
@@ -103,10 +118,54 @@ public class OAuthServiceImpl implements OAuthService {
   }
 
   @Override
-  public MemberLogin.Response kakaoLogin(KakaoToken kakaoToken) {
+  public MemberDto kakaoLogin(KakaoToken kakaoToken) {
 
     KakaoUserInfo userInfo = getProfile(kakaoToken);
 
-    return null;
+    String nickName = userInfo.properties.getNickname();
+    String email = userInfo.kakao_account.getEmail();
+    String gender = userInfo.kakao_account.getGender();
+
+    Optional<MemberEntity> member = memberRepository.findByEmail(email);
+
+    MemberEntity memberEntity = null;
+
+    if (member.isEmpty()) {
+      log.info("{} : 새로운 유저입니다", email);
+
+      Gender saveGender = null;
+      if (gender.equals("male")) saveGender = Gender.MALE;
+      else if (gender.equals("famale")) saveGender = Gender.FEMALE;
+
+      StringBuilder tempAccountName = new StringBuilder();
+      tempAccountName.append(email.split("@")[0]);
+      tempAccountName.append("%");
+      tempAccountName.append(UUID.randomUUID().toString().substring(0,6));
+      log.info("{}", tempAccountName);
+
+      memberEntity = memberRepository.save(
+          MemberEntity.builder()
+              .accountName(tempAccountName.toString())
+              .name(nickName)
+              .email(email)
+              .emailAuthAt(LocalDateTime.now())
+              .password(passwordEncoder.encode(UUID.randomUUID().toString().substring(0, 10)))
+              .gender(saveGender)
+              .profileOpen(false)
+              .loginBy(LoginBy.KAKAO)
+              .role(Role.UNAUTH)
+              .build());
+    } else {
+      memberEntity = member.get();
+
+      MemberDto memberDto = MemberDto.fromEntity(memberEntity);
+
+      if (memberDto.getEmailAuthAt() == null) {
+        memberEntity.setEmailAuthAt(LocalDateTime.now());
+        memberEntity = memberRepository.save(memberEntity);
+      }
+    }
+
+    return MemberDto.fromEntity(memberEntity);
   }
 }

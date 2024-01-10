@@ -1,5 +1,6 @@
 package com.anonymous.usports.domain.member.controller;
 
+import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberLogin;
 import com.anonymous.usports.domain.member.dto.kakao.KakaoToken;
 import com.anonymous.usports.domain.member.service.OAuthService;
@@ -32,7 +33,9 @@ public class OAuthController {
     log.info("{}", kakaoToken);
 
     // 토큰을 가지고 유저 정보를 통해, 회원가입을 시키거나 로그인을 시킨다
-    oAuthService.kakaoLogin(kakaoToken);
+    MemberDto memberDto = oAuthService.kakaoLogin(kakaoToken);
+
+
 
 
     return null;
