@@ -1,7 +1,7 @@
 package com.anonymous.usports.websocket.controller;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
-import com.anonymous.usports.websocket.dto.ChatMessageDto;
+import com.anonymous.usports.websocket.dto.ChatMessageListDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.ChatResponses.ChatEnterDto;
 import com.anonymous.usports.websocket.dto.ChatResponses.ChatInviteDto;
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -86,11 +87,12 @@ public class ChatRoomController {
             chatRoomService.exitChat(chatRoomId, memberDto));
     }
 
-  @GetMapping("/{chatRoomId}/getMessagelist")
-  public ResponseEntity<List<ChatMessageDto>> getMessageList(
-      @PathVariable Long chatRoomId,
-      @AuthenticationPrincipal MemberDto memberDto
-  ){
-    return ResponseEntity.ok(chatRoomService.getMessageList(chatRoomId,memberDto));
-  }
+    @GetMapping("/{chatRoomId}/message-list")
+    public ResponseEntity<ChatMessageListDto> getMessageList(
+        @PathVariable Long chatRoomId,
+        @RequestParam(value = "page",defaultValue = "1") int page,
+        @AuthenticationPrincipal MemberDto memberDto
+    ){
+        return ResponseEntity.ok(chatRoomService.getMessageList(chatRoomId,memberDto,page));
+    }
 }

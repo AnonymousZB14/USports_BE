@@ -35,12 +35,21 @@ public class FollowController {
   }
 
   @ApiOperation("타입별 팔로우 리스트 가져오기")
-  @GetMapping("/follow/{type}")
+  @GetMapping("/follow/{memberId}/{type}")
   public ResponseEntity<FollowListDto> getFollowList(
+      @PathVariable Long memberId,
       @PathVariable FollowListType type,
+      @RequestParam(value = "page", defaultValue = "1") int page) {
+    FollowListDto followList = followService.getFollowPage(type, page, memberId);
+    return ResponseEntity.ok(followList);
+  }
+
+  @ApiOperation("나에게 팔로우 신청한 리스트 가져오기")
+  @GetMapping("/follow/requested-follow")
+  public ResponseEntity<FollowListDto> getRequestedFollowList(
       @RequestParam(value = "page", defaultValue = "1") int page,
       @AuthenticationPrincipal MemberDto loginMember) {
-    FollowListDto followList = followService.getFollowPage(type, page, loginMember.getMemberId());
+    FollowListDto followList = followService.getRequestedFollowList(page, loginMember.getMemberId());
     return ResponseEntity.ok(followList);
   }
 
