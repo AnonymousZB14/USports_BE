@@ -13,7 +13,7 @@ import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.RecruitException;
 import com.anonymous.usports.global.type.ParticipantStatus;
-import com.anonymous.usports.websocket.dto.ChatMessageDto;
+import com.anonymous.usports.websocket.dto.ChatMessageListDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
 import com.anonymous.usports.websocket.dto.ChatResponses.ChatEnterDto;
 import com.anonymous.usports.websocket.dto.ChatResponses.ChatInviteDto;
@@ -36,6 +36,10 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -346,37 +350,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
   }
 
   @Override
-  public List<ChatMessageDto> getMessageList(Long chatRoomId, MemberDto memberDto) {
+  public ChatMessageListDto getMessageList(Long chatRoomId, MemberDto memberDto, int page) {
     ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
         .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
 
     MemberEntity member = memberRepository.findById(memberDto.getMemberId())
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
+    Pageable pageable = PageRequest.of(page-1, ChatConstant.CHAT_MESSAGE_SIZE, Sort.by(Sort.Order.desc("createdAt")));
+
     /** 개인 입장 시간 기록 후 그 이후 채팅만 불러올 경우 필요. ChatPartake에 입장시간이 있으니
      ChatPartakeEntity chatPartake
      = chatPartakeRepository.findByChatRoomEntityAndMemberEntity(chatRoom,member)
      .orElseThrow(()->new ChatException(ErrorCode.USER_NOT_IN_THE_CHAT));
      */
-
-    List<ChattingEntity> chats = chattingRepository.findAllByChatRoomId(chatRoomId);
-    return chats.stream()
-        .map(chattingEntity -> toChatMessageDto(chattingEntity))
-        .collect(Collectors.toList());
-  }
-
-  private ChatMessageDto toChatMessageDto(ChattingEntity chattingEntity) {
-    MemberEntity senderMember = memberRepository.findById(chattingEntity.getMemberId())
-        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
-
-    return ChatMessageDto.builder()
-        .chatRoomId(chattingEntity.getChatRoomId())
-        .userId(chattingEntity.getMemberId())
-        .user(senderMember.getName())
-        .time(chattingEntity.getCreatedAt())
-        .imageAddress(senderMember.getProfileImage())
-        .content(chattingEntity.getContent())
-        .type(chattingEntity.getType())
-        .build();
+    Page<ChattingEntity> chatsPage = chattingRepository.findAllByChatRoomId(chatRoomId, pageable);
+    return new ChatMessageListDto(chatsPage, member);
   }
 }

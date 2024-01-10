@@ -1,0 +1,52 @@
+package com.anonymous.usports.websocket.dto;
+
+import com.anonymous.usports.domain.member.entity.MemberEntity;
+import com.anonymous.usports.websocket.entity.ChattingEntity;
+import java.util.List;
+import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.domain.Page;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ChatMessageListDto {
+
+  private int currentPage;
+  private int currentElements;
+  private int pageSize;
+  private int totalPages;
+  private int totalElements;
+
+  private List<ChatMessageDto> list;
+
+  public ChatMessageListDto(Page<ChattingEntity> chattingEntityPage, MemberEntity member) {
+    this.currentPage = chattingEntityPage.getNumber()+1;
+    this.currentElements = chattingEntityPage.getNumberOfElements();
+    this.pageSize = chattingEntityPage.getSize();
+    this.totalPages = chattingEntityPage.getTotalPages();
+    this.totalElements = (int) chattingEntityPage.getTotalElements();
+    this.list = chattingEntityPage.getContent().stream()
+        .map(chattingEntity -> toChatMessageDto(chattingEntity, member))
+        .collect(Collectors.toList());
+  }
+  private ChatMessageDto toChatMessageDto(ChattingEntity chattingEntity, MemberEntity senderMember) {
+    return ChatMessageDto.builder()
+        .chatRoomId(chattingEntity.getChatRoomId())
+        .userId(chattingEntity.getMemberId())
+        .user(senderMember.getName())
+        .time(chattingEntity.getCreatedAt())
+        .imageAddress(senderMember.getProfileImage())
+        .content(chattingEntity.getContent())
+        .type(chattingEntity.getType())
+        .build();
+  }
+
+
+}

@@ -42,6 +42,8 @@ public class RecordDto {
 
   private List<String> imageAddressList;
 
+  private List<String> thumbnailAddressList;
+
   private List<CommentDto> commentList;
 
   private Long countRecordLike;
@@ -60,6 +62,7 @@ public class RecordDto {
         .updatedAt(recordEntity.getUpdatedAt())
         .countComment(recordEntity.getCountComment())
         .imageAddressList(recordEntity.getImageAddress())
+        .thumbnailAddressList(recordEntity.getThumbnailAddress())
         .countRecordLike(recordEntity.getCountRecordLikes())
         .build();
   }
