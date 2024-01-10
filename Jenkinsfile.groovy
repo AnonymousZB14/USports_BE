@@ -26,6 +26,7 @@ pipeline {
         stage('Build') {\
             agent any
             steps {
+                sh 'chmod +x gradlew'
                 sh './gradlew clean build -x test'
             }
             post{
