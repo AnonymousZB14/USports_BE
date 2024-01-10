@@ -36,7 +36,7 @@ pipeline {
         }
 
         stage('Deploy') {
-            agnet any
+            agent any
             steps {
                 script {
                     sshPublisher(
