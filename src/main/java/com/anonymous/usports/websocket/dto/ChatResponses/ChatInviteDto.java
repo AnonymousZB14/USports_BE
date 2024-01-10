@@ -1,4 +1,4 @@
-package com.anonymous.usports.websocket.dto.httpbody;
+package com.anonymous.usports.websocket.dto.ChatResponses;
 
 import lombok.*;
 
@@ -21,6 +21,7 @@ public class ChatInviteDto {
     @NoArgsConstructor
     @Builder
     public static class Response {
+        private Long chatRoomId;
         private String message;
     }
 }
