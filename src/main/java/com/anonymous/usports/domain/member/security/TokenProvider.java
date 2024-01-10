@@ -1,6 +1,6 @@
 package com.anonymous.usports.domain.member.security;
 
-import com.anonymous.usports.domain.member.dto.TokenDto;
+import com.anonymous.usports.domain.member.dto.token.TokenDto;
 import com.anonymous.usports.domain.member.service.impl.MemberServiceImpl;
 import com.anonymous.usports.global.constant.TokenConstant;
 import com.anonymous.usports.global.exception.ErrorCode;

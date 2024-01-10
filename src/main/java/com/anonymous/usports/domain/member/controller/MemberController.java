@@ -9,7 +9,7 @@ import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
 import com.anonymous.usports.domain.member.dto.PasswordUpdate;
-import com.anonymous.usports.domain.member.dto.TokenDto;
+import com.anonymous.usports.domain.member.dto.token.TokenDto;
 import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.CookieService;

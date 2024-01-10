@@ -1,6 +1,7 @@
 package com.anonymous.usports.domain.member.dto;
 
 import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
+import com.anonymous.usports.domain.member.dto.token.TokenDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

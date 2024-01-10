@@ -8,7 +8,6 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +21,7 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberDto implements UserDetails, OAuth2User {
+public class MemberDto implements UserDetails {
 
     private Long memberId;
 
@@ -95,11 +94,6 @@ public class MemberDto implements UserDetails, OAuth2User {
                 .role(memberEntity.getRole())
                 .loginBy(memberEntity.getLoginBy())
                 .build();
-    }
-
-    @Override
-    public Map<String, Object> getAttributes() {
-        return attributes;
     }
 
     @Override

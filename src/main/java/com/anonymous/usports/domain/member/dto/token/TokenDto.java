@@ -1,4 +1,4 @@
-package com.anonymous.usports.domain.member.dto;
+package com.anonymous.usports.domain.member.dto.token;
 
 import lombok.*;
 
