@@ -41,6 +41,7 @@ public class ChatPartakeServiceImpl implements ChatPartakeService {
     ChatPartakeEntity chatPartake = chatPartakeRepository.findByChatRoomEntityAndMemberEntity(chatRoom, member)
         .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_IN_THE_CHAT));
 
+    // 해당 채팅방 가장 최근 ChattingEntity 가져오기
     ChattingEntity chattingEntity = chattingRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
 
     chatPartake.setLastReadChatId(chattingEntity.getId().toString());
