@@ -1,4 +1,4 @@
-package com.anonymous.usports.domain.member.dto.token;
+package com.anonymous.usports.domain.member.dto.kakao;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

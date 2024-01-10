@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 public class KakaoConstant {
 
   @Value("${kakao.client-id}")
-  public static String CLIENT_ID;
+  private String CLIENT_ID;
 
   @Value("${kakao.client-secret}")
   public static String CLIENT_SECRET;
@@ -18,9 +18,5 @@ public class KakaoConstant {
 
   @Value("${kakao.user-info-uri}")
   public static String USER_INFO_URI;
-
-
-  }
-
 
 }
