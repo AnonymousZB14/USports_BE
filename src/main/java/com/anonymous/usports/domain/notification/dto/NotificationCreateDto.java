@@ -89,6 +89,22 @@ public class NotificationCreateDto {
         .build();
   }
 
+  /**
+   * 알림 : [RecruitTitle]모임에서 평가를 받으셨습니다.
+   * 상황 : 평가를 받았을 때, 피 평가자에게 알림
+   */
+  public static NotificationCreateDto evaluated(RecruitEntity recruit){
+    return NotificationCreateDto.builder()
+        .type(NotificationType.NOTICE)
+        .notificationSituation(NotificationSituation.EVALUATED)
+        .targetEntityId(recruit.getRecruitId())
+        .message(getNotificationString(recruit.getTitle(), NotificationConstant.EVALUATED))
+        .url("/mypage")
+        .build();
+  }
+
+
+
   public static NotificationEntity toEntity(NotificationCreateDto createDto, MemberEntity member){
     return NotificationEntity.builder()
         .member(member)
