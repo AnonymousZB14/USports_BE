@@ -1,13 +1,13 @@
 package com.anonymous.usports.websocket.service;
 
-import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.websocket.dto.ChatMessageDto;
+import com.anonymous.usports.websocket.dto.ChatMessageResponseDto;
 
 public interface ChatService {
 
-  ChatMessageDto assembleEnterChat(ChatMessageDto chat);
+  ChatMessageResponseDto assembleEnterChat(ChatMessageDto chat);
 
-  ChatMessageDto assembleMessage(ChatMessageDto chat);
+  ChatMessageResponseDto assembleMessage(ChatMessageDto chat);
 
-  void receiveMessage(ChatMessageDto chatDto);
+  void receiveMessage(ChatMessageResponseDto chatDto);
 }

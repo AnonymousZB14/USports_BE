@@ -6,6 +6,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.websocket.dto.ChatMessageDto;
+import com.anonymous.usports.websocket.dto.ChatMessageResponseDto;
 import com.anonymous.usports.websocket.entity.ChattingEntity;
 import com.anonymous.usports.websocket.repository.ChattingRepository;
 import com.anonymous.usports.websocket.service.ChatService;
@@ -22,9 +23,9 @@ public class ChatServiceImpl implements ChatService {
   private final ChattingRepository chattingRepository;
 
   @Override
-  public ChatMessageDto assembleEnterChat(ChatMessageDto chat) {
+  public ChatMessageResponseDto assembleEnterChat(ChatMessageDto chat) {
 
-    return ChatMessageDto.builder()
+    return ChatMessageResponseDto.builder()
         .chatRoomId(chat.getChatRoomId())
         .userId(chat.getUserId())
         .user(chat.getUser())
@@ -37,9 +38,9 @@ public class ChatServiceImpl implements ChatService {
   }
 
   @Override
-  public ChatMessageDto assembleMessage(ChatMessageDto chat) {
+  public ChatMessageResponseDto assembleMessage(ChatMessageDto chat) {
 
-    return ChatMessageDto.builder()
+    return ChatMessageResponseDto.builder()
         .chatRoomId(chat.getChatRoomId())
         .userId(chat.getUserId())
         .user(chat.getUser())
@@ -52,12 +53,12 @@ public class ChatServiceImpl implements ChatService {
   }
 
   @Override
-  public void receiveMessage(ChatMessageDto chatDto) {
+  public void receiveMessage(ChatMessageResponseDto chatDto) {
 
     memberRepository.findById(chatDto.getUserId())
         .orElseThrow(()->new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    ChattingEntity chatting = ChatMessageDto.toEntity(chatDto);
+    ChattingEntity chatting = ChatMessageResponseDto.toEntity(chatDto);
     chattingRepository.save(chatting);
   }
 

@@ -2,6 +2,7 @@ package com.anonymous.usports.websocket.controller;
 
 import com.anonymous.usports.global.constant.ChatConstant;
 import com.anonymous.usports.websocket.dto.ChatMessageDto;
+import com.anonymous.usports.websocket.dto.ChatMessageResponseDto;
 import com.anonymous.usports.websocket.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,20 +27,20 @@ public class ChatController {
   @MessageMapping("chat/enter/{chatRoomId}")
   public void enterUser(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
 
-    ChatMessageDto chatMessageDto = chatService.assembleEnterChat(chat);
+    ChatMessageResponseDto chatMessageDto = chatService.assembleEnterChat(chat);
     rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chatMessageDto);
   }
 
   @MessageMapping("chat/message/{chatRoomId}")
   public void sendMessage(@Payload ChatMessageDto chat, @DestinationVariable Long chatRoomId) {
 
-    ChatMessageDto chatMessageDto = chatService.assembleMessage(chat);
+    ChatMessageResponseDto chatMessageDto = chatService.assembleMessage(chat);
     rabbitTemplate.convertAndSend(ChatConstant.CHAT_EXCHANGE_NAME, "room." + chatRoomId, chatMessageDto);
   }
 
   // 기본적으로 chat.queue가 exchange에 바인딩 되어있기 때문에 모든 메시지 처리
   @RabbitListener(queues = ChatConstant.CHAT_QUEUE_NAME)
-  public void receive(ChatMessageDto chatDto) {
+  public void receive(ChatMessageResponseDto chatDto) {
 
     chatService.receiveMessage(chatDto);
   }
