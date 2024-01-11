@@ -6,7 +6,7 @@ import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
 import com.anonymous.usports.domain.notification.dto.NotificationDto;
 import com.anonymous.usports.domain.notification.service.NotificationService;
-import com.anonymous.usports.global.type.NotificationEntityType;
+import com.anonymous.usports.global.type.NotificationSituation;
 import com.anonymous.usports.global.type.NotificationType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,8 +36,7 @@ public class NotificationSseController {
   public SseEmitter subscribe(@AuthenticationPrincipal MemberDto loginMember,
       HttpServletResponse response) {
     response.setCharacterEncoding("UTF-8");
-    response.setHeader("Connection", "keep-alive");
-    response.setHeader("Credential", "include");
+
     return notificationService.subscribe(loginMember.getMemberId());
   }
 
@@ -45,8 +44,7 @@ public class NotificationSseController {
   @GetMapping(value = "/subscribe/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter subscribeTest(@PathVariable Long id, HttpServletResponse response) {
     response.setCharacterEncoding("UTF-8");
-    response.setHeader("Connection", "keep-alive");
-    response.setHeader("Credential", "include");
+
     return notificationService.subscribe(id);
   }
 
@@ -60,9 +58,10 @@ public class NotificationSseController {
     MemberEntity member = memberRepository.findById(id).get();
     NotificationCreateDto req = NotificationCreateDto.builder()
         .type(NotificationType.NOTICE)
-        .entityType(NotificationEntityType.PARTICIPANT)
+        .notificationSituation(NotificationSituation.PARTICIPANT)
         .targetEntityId(5L)
         .message(d)
+        .url("/home")
         .build();
     NotificationDto notificationDto = notificationService.notify(member, req);
 
