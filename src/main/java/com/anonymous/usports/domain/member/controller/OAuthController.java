@@ -44,8 +44,6 @@ public class OAuthController {
     // 토큰을 가지고 유저 정보를 통해, 회원가입을 시키거나 로그인을 시킨다
     MemberResponse memberResponse = oAuthService.kakaoLogin(kakaoToken);
 
-    notificationService.checkUnreadNotificationAndSetSession(memberResponse.getMemberId(), httpServletRequest);
-
     TokenDto tokenDto = tokenProvider.saveTokenInRedis(memberResponse.getEmail());
     cookieService.setCookieForLogin(httpServletResponse,tokenDto.getAccessToken());
 
