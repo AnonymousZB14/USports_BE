@@ -6,6 +6,7 @@ import com.anonymous.usports.domain.notification.service.NotificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,17 +24,23 @@ public class NotificationController {
 
   @ApiOperation("알림 리스트 보기")
   @GetMapping("/notifications")
-  public @ResponseBody ResponseEntity<List<NotificationDto>> notificationList(
+  public ResponseEntity<List<NotificationDto>> notificationList(
       @AuthenticationPrincipal MemberDto loginMember,
       HttpServletRequest httpServletRequest) {
 
     List<NotificationDto> notifications =
         notificationService.getNotifications(loginMember.getMemberId());
 
-    //알림 리스트 조회 시 "안읽은 알림 없음 상태" 로 변경
-    notificationService.setUnreadNotificationSession(httpServletRequest, false);
-
     return ResponseEntity.ok(notifications);
+  }
+
+  @ApiOperation("안읽은 알림 존재 여부")
+  @GetMapping("/notification/unread")
+  public ResponseEntity<Map<String, Boolean>> unreadNotificationExists(
+      @AuthenticationPrincipal MemberDto loginMember){
+
+    boolean result = notificationService.checkUnreadNotification(loginMember.getMemberId());
+    return ResponseEntity.ok(Map.of("unreadNotificationExists", result));
   }
 
 }

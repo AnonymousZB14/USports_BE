@@ -31,12 +31,18 @@ public class NotificationSseController {
   private final NotificationService notificationService;
   private final MemberRepository memberRepository;
 
-  @ApiOperation(value = "구독을 시작하기 위한 메서드", notes = "테스트를 위해 id를 PathVariable로 설정했지만, 실제로는 loginMemberId를 사용")
+  @ApiOperation(value = "구독을 시작하기 위한 메서드")
   @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public SseEmitter subscribe(@PathVariable Long id,
-      @AuthenticationPrincipal MemberDto loginMember) {
+  public SseEmitter subscribe(@AuthenticationPrincipal MemberDto loginMember) {
 
     return notificationService.subscribe(loginMember.getMemberId());
+  }
+
+  @ApiOperation(value = "구독을 시작하기 위한 메서드")
+  @GetMapping(value = "/subscribe/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+  public SseEmitter subscribeTest(@PathVariable Long id) {
+
+    return notificationService.subscribe(id);
   }
 
   /**
@@ -45,8 +51,7 @@ public class NotificationSseController {
    */
   @ApiOperation(value = "테스트를 위한 api", notes = "이후에 실제 사용시에는 아예 삭제 될 메서드이다.")
   @GetMapping(value = "/send/{id}")
-  public void sendDate(@PathVariable Long id, @RequestParam String d,
-      HttpServletRequest httpServletRequest) {
+  public void sendData(@PathVariable Long id, @RequestParam String d) {
     MemberEntity member = memberRepository.findById(id).get();
     NotificationCreateDto req = NotificationCreateDto.builder()
         .type(NotificationType.NOTICE)
@@ -55,20 +60,8 @@ public class NotificationSseController {
         .message(d)
         .build();
     notificationService.notify(member, req);
-    notificationService.setUnreadNotificationSession(httpServletRequest, true);
-    httpServletRequest.getSession();
+
   }
 
-  /**
-   * !!! 테스트용
-   * FIXME : 테스트 끝나면 삭제하기
-   */
-  @ApiOperation(value = "테스트를 위한 api , 안읽은 알림이 있는 경우 true, 이외에는 false가 출력된다.", notes = "이후에 실제 사용시에는 아예 삭제 될 메서드이다.")
-  @GetMapping("/test")
-  public ResponseEntity<?> getCurrentUnreadNotificationSession(HttpServletRequest request) {
-    HttpSession session = request.getSession();
-    boolean result = (boolean) session.getAttribute("unreadNotification");
-    return ResponseEntity.ok(result);
-  }
 
 }

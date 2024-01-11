@@ -84,9 +84,6 @@ public class MemberController {
 
     MemberResponse member = memberService.loginMember(request);
 
-    notificationService.checkUnreadNotificationAndSetSession(member.getMemberId(),
-        httpServletRequest);
-
     TokenDto tokenDto = tokenProvider.saveTokenInRedis(member.getEmail());
     cookieService.setCookieForLogin(httpServletResponse, tokenDto.getAccessToken());
 
