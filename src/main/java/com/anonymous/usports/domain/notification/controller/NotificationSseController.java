@@ -4,6 +4,7 @@ import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
 import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
+import com.anonymous.usports.domain.notification.dto.NotificationDto;
 import com.anonymous.usports.domain.notification.service.NotificationService;
 import com.anonymous.usports.global.type.NotificationEntityType;
 import com.anonymous.usports.global.type.NotificationType;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,6 +36,8 @@ public class NotificationSseController {
   public SseEmitter subscribe(@AuthenticationPrincipal MemberDto loginMember,
       HttpServletResponse response) {
     response.setCharacterEncoding("UTF-8");
+    response.setHeader("Connection", "keep-alive");
+    response.setHeader("Credential", "include");
     return notificationService.subscribe(loginMember.getMemberId());
   }
 
@@ -41,6 +45,8 @@ public class NotificationSseController {
   @GetMapping(value = "/subscribe/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public SseEmitter subscribeTest(@PathVariable Long id, HttpServletResponse response) {
     response.setCharacterEncoding("UTF-8");
+    response.setHeader("Connection", "keep-alive");
+    response.setHeader("Credential", "include");
     return notificationService.subscribe(id);
   }
 
@@ -50,7 +56,7 @@ public class NotificationSseController {
    */
   @ApiOperation(value = "테스트를 위한 api", notes = "이후에 실제 사용시에는 아예 삭제 될 메서드이다.")
   @GetMapping(value = "/send/{id}")
-  public void sendData(@PathVariable Long id, @RequestParam String d) {
+  public ResponseEntity<NotificationDto> sendData(@PathVariable Long id, @RequestParam String d) {
     MemberEntity member = memberRepository.findById(id).get();
     NotificationCreateDto req = NotificationCreateDto.builder()
         .type(NotificationType.NOTICE)
@@ -58,9 +64,9 @@ public class NotificationSseController {
         .targetEntityId(5L)
         .message(d)
         .build();
-    notificationService.notify(member, req);
+    NotificationDto notificationDto = notificationService.notify(member, req);
 
+    return ResponseEntity.ok(notificationDto);
   }
-
 
 }
