@@ -320,7 +320,7 @@ class RecordServiceImplTest {
       }
       int page = 1;
       PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
-          Sort.by(Direction.DESC, "updatedAt"));
+          Sort.by(Direction.DESC, "registeredAt"));
       int start = (int) pageRequest.getOffset();
       int end = Math.min((start + pageRequest.getPageSize()), recordEntityList.size());
       List<RecordEntity> paginatedRecordEntities = recordEntityList.subList(start,end);
@@ -360,7 +360,7 @@ class RecordServiceImplTest {
       recordEntityList.add(record2);
       int page = 1;
       PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_SIX,
-          Sort.by(Direction.DESC, "updatedAt"));
+          Sort.by(Direction.DESC, "registeredAt"));
       int start = (int) pageRequest.getOffset();
       int end = Math.min((start + pageRequest.getPageSize()), recordEntityList.size());
       List<RecordEntity> paginatedRecordEntities = recordEntityList.subList(start,end);
