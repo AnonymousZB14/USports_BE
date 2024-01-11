@@ -1,7 +1,7 @@
 package com.anonymous.usports.domain.notification.entity;
 
 import com.anonymous.usports.domain.member.entity.MemberEntity;
-import com.anonymous.usports.global.type.NotificationEntityType;
+import com.anonymous.usports.global.type.NotificationSituation;
 import com.anonymous.usports.global.type.NotificationType;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -49,7 +49,7 @@ public class NotificationEntity{
 
   @Enumerated(EnumType.STRING)
   @Column(name = "entity_type", nullable = false)
-  private NotificationEntityType entityType; //어떤 엔티티에 대한 알림인지 타입
+  private NotificationSituation notificationSituation; //어떤 엔티티에 대한 알림인지 타입
 
   @Column(name = "target_entity_id", nullable = false)
   private Long targetEntityId; //type에서 선택된 타겟 엔티티의 id(PK)값

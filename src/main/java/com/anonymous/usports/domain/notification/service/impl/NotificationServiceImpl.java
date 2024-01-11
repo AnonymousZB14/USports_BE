@@ -61,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
     //이미터 생성
     SseEmitter emitter = this.createEmitter(memberId);
 
-    this.sendToClient(memberId, "EventStream Created. [memberId=" + memberId + "]");
+    this.sendToClient(memberId, "EventStream Created");
     return emitter;
   }
 

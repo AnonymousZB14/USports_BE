@@ -1,7 +1,7 @@
 package com.anonymous.usports.domain.notification.dto;
 
 import com.anonymous.usports.domain.notification.entity.NotificationEntity;
-import com.anonymous.usports.global.type.NotificationEntityType;
+import com.anonymous.usports.global.type.NotificationSituation;
 import com.anonymous.usports.global.type.NotificationType;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ public class NotificationDto {
 
   private NotificationType type;
 
-  private NotificationEntityType entityType;
+  private NotificationSituation notificationSituation;
 
   private Long targetEntityId;
 
@@ -40,7 +40,7 @@ public class NotificationDto {
         .notificationId(notification.getNotificationId())
         .memberId(notification.getMember().getMemberId())
         .type(notification.getType())
-        .entityType(notification.getEntityType())
+        .notificationSituation(notification.getNotificationSituation())
         .targetEntityId(notification.getTargetEntityId())
         .message(notification.getMessage())
         .url(notification.getUrl())

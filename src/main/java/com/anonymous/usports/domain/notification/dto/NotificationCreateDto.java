@@ -5,9 +5,8 @@ import com.anonymous.usports.domain.notification.entity.NotificationEntity;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.global.constant.NotificationConstant;
-import com.anonymous.usports.global.type.NotificationEntityType;
+import com.anonymous.usports.global.type.NotificationSituation;
 import com.anonymous.usports.global.type.NotificationType;
-import com.anonymous.usports.global.type.ParticipantStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -24,57 +23,77 @@ import lombok.Setter;
 public class NotificationCreateDto {
 
   private NotificationType type;
-  private NotificationEntityType entityType;
+  private NotificationSituation notificationSituation;
   private Long targetEntityId;
   private String message;
   private String url;
 
-  private String getNotificationString(String header, String notificationConstant) {
+  private static String getNotificationString(String title, String notificationConstant) {
     StringBuilder sb = new StringBuilder();
-    return sb.append("[").append(header).append("] ").append(notificationConstant).toString();
+    return sb.append("[").append(title).append("] ").append(notificationConstant).toString();
   }
 
   /**
-   * Join Recruit 에서 사용
+   * 알림 : [RecruitTitle] 모임에 참여 신청자가 있습니다.
+   * 상황 : 해당 Recruit에 지원 신청 발생 시 HOST에 알림 - 내 모임에 지원 신청자가 있을 때
    */
-  public NotificationCreateDto(ParticipantEntity participantEntity,RecruitEntity recruitEntity) {
-    this.type = NotificationType.NOTICE;
-    this.entityType = NotificationEntityType.PARTICIPANT;
-    this.targetEntityId = participantEntity.getParticipantId();
-    this.message = this.getNotificationString(recruitEntity.getTitle(),
-        NotificationConstant.PARTICIPATE_REQUEST);
+  public static NotificationCreateDto joinRecruit(ParticipantEntity participantEntity, RecruitEntity recruitEntity){
+    return NotificationCreateDto.builder()
+        .type(NotificationType.NOTICE)
+        .notificationSituation(NotificationSituation.JOIN_RECRUIT)
+        .targetEntityId(participantEntity.getParticipantId())
+        .message(getNotificationString(recruitEntity.getTitle(), NotificationConstant.PARTICIPATE_REQUEST))
+        .url("/recruit/" + recruitEntity.getRecruitId())
+        .build();
   }
 
   /**
-   * 패널티 부여 시
+   * 알림 : [RecruitTitle] 모임에 평가를 하지 않아서, 매너점수 -3의 패널티가 발생되었습니다. 다음부턴 꼭 한명 이상 평가를 해주세요!
+   * 상황 : 패널티 부여 시 패널티 부여받는 당사자에게 알림
    */
-  public NotificationCreateDto(RecruitEntity recruit) {
-    this.type = NotificationType.ALERT;
-    this.entityType = NotificationEntityType.RECRUIT;
-    this.targetEntityId = recruit.getRecruitId();
-    this.message = this.getNotificationString(recruit.getTitle(), NotificationConstant.IMPOSE_PENALTY);
-    this.url = "/recruit/"+ recruit.getRecruitId();
+  public static NotificationCreateDto imposePenalty(RecruitEntity recruit){
+    return NotificationCreateDto.builder()
+        .type(NotificationType.ALERT)
+        .notificationSituation(NotificationSituation.IMPOSE_PENALTY)
+        .targetEntityId(recruit.getRecruitId())
+        .message(getNotificationString(recruit.getTitle(), NotificationConstant.IMPOSE_PENALTY))
+        .url("/recruit/" + recruit.getRecruitId())
+        .build();
   }
 
   /**
-   * RECRUIT 참여 수락 / 거절 시
+   * 알림 : [Recruit]모임 참여가 거절되었습니다.
+   * 상황 : Recruit 신청 거절 시 Participant 에게 전송
    */
-  public NotificationCreateDto(RecruitEntity recruit, ParticipantStatus participantStatus) {
-    if(participantStatus.equals(ParticipantStatus.REFUSED)){
-      this.message = this.getNotificationString(recruit.getTitle(), NotificationConstant.PARTICIPATE_REFUSED);
-    }else{
-      this.message = this.getNotificationString(recruit.getTitle(), NotificationConstant.PARTICIPATE_ACCEPTED);
-    }
-    this.type = NotificationType.NOTICE;
-    this.entityType = NotificationEntityType.RECRUIT;
-    this.targetEntityId = recruit.getRecruitId();
+  public static NotificationCreateDto participateRefused(RecruitEntity recruit){
+    return NotificationCreateDto.builder()
+        .type(NotificationType.NOTICE)
+        .notificationSituation(NotificationSituation.PARTICIPATE_REFUSED)
+        .targetEntityId(recruit.getRecruitId())
+        .message(getNotificationString(recruit.getTitle(), NotificationConstant.PARTICIPATE_REFUSED))
+        .url("/recruit/" + recruit.getRecruitId())
+        .build();
+  }
+
+  /**
+   * 알림 : [RecruitTitle]모임 참여가 수락되었습니다.
+   * 상황 : Recruit 신청 수락 시 Participant 에게 전송
+   */
+  public static NotificationCreateDto participateAccepted(RecruitEntity recruit){
+    return NotificationCreateDto.builder()
+        .type(NotificationType.NOTICE)
+        .notificationSituation(NotificationSituation.PARTICIPATE_ACCEPTED)
+        .targetEntityId(recruit.getRecruitId())
+        .message(getNotificationString(recruit.getTitle(), NotificationConstant.PARTICIPATE_ACCEPTED))
+        .url("/recruit/" + recruit.getRecruitId())
+        .build();
   }
 
   public static NotificationEntity toEntity(NotificationCreateDto createDto, MemberEntity member){
     return NotificationEntity.builder()
         .member(member)
         .type(createDto.getType())
-        .entityType(createDto.getEntityType())
+        .notificationSituation(createDto.getNotificationSituation())
         .targetEntityId(createDto.getTargetEntityId())
         .message(createDto.getMessage())
         .url(createDto.getUrl())

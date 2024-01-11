@@ -58,7 +58,7 @@ public class NotificationSseController {
     MemberEntity member = memberRepository.findById(id).get();
     NotificationCreateDto req = NotificationCreateDto.builder()
         .type(NotificationType.NOTICE)
-        .notificationSituation(NotificationSituation.PARTICIPANT)
+        .notificationSituation(NotificationSituation.JOIN_RECRUIT)
         .targetEntityId(5L)
         .message(d)
         .url("/home")
