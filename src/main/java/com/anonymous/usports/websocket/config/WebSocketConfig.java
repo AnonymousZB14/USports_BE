@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void configureMessageBroker(MessageBrokerRegistry config) {
         // 메세지 구독 url
         config.enableStompBrokerRelay("/exchange") //메시지 수신(subscribe), 경로를 설정해주는 메서드
-            .setRelayHost("15.164.78.91")
+            .setRelayHost("localhost")
             .setRelayPort(61613) //RabbitMQ STOMP 기본 포트
             .setClientLogin("rootuser")
             .setClientPasscode("rootpass")
