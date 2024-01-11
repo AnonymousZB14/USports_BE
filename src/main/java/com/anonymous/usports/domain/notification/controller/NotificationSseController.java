@@ -9,12 +9,10 @@ import com.anonymous.usports.global.type.NotificationEntityType;
 import com.anonymous.usports.global.type.NotificationType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,15 +31,16 @@ public class NotificationSseController {
 
   @ApiOperation(value = "구독을 시작하기 위한 메서드")
   @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public SseEmitter subscribe(@AuthenticationPrincipal MemberDto loginMember) {
-
+  public SseEmitter subscribe(@AuthenticationPrincipal MemberDto loginMember,
+      HttpServletResponse response) {
+    response.setCharacterEncoding("UTF-8");
     return notificationService.subscribe(loginMember.getMemberId());
   }
 
   @ApiOperation(value = "구독을 시작하기 위한 메서드")
-  @GetMapping(value = "/subscribe/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-  public SseEmitter subscribeTest(@PathVariable Long id) {
-
+  @GetMapping(value = "/subscribe/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  public SseEmitter subscribeTest(@PathVariable Long id, HttpServletResponse response) {
+    response.setCharacterEncoding("UTF-8");
     return notificationService.subscribe(id);
   }
 
