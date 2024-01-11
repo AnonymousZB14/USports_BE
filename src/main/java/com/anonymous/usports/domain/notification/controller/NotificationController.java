@@ -7,12 +7,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @Api(tags = "알림(Notification)")
@@ -25,8 +23,7 @@ public class NotificationController {
   @ApiOperation("알림 리스트 보기")
   @GetMapping("/notifications")
   public ResponseEntity<List<NotificationDto>> notificationList(
-      @AuthenticationPrincipal MemberDto loginMember,
-      HttpServletRequest httpServletRequest) {
+      @AuthenticationPrincipal MemberDto loginMember) {
 
     List<NotificationDto> notifications =
         notificationService.getNotifications(loginMember.getMemberId());
@@ -37,7 +34,7 @@ public class NotificationController {
   @ApiOperation("안읽은 알림 존재 여부")
   @GetMapping("/notification/unread")
   public ResponseEntity<Map<String, Boolean>> unreadNotificationExists(
-      @AuthenticationPrincipal MemberDto loginMember){
+      @AuthenticationPrincipal MemberDto loginMember) {
 
     boolean result = notificationService.checkUnreadNotification(loginMember.getMemberId());
     return ResponseEntity.ok(Map.of("unreadNotificationExists", result));
