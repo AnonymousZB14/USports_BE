@@ -29,4 +29,7 @@ public interface ChatRoomService {
 
   // 채팅방에서 채팅 내역 가져오기
   ChatMessageListDto getMessageList(Long chatRoomId, MemberDto memberDto, int page);
+
+  // 초대 가능 리스트(모임 수락 상태이면서 채팅방에 없는 사람) 출력
+  List<MemberDto> getListToInvite(Long chatRoomId, MemberDto memberDto);
 }

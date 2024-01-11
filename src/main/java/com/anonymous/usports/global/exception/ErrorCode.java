@@ -75,6 +75,7 @@ public enum ErrorCode {
   MEMBER_ALREADY_IN_CHAT_ROOM(HttpStatus.BAD_REQUEST, "이미 유저가 채팅방에 있습니다"),
   USER_NOT_IN_THE_CHAT(HttpStatus.NOT_FOUND, "해당 유저는 채팅에 없습니다"),
   CANNOT_CREATE_CHAT_WITH_SAME_USER(HttpStatus.BAD_REQUEST, "내 자신과는 chat을 만들 수 없습니다"),
+  NO_AVAILABLE_LIST(HttpStatus.BAD_REQUEST,"DM 에서는 불러올 수 없는 list 입니다."),
 
   //Type
   TYPE_INVALID_ERROR(HttpStatus.BAD_REQUEST, "Type(enum)이 잘못되었습니다."),
