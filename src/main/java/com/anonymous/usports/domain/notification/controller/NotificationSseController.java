@@ -59,7 +59,7 @@ public class NotificationSseController {
     NotificationCreateDto req = NotificationCreateDto.builder()
         .type(NotificationType.NOTICE)
         .notificationSituation(NotificationSituation.JOIN_RECRUIT)
-        .targetEntityId(5L)
+        .targetEntityId(1L)
         .message(d)
         .url("/home")
         .build();
