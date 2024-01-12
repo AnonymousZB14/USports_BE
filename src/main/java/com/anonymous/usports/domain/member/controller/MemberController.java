@@ -4,11 +4,12 @@ import com.anonymous.usports.domain.member.dto.MailResponse;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberLogin;
 import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberSearchResponse;
 import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
 import com.anonymous.usports.domain.member.dto.PasswordUpdate;
-import com.anonymous.usports.domain.member.dto.TokenDto;
+import com.anonymous.usports.domain.member.dto.token.TokenDto;
 import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
 import com.anonymous.usports.domain.member.security.TokenProvider;
 import com.anonymous.usports.domain.member.service.CookieService;
@@ -16,6 +17,7 @@ import com.anonymous.usports.domain.member.service.MemberService;
 import com.anonymous.usports.domain.notification.service.NotificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -81,9 +83,6 @@ public class MemberController {
   ) {
 
     MemberResponse member = memberService.loginMember(request);
-
-    notificationService.checkUnreadNotificationAndSetSession(member.getMemberId(),
-        httpServletRequest);
 
     TokenDto tokenDto = tokenProvider.saveTokenInRedis(member.getEmail());
     cookieService.setCookieForLogin(httpServletResponse, tokenDto.getAccessToken());
@@ -226,4 +225,15 @@ public class MemberController {
     return ResponseEntity.ok(
         memberService.resendEmailAuth(memberDto, id));
   }
+
+  @PreAuthorize("hasAnyRole('ROLE_USER')")
+  @GetMapping("/search")
+  @ApiOperation("회원 검색")
+  public ResponseEntity<List<MemberSearchResponse>> searchMember(@RequestParam String accountName){
+
+    List<MemberSearchResponse> result = memberService.searchMember(accountName);
+
+    return ResponseEntity.ok(result);
+  }
+
 }

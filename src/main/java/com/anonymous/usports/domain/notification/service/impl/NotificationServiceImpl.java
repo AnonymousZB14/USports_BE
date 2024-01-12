@@ -29,11 +29,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter.SseEvent
 public class NotificationServiceImpl implements NotificationService {
 
   private static final Long DEFAULT_TIMEOUT = 1000 * 60 * 60L;
-  private static final String UNREAD_NOTIFICATION = "unreadNotification";
   private final EmitterRepository emitterRepository;
   private final NotificationRepository notificationRepository;
   private final MemberRepository memberRepository;
-
 
   @Override
   public List<NotificationDto> getNotifications(Long memberId) {
@@ -63,7 +61,7 @@ public class NotificationServiceImpl implements NotificationService {
     //이미터 생성
     SseEmitter emitter = this.createEmitter(memberId);
 
-    this.sendToClient(memberId, "EventStream Created. [memberId=" + memberId + "]");
+    this.sendToClient(memberId, "EventStream Created");
     return emitter;
   }
 
@@ -78,24 +76,11 @@ public class NotificationServiceImpl implements NotificationService {
   }
 
   @Override
-  public void setUnreadNotificationSession(HttpServletRequest httpServletRequest,
-      boolean isUnread) {
-    HttpSession session = httpServletRequest.getSession(); // 세션이 없으면 세션 생성
-    session.setAttribute(UNREAD_NOTIFICATION, isUnread);
-  }
-
-  @Override
-  public boolean checkUnreadNotificationAndSetSession(Long memberId,
-      HttpServletRequest httpServletRequest) {
+  public boolean checkUnreadNotification(Long memberId) {
     MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
-    boolean result = notificationRepository.existsByMemberAndReadAtIsNull(member);
-
-    HttpSession session = httpServletRequest.getSession(); // 세션이 없으면 세션 생성
-    session.setAttribute(UNREAD_NOTIFICATION, result);
-
-    return result;
+    return notificationRepository.existsByMemberAndReadAtIsNull(member);
   }
 
 

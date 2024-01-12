@@ -10,6 +10,7 @@ import com.anonymous.usports.domain.member.dto.MailResponse;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberLogin;
 import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberSearchResponse;
 import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
@@ -41,6 +42,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -1275,5 +1277,41 @@ public class MemberServiceTest {
             //then
             assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_ID_UNMATCH);
         }
+    }
+
+    @Test
+    @DisplayName("회원 검색")
+    void searchMember(){
+        //given
+        MemberEntity member1 = member(1L, "test", "테스트1", "joons@gmail.com", "password1",
+            "010-1234-1234", LocalDate.now(), Gender.MALE, null, null, null,
+            true, Role.UNAUTH);
+        MemberEntity member2 = member(2L, "testTwooo", "테스트2", "joons@gmail.com", "password1",
+            "010-1234-1234", LocalDate.now(), Gender.MALE, null, null, null,
+            true, Role.UNAUTH);
+        MemberEntity member3 = member(3L, "test3", "검색테스트3", "joons@gmail.com", "password1",
+            "010-1234-1234", LocalDate.now(), Gender.MALE, null, null, null,
+            true, Role.UNAUTH);
+
+        List<MemberEntity> memberList = new ArrayList<>();
+        memberList.add(member1);
+        memberList.add(member2);
+        memberList.add(member3);
+
+        Collections.sort(memberList, (m1, m2) -> m1.getAccountName().length() - m2.getAccountName().length());
+
+        String search = "test";
+
+        when(memberRepository.findAllByAccountNameContaining(search))
+            .thenReturn(memberList);
+
+        //when
+        List<MemberSearchResponse> responseList = memberService.searchMember(search);
+
+        //then
+        for (MemberSearchResponse memberSearchResponse : responseList) {
+            assertThat(memberSearchResponse.getAccountName()).contains(search);
+        }
+
     }
 }

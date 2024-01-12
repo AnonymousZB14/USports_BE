@@ -9,6 +9,8 @@ import com.anonymous.usports.domain.evaluation.repository.EvaluationRepository;
 import com.anonymous.usports.domain.evaluation.service.EvaluationService;
 import com.anonymous.usports.domain.member.entity.MemberEntity;
 import com.anonymous.usports.domain.member.repository.MemberRepository;
+import com.anonymous.usports.domain.notification.dto.NotificationCreateDto;
+import com.anonymous.usports.domain.notification.service.NotificationService;
 import com.anonymous.usports.domain.participant.entity.ParticipantEntity;
 import com.anonymous.usports.domain.participant.repository.ParticipantRepository;
 import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
@@ -37,6 +39,7 @@ public class EvaluationServiceImpl implements EvaluationService {
   private final EvaluationRepository evaluationRepository;
   private final SportsSkillRepository sportsSkillRepository;
   private final ParticipantRepository participantRepository;
+  private final NotificationService notificationService;
 
   @Override
   public Response registerEvaluation(Request request, Long loginMemberId) {
@@ -80,6 +83,9 @@ public class EvaluationServiceImpl implements EvaluationService {
     //Participant에서 타인 평가 여부 변경
     participantOfFromMember.setEvaluationAt(LocalDateTime.now());
     participantRepository.save(participantOfFromMember);
+
+    //피 평가자에게 알림 발송
+    notificationService.notify(toMember, NotificationCreateDto.evaluated(recruit));
 
     return EvaluationRegister.Response.fromEntity(saved);
   }
