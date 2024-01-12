@@ -95,4 +95,12 @@ public class ChatRoomController {
     ){
         return ResponseEntity.ok(chatRoomService.getMessageList(chatRoomId,memberDto,page));
     }
+
+    @GetMapping("/{chatRoomId}/invite-list")
+    public ResponseEntity<List<MemberDto>> getListToInvite(
+        @PathVariable Long chatRoomId,
+        @AuthenticationPrincipal MemberDto memberDto
+    ) {
+        return ResponseEntity.ok(chatRoomService.getListToInvite(chatRoomId, memberDto));
+    }
 }

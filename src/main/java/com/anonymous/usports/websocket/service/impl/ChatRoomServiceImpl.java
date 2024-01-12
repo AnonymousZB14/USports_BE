@@ -66,6 +66,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
       throw new MemberException(ErrorCode.MEMBER_NOT_FOUND);
     }
 
+    Long recruitId = chatPartakeRepository.findAllByChatRoomEntity(chatRoom).stream()
+        .filter(chatPartake -> Objects.equals(chatPartake.getMemberEntity().getMemberId(), memberDto.getMemberId()))
+        .findFirst()
+        .map(ChatPartakeEntity::getRecruitId) // ChatPartake 엔티티에서 recruitId를 추출
+        .orElse(null);
+
+
     List<MemberDto> memberList = chatPartakeRepository.findAllByChatRoomEntity(chatRoom)
         .stream().map(chatPartake -> MemberDto.fromEntity(chatPartake.getMemberEntity()))
         .collect(Collectors.toList());
@@ -86,6 +93,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     return ChatEnterDto.Response.builder()
         .chatRoomId(chatRoom.getChatRoomId())
         .chatRoomName(chatRoom.getChatRoomName())
+        .recruitId(recruitId)
         .members(memberList)
         .build();
   }
@@ -370,5 +378,35 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         .map(ChatPartakeEntity::getMemberEntity)
         .collect(Collectors.toList());
     return new ChatMessageListDto(chatsPage, participantList);
+  }
+
+  @Override
+  public List<MemberDto> getListToInvite(Long chatRoomId, MemberDto memberDto) {
+    ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomId)
+        .orElseThrow(() -> new ChatException(ErrorCode.CHAT_ROOM_NOT_FOUND));
+
+    MemberEntity loginMember = memberRepository.findById(memberDto.getMemberId())
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    Long recruitId = chatPartakeRepository.findAllByChatRoomEntity(chatRoom).stream()
+        .filter(chatPartake -> Objects.equals(chatPartake.getMemberEntity().getMemberId(), memberDto.getMemberId()))
+        .findFirst()
+        .map(ChatPartakeEntity::getRecruitId)
+        .orElseThrow(()->new ChatException(ErrorCode.NO_AVAILABLE_LIST));
+
+    RecruitEntity recruit = recruitRepository.findById(recruitId)
+        .orElseThrow(() -> new RecruitException(ErrorCode.RECRUIT_NOT_FOUND));
+
+    isRecruitHost(recruit, memberDto);
+
+    List<MemberEntity> acceptedMembers = participantRepository.findAllByRecruitAndStatus(recruit,ParticipantStatus.ACCEPTED)
+        .stream()
+        .map(ParticipantEntity::getMember)
+        .collect(Collectors.toList());
+
+    return acceptedMembers.stream()
+        .filter(member -> !chatPartakeRepository.existsByRecruitIdAndChatRoomEntityAndMemberEntity(recruitId,chatRoom,member))
+        .map(MemberDto::fromEntity)
+        .collect(Collectors.toList());
   }
 }
