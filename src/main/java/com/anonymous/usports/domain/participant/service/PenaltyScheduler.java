@@ -55,7 +55,8 @@ public class PenaltyScheduler {
       MemberEntity member = participantEntity.getMember();
       member.addPenaltyCount();
       memberRepository.save(member);
-      notificationService.notify(member, new NotificationCreateDto(participantEntity.getRecruit()));
+      //패널티 부여 알림
+      notificationService.notify(member, NotificationCreateDto.imposePenalty(participantEntity.getRecruit()));
     }
 
     return findAll.getNumberOfElements();

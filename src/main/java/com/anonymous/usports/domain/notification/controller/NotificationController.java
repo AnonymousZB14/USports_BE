@@ -6,7 +6,6 @@ import com.anonymous.usports.domain.notification.service.NotificationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,11 +32,11 @@ public class NotificationController {
 
   @ApiOperation("안읽은 알림 존재 여부")
   @GetMapping("/notification/unread")
-  public ResponseEntity<Map<String, Boolean>> unreadNotificationExists(
+  public ResponseEntity<Boolean> unreadNotificationExists(
       @AuthenticationPrincipal MemberDto loginMember) {
 
     boolean result = notificationService.checkUnreadNotification(loginMember.getMemberId());
-    return ResponseEntity.ok(Map.of("unreadNotificationExists", result));
+    return ResponseEntity.ok(result);
   }
 
 }
