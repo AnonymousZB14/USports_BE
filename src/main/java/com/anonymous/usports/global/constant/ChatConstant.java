@@ -23,5 +23,7 @@ public class ChatConstant {
 
     public static final String MARK_READ_CHAT = "읽은 채팅을 체크했습니다.";
 
+    public static final String NO_CHAT_AVAILABLE = "체크할 채팅이 없습니다.";
+
     public static final int CHAT_MESSAGE_SIZE = 100;
 }

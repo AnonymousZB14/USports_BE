@@ -18,6 +18,7 @@ public class ChatEnterDto {
   public static class Response {
     private Long chatRoomId;
     private String chatRoomName;
+    private Long recruitId;
     private List<MemberDto> members;
   }
 
