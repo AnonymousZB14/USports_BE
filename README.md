@@ -77,7 +77,8 @@
 <br>
 
 <h2 align=center>🧮 ERD</h2>
-<img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/82e96fd4-db8d-4aa5-847c-0e1452592e65" />
+<img src="https://github.com/AnonymousZB14/USports_BE/assets/115455126/cf5d62ad-cf62-4477-9869-032ad2f47fe8" />
+
 
 <br>
 <br>
