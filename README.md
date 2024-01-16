@@ -86,7 +86,7 @@
 <h2 align=center>📄 Features</h2>
 
 <h3>회원 API</h3>
-`by JeJoon`
+<p><b>by JeJoon</b></p>
 
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/66efc2c6-1ca4-4a91-9b9b-9df329a65dd4" />
 <p><b>OAuth2.0</b>를 활용하여 간편 로그인을 구현했습니다.</p>
@@ -97,7 +97,7 @@
 <br>
 
 <h3>기록 API</h3>
-`by MunJin`
+<p><b>by MunJin</b></p>
 
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/a68222f4-4d56-457d-a61f-f10c61bcadf0"/>
 <p>인스타그램 피드처럼 운동을 한 기록을 남기는 페이지다.</p>
@@ -109,7 +109,8 @@
 <br>
 
 <h3>운동 모집 API</h3>
-`by HyunSik`
+<p><b>by HyunSik</b></p>
+
 
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/4f1832a9-4a9d-4e05-bc8c-6394d1dbecc9"/>
 <p>모집글 리스트 같은 경우 <b>검색어(제목), 지역, 운동 종목, 성별, 마감 여부</b>로 필터링 할 수 있다.</p>
@@ -123,7 +124,8 @@
 <br>
 
 <h3>알림 API</h3>
-`by HyunSik`
+<p><b>by HyunSik</b></p>
+
 <p>SSE를 활용하여 알림 기능을 구현했다.</p>
 <p>멤버에게 알림이 필요한 경우 실시간으로 알림이 전송되고, Notification 탭에서 알림 내역을 확인할 수 있다.</p>
 <p>안읽은 알림 여부는 로그인 시, 알림 발생 시, 알림 리스트 조회 시에 변경된다.</p>
@@ -131,7 +133,7 @@
 <br>
 
 <h3>마이 페이지 API</h3>
-`by HyunSik`
+<p><b>by HyunSik</b></p>
 
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/c5d3d861-c402-48a6-951f-19ccc49fc3ae"/>
 <p>유저의 정보를 볼 수 있는 페이지다</p>
@@ -149,7 +151,7 @@
 <br>
 
 <h3>평가 API</h3>
-`by HyunSik`
+<p><b>by HyunSik</b></p>
 
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/01acc250-4de4-4b86-8281-3dd848366ced" width=500px/>
 <p><b>매너 점수</b>와 <b>운동 실력</b>을 평가하는 것이다.</p>
@@ -160,7 +162,7 @@
 <br>
 
 <h3>프로필 API</h3>
-`by HyunSik`
+<p><b>by HyunSik</b></p>
 
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/c2b837f5-e913-4c97-9b8d-096509c46924"/>
 <p>특정 유저의 <b>기록글과, 등록한 모집글</b>을 확인할 수 있다.</p>
@@ -171,7 +173,7 @@
 <br>
 
 <h3>채팅 API </h3>
-`by JeJoon & MunJin`
+<p><b>by JeJoon & MunJin</b></p>
 
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/16f8b617-1c68-481c-a406-f8bf10e6e02c"/>
 <p><b>WebSocket</b>을 활용하여 실시간 채팅을 구현했습니다.</p>
@@ -184,14 +186,16 @@
 <br>
 
 <h3>팔로우 API</h3>
-`by MunJin`
+<p><b>by MunJin</b></p>
+
 <p>타 유저를 팔로우하는 기능이다.</p>
 <p>비공개 계정일 경우, 수락을 해야지, 팔로우가 성사가 된다.</p>
 <p>그 외에, 팔로우를 하면, 기록글에서, 내가 팔로우한 사람의 피드를 볼 수 있게 된다.</p>
 <br>
 
 <h3>신고/문의 API</h3>
-`by JeJoon`
+<p><b>by JeJoon</b></p>
+
 <p>코드 상으로 해결하는 것이 어려운 것들을 해결하여, 어플리케이션에 대한 유저들의 신뢰도를 높이려는 기능이다.</p>
 <p>유저들이 어드민에게 문의 또는 신고를 할 것들이 있을 때를 위해 만든 API다.</p>
 <p>이 API를 통해 유저들은, 부적절한 내용을 발견하거나, 운동 모임에서 나쁜 일을 겪으면, 신고 또는 문의를 할 수 있다.</p>
