@@ -1,16 +1,17 @@
 package com.anonymous.usports.websocket.service;
 
 import com.anonymous.usports.domain.member.dto.MemberDto;
-import com.anonymous.usports.websocket.dto.ChatMessageDto;
+import com.anonymous.usports.websocket.dto.ChatMessageListDto;
 import com.anonymous.usports.websocket.dto.ChatPartakeDto;
-import com.anonymous.usports.websocket.dto.httpbody.ChatInviteDto;
-import com.anonymous.usports.websocket.dto.httpbody.CreateDMDto;
-import com.anonymous.usports.websocket.dto.httpbody.CreateRecruitChat;
+import com.anonymous.usports.websocket.dto.ChatResponses.ChatEnterDto;
+import com.anonymous.usports.websocket.dto.ChatResponses.ChatInviteDto;
+import com.anonymous.usports.websocket.dto.ChatResponses.CreateDMDto;
+import com.anonymous.usports.websocket.dto.ChatResponses.CreateRecruitChat;
 import java.util.List;
 
 public interface ChatRoomService {
 
-    ChatMessageDto enterChatRoom(Long chatRoomId, MemberDto memberDto);
+  ChatEnterDto.Response enterChatRoom(Long chatRoomId, MemberDto memberDto);
 
     List<ChatPartakeDto> getChatRoomList(MemberDto memberDto);
 
@@ -27,5 +28,8 @@ public interface ChatRoomService {
     String exitChat(Long chatRoomId, MemberDto memberDto);
 
   // 채팅방에서 채팅 내역 가져오기
-  List<ChatMessageDto> getMessageList(Long chatRoomId, MemberDto memberDto);
+  ChatMessageListDto getMessageList(Long chatRoomId, MemberDto memberDto, int page);
+
+  // 초대 가능 리스트(모임 수락 상태이면서 채팅방에 없는 사람) 출력
+  List<MemberDto> getListToInvite(Long chatRoomId, MemberDto memberDto);
 }

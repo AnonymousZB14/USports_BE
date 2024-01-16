@@ -9,7 +9,9 @@ public interface FollowService {
 
   FollowResponse changeFollow(Long loginMemberId, Long toMemberId);
 
-  FollowListDto getFollowPage(FollowListType type, int page, Long loginMemberId);
+  FollowListDto getFollowPage(FollowListType type, int page, Long memberId);
+
+  FollowListDto getRequestedFollowList(int page, Long loginMemberId);
 
   FollowResponse manageFollow(Long fromMemberId, Long loginMemberId, FollowDecisionType decision);
 }

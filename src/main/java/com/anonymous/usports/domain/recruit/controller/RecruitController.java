@@ -77,7 +77,7 @@ public class RecruitController {
       @RequestParam(required = false) String region,
       @RequestParam(required = false) String sports,
       @RequestParam(required = false) Gender gender,
-      @RequestParam(required = false) boolean closeInclude
+      @RequestParam(required = false, defaultValue = "false") boolean closeInclude
       ){
 
     RecruitListDto result =

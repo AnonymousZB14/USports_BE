@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +91,7 @@ public class RecordServiceImpl implements RecordService {
     SportsEntity sports = sportsRepository.findById(request.getSportsId())
         .orElseThrow(() -> new SportsException(ErrorCode.SPORTS_NOT_FOUND));
 
+
     List<String> recordImageList = saveImages(images);
 
     RecordEntity recordEntity = recordRepository.save(
@@ -106,7 +106,7 @@ public class RecordServiceImpl implements RecordService {
    * @param images 저장할 Images
    * @return 저장한 List<String> 이미지 주소 반환
    */
-  private List<String> saveImages(List<MultipartFile> images) {
+  private List<String>  saveImages(List<MultipartFile> images) {
     // 이미지 수 체크
     validateImageCount(images);
 

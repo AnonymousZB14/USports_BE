@@ -79,23 +79,34 @@ public class FollowServiceImpl implements FollowService {
    * 들어온 FOLLOW 신청 리스트 FOLLOWER: 나를 FOLLOW 하는 리스트
    */
   @Override
-  public FollowListDto getFollowPage(FollowListType type, int page, Long loginMemberId) {
-    MemberEntity loginMember = memberRepository.findById(loginMemberId)
+  public FollowListDto getFollowPage(FollowListType type, int page, Long memberId) {
+    MemberEntity member = memberRepository.findById(memberId)
         .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
 
     PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
 
     Page<FollowEntity> findPage;
     if (type == FollowListType.FOLLOWING) {
-      findPage = followRepository.findAllByFromMemberAndFollowStatusOrderByFollowDateDesc(loginMember,
+      findPage = followRepository.findAllByFromMemberAndFollowStatusOrderByFollowDateDesc(member,
           FollowStatus.ACTIVE, pageRequest);
-    } else if (type == FollowListType.REQUESTED_FOLLOW) {
-      findPage = followRepository.findAllByToMemberAndFollowStatus(loginMember, FollowStatus.WAITING,
-          pageRequest);
     } else {
-      findPage = followRepository.findAllByToMemberAndFollowStatusOrderByFollowDateDesc(loginMember,
+      findPage = followRepository.findAllByToMemberAndFollowStatusOrderByFollowDateDesc(member,
           FollowStatus.ACTIVE, pageRequest);
     }
+    return FollowListDto.fromEntityPage(findPage);
+  }
+
+  @Override
+  public FollowListDto getRequestedFollowList(int page, Long loginMemberId) {
+    MemberEntity loginMember = memberRepository.findById(loginMemberId)
+        .orElseThrow(() -> new MemberException(ErrorCode.MEMBER_NOT_FOUND));
+
+    PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
+
+    Page<FollowEntity> findPage =
+        followRepository.findAllByToMemberAndFollowStatus(loginMember, FollowStatus.WAITING,
+        pageRequest);
+
     return FollowListDto.fromEntityPage(findPage);
   }
 

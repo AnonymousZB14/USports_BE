@@ -240,7 +240,7 @@ class ParticipantServiceTest {
       when(participantRepository.save(participantEntity))
           .thenReturn(saved);
       when(notificationService.notify(recruit.getMember(),
-          new NotificationCreateDto(saved, recruit)))
+          NotificationCreateDto.joinRecruit(saved, recruit)))
           .thenReturn(any());
 
       //when
@@ -281,7 +281,7 @@ class ParticipantServiceTest {
       when(participantRepository.save(participantEntity))
           .thenReturn(saved);
       when(notificationService.notify(recruit.getMember(),
-          new NotificationCreateDto(saved, recruit)))
+          NotificationCreateDto.joinRecruit(saved, recruit)))
           .thenReturn(any());
 
       //when

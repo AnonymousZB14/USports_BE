@@ -16,7 +16,7 @@ import com.anonymous.usports.domain.notification.service.impl.NotificationServic
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.type.Gender;
-import com.anonymous.usports.global.type.NotificationEntityType;
+import com.anonymous.usports.global.type.NotificationSituation;
 import com.anonymous.usports.global.type.NotificationType;
 import com.anonymous.usports.global.type.Role;
 import java.time.LocalDate;
@@ -68,7 +68,7 @@ class NotificationServiceTest {
     return NotificationEntity.builder()
         .member(member)
         .type(NotificationType.ALERT)
-        .entityType(NotificationEntityType.PARTICIPANT)
+        .notificationSituation(NotificationSituation.JOIN_RECRUIT)
         .targetEntityId(id + 10000)
         .message("test message" + id)
         .url("/test/" + id)
@@ -150,7 +150,7 @@ class NotificationServiceTest {
     NotificationEntity notification = createNotification(10L, memberEntity);
     NotificationCreateDto createDto = NotificationCreateDto.builder()
         .type(notification.getType())
-        .entityType(notification.getEntityType())
+        .notificationSituation(notification.getNotificationSituation())
         .targetEntityId(notification.getTargetEntityId())
         .message(notification.getMessage())
         .url(notification.getUrl())
@@ -163,7 +163,7 @@ class NotificationServiceTest {
 
     //then
     assertThat(result.getType()).isEqualTo(createDto.getType());
-    assertThat(result.getEntityType()).isEqualTo(createDto.getEntityType());
+    assertThat(result.getNotificationSituation()).isEqualTo(createDto.getNotificationSituation());
     assertThat(result.getTargetEntityId()).isEqualTo(createDto.getTargetEntityId());
     assertThat(result.getMessage()).isEqualTo(createDto.getMessage());
     assertThat(result.getUrl()).isEqualTo(createDto.getUrl());
@@ -178,20 +178,16 @@ class NotificationServiceTest {
     void checkUnreadNotificationAndSetSession_is_true() {
       MemberEntity member = createMember(1L);
 
-      HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-      HttpSession session = mock(HttpSession.class);
 
       //given
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
       when(notificationRepository.existsByMemberAndReadAtIsNull(member))
           .thenReturn(true);
-      when(httpServletRequest.getSession())
-          .thenReturn(session);
 
       //when
       boolean result = notificationService
-          .checkUnreadNotificationAndSetSession(1L, httpServletRequest);
+          .checkUnreadNotification(1L);
 
       //then
       assertThat(result).isTrue();
@@ -202,20 +198,15 @@ class NotificationServiceTest {
     void checkUnreadNotificationAndSetSession_is_false() {
       MemberEntity member = createMember(1L);
 
-      HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-      HttpSession session = mock(HttpSession.class);
-
       //given
       when(memberRepository.findById(1L))
           .thenReturn(Optional.of(member));
       when(notificationRepository.existsByMemberAndReadAtIsNull(member))
           .thenReturn(false);
-      when(httpServletRequest.getSession())
-          .thenReturn(session);
 
       //when
       boolean result = notificationService
-          .checkUnreadNotificationAndSetSession(1L, httpServletRequest);
+          .checkUnreadNotification(1L);
 
       //then
       assertThat(result).isFalse();
@@ -226,9 +217,6 @@ class NotificationServiceTest {
     void checkUnreadNotificationAndSetSession_MEMBER_NOT_FOUND() {
       MemberEntity member = createMember(1L);
 
-      HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
-      HttpSession session = mock(HttpSession.class);
-
       //given
       when(memberRepository.findById(1L))
           .thenReturn(Optional.empty());
@@ -238,7 +226,7 @@ class NotificationServiceTest {
       MemberException exception =
           catchThrowableOfType(() ->
                   notificationService
-                      .checkUnreadNotificationAndSetSession(1L, httpServletRequest),
+                      .checkUnreadNotification(1L),
               MemberException.class);
 
       assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.MEMBER_NOT_FOUND);

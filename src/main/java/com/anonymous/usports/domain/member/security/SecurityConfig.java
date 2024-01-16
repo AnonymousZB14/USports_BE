@@ -1,8 +1,6 @@
 package com.anonymous.usports.domain.member.security;
 
 import com.anonymous.usports.domain.member.security.handler.CustomAccessDeniedHandler;
-import com.anonymous.usports.domain.member.security.handler.OAuth2SuccessHandler;
-import com.anonymous.usports.domain.member.service.impl.CustomOAuth2MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,8 +19,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter authenticationFilter;
-  private final CustomOAuth2MemberService customOAuth2MemberService;
-  private final OAuth2SuccessHandler oAuth2SuccessHandler;
   private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
   private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
@@ -37,11 +33,6 @@ public class SecurityConfig {
     http
         .authorizeRequests()
         .antMatchers("/**").permitAll();
-
-    http
-        .oauth2Login()
-        .userInfoEndpoint().userService(customOAuth2MemberService)
-        .and().successHandler(oAuth2SuccessHandler);
 
     http
         .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class)

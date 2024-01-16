@@ -10,6 +10,7 @@ import com.anonymous.usports.domain.member.dto.MailResponse;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberLogin;
 import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberSearchResponse;
 import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
@@ -456,6 +457,15 @@ public class MemberServiceImpl implements MemberService, UserDetailsService {
     mailService.sendEmailAuthMail(memberDto.getEmail());
 
     return new MailResponse(MailConstant.AUTH_EMAIL_SEND);
+  }
+
+  @Override
+  public List<MemberSearchResponse> searchMember(String accountName) {
+        return memberRepository.findAllByAccountNameContaining(accountName)
+            .stream()
+            .map(MemberSearchResponse::fromEntity)
+            .sorted((m1, m2)-> m1.getAccountName().length() - m2.getAccountName().length())
+            .collect(Collectors.toList());
   }
 
   @Override

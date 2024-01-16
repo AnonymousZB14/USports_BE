@@ -5,11 +5,13 @@ import com.anonymous.usports.domain.member.dto.MailResponse;
 import com.anonymous.usports.domain.member.dto.MemberDto;
 import com.anonymous.usports.domain.member.dto.MemberLogin;
 import com.anonymous.usports.domain.member.dto.MemberRegister;
+import com.anonymous.usports.domain.member.dto.MemberSearchResponse;
 import com.anonymous.usports.domain.member.dto.MemberUpdate;
 import com.anonymous.usports.domain.member.dto.MemberWithdraw;
 import com.anonymous.usports.domain.member.dto.PasswordLostResponse;
 import com.anonymous.usports.domain.member.dto.PasswordUpdate;
 import com.anonymous.usports.domain.member.dto.frontResponse.MemberResponse;
+import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberService {
@@ -79,5 +81,9 @@ public interface MemberService {
    */
   MailResponse resendEmailAuth(MemberDto memberDto, Long memberId);
 
+  /**
+   * 회원 검색
+   */
+  List<MemberSearchResponse> searchMember(String accountName);
 
 }

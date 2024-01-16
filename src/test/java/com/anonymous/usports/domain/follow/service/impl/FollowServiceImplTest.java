@@ -92,7 +92,8 @@ class FollowServiceImplTest {
           .thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L))
           .thenReturn(Optional.of(toMember));
-      when(followRepository.findByFromMemberAndToMember(fromMember, toMember)).thenReturn(Optional.empty());
+      when(followRepository.findByFromMemberAndToMember(fromMember, toMember))
+          .thenReturn(Optional.empty());
 
       FollowResponse response = followService.changeFollow(fromMember.getMemberId(),
           toMember.getMemberId());
@@ -114,7 +115,8 @@ class FollowServiceImplTest {
           .thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L))
           .thenReturn(Optional.of(toMember));
-      when(followRepository.findByFromMemberAndToMember(fromMember, toMember)).thenReturn(Optional.of(follow));
+      when(followRepository.findByFromMemberAndToMember(fromMember, toMember))
+          .thenReturn(Optional.of(follow));
 
       FollowResponse response = followService.changeFollow(fromMember.getMemberId(),
           toMember.getMemberId());
@@ -138,7 +140,8 @@ class FollowServiceImplTest {
           .thenReturn(Optional.of(fromMember));
       when(memberRepository.findById(2L))
           .thenReturn(Optional.of(toMember));
-      when(followRepository.findByFromMemberAndToMember(fromMember, toMember)).thenReturn(Optional.of(follow));
+      when(followRepository.findByFromMemberAndToMember(fromMember, toMember))
+          .thenReturn(Optional.of(follow));
 
       FollowResponse response = followService.changeFollow(fromMember.getMemberId(),
           toMember.getMemberId());
@@ -189,7 +192,7 @@ class FollowServiceImplTest {
     @Test
     @DisplayName("성공 - FOLLOWING 리스트 가져오기")
     void success_GetFollowingPage() {
-      MemberEntity loginMember = createMember(1L);
+      MemberEntity member = createMember(1L);
       List<MemberEntity> members = new ArrayList<>();
 
       Long numberOfMembers = 15L;
@@ -201,7 +204,7 @@ class FollowServiceImplTest {
       List<FollowEntity> followEntities = new ArrayList<>();
 
       for (Long i = 2L; i <= numberOfMembers + 1; i++) {
-        followEntities.add(createFollow(i * 100, loginMember, createMember(i)));
+        followEntities.add(createFollow(i * 100, member, createMember(i)));
       }
 
       int page = 2;
@@ -209,13 +212,13 @@ class FollowServiceImplTest {
       int start = (int) pageRequest.getOffset();
       int end = Math.min((start + pageRequest.getPageSize()), followEntities.size());
       List<FollowEntity> paginatedFollowEntities = followEntities.subList(start, end);
-      when(memberRepository.findById(1L)).thenReturn(Optional.of(loginMember));
-      when(followRepository.findAllByFromMemberAndFollowStatusOrderByFollowDateDesc(loginMember,
+      when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+      when(followRepository.findAllByFromMemberAndFollowStatusOrderByFollowDateDesc(member,
           FollowStatus.ACTIVE, pageRequest))
           .thenReturn(new PageImpl<>(paginatedFollowEntities, pageRequest, followEntities.size()));
 
-      FollowListDto result = followService.getFollowPage(FollowListType.FOLLOWING, page,
-          loginMember.getMemberId());
+      FollowListDto result =
+          followService.getFollowPage(FollowListType.FOLLOWING, page, member.getMemberId());
 
       assertNotNull(result);
       assertEquals(followEntities.size(), result.getTotalElements());
@@ -231,7 +234,7 @@ class FollowServiceImplTest {
     @Test
     @DisplayName("성공 - FOLLOWER 리스트 가져오기")
     void success_GetFollowerPage() {
-      MemberEntity loginMember = createMember(1L);
+      MemberEntity member = createMember(1L);
       List<MemberEntity> members = new ArrayList<>();
 
       Long numberOfMembers = 15L;
@@ -243,7 +246,7 @@ class FollowServiceImplTest {
       List<FollowEntity> followEntities = new ArrayList<>();
 
       for (Long i = 2L; i <= numberOfMembers + 1; i++) {
-        followEntities.add(createFollow(i * 100, createMember(i), loginMember));
+        followEntities.add(createFollow(i * 100, createMember(i), member));
       }
 
       int page = 1;
@@ -251,13 +254,14 @@ class FollowServiceImplTest {
       int start = (int) pageRequest.getOffset();
       int end = Math.min((start + pageRequest.getPageSize()), followEntities.size());
       List<FollowEntity> paginatedFollowEntities = followEntities.subList(start, end);
-      when(memberRepository.findById(1L)).thenReturn(Optional.of(loginMember));
-      when(followRepository.findAllByToMemberAndFollowStatusOrderByFollowDateDesc(loginMember,
-          FollowStatus.ACTIVE, pageRequest))
+
+      when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+      when(followRepository.findAllByToMemberAndFollowStatusOrderByFollowDateDesc
+          (member, FollowStatus.ACTIVE, pageRequest))
           .thenReturn(new PageImpl<>(paginatedFollowEntities, pageRequest, followEntities.size()));
 
-      FollowListDto result = followService.getFollowPage(FollowListType.FOLLOWER, page,
-          loginMember.getMemberId());
+      FollowListDto result =
+          followService.getFollowPage(FollowListType.FOLLOWER, page, member.getMemberId());
 
       assertNotNull(result);
       assertEquals(followEntities.size(), result.getTotalElements());
@@ -271,8 +275,49 @@ class FollowServiceImplTest {
     }
 
     @Test
-    @DisplayName("성공 - REQUESTED_FOLLOW 리스트 가져오기")
-    void success_GetRequestedFolloWPage() {
+    @DisplayName("실패 - MEMBER_NOT_FOUND")
+    void fail_MemberNotFound() {
+      MemberEntity member = createMember(1L);
+      List<MemberEntity> members = new ArrayList<>();
+
+      Long numberOfMembers = 15L;
+
+      for (Long i = 2L; i <= numberOfMembers + 1; i++) {
+        members.add(createMember(i));
+      }
+
+      List<FollowEntity> followEntities = new ArrayList<>();
+
+      for (Long i = 2L; i <= numberOfMembers + 1; i++) {
+        followEntities.add(createFollow(i * 100, member, createMember(i)));
+      }
+
+      int page = 2;
+      PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
+      int start = (int) pageRequest.getOffset();
+      int end = Math.min((start + pageRequest.getPageSize()), followEntities.size());
+      List<FollowEntity> paginatedFollowEntities = followEntities.subList(start, end);
+
+      when(memberRepository.findById(1L))
+          .thenReturn(Optional.empty());
+
+      MemberException exception =
+          catchThrowableOfType(() ->
+                  followService.getFollowPage(FollowListType.FOLLOWING, page,
+                      member.getMemberId()),
+              MemberException.class);
+      assertEquals(exception.getErrorCode(), ErrorCode.MEMBER_NOT_FOUND);
+
+    }
+  }
+
+  @Nested
+  @DisplayName("Follow 신청 받은 리스트")
+  class RequestesFollowList {
+
+    @Test
+    @DisplayName("성공 - Follow 신청 받은 리스트")
+    void success_RequestedFollowList() {
       MemberEntity loginMember = createMember(1L);
       loginMember.setProfileOpen(false);
       List<MemberEntity> members = new ArrayList<>();
@@ -303,8 +348,7 @@ class FollowServiceImplTest {
           pageRequest))
           .thenReturn(new PageImpl<>(paginatedFollowEntities, pageRequest, followEntities.size()));
 
-      FollowListDto result = followService.getFollowPage(
-          FollowListType.REQUESTED_FOLLOW, page, loginMember.getMemberId());
+      FollowListDto result = followService.getRequestedFollowList(page, loginMember.getMemberId());
 
       assertNotNull(result);
       assertEquals(followEntities.size(), result.getTotalElements());
@@ -321,13 +365,37 @@ class FollowServiceImplTest {
     @DisplayName("실패 - MEMBER_NOT_FOUND")
     void fail_MemberNotFound() {
       MemberEntity loginMember = createMember(1L);
+      loginMember.setProfileOpen(false);
+      List<MemberEntity> members = new ArrayList<>();
+
+      Long numberOfMembers = 15L;
+
+      for (Long i = 2L; i <= numberOfMembers + 1; i++) {
+        members.add(createMember(i));
+      }
+
+      List<FollowEntity> followEntities = new ArrayList<>();
+
+      for (Long i = 2L; i <= numberOfMembers + 1; i++) {
+        FollowEntity follow = createFollow(i * 100, createMember(i), loginMember);
+        follow.setFollowStatus(FollowStatus.WAITING);
+        followEntities.add(follow);
+      }
+
+      int page = 1;
+      PageRequest pageRequest = PageRequest.of(page - 1, NumberConstant.PAGE_SIZE_DEFAULT);
+      int start = (int) pageRequest.getOffset();
+      int end = Math.min((start + pageRequest.getPageSize()), followEntities.size());
+
+      List<FollowEntity> paginatedFollowEntities = followEntities.subList(start, end);
+
 
       when(memberRepository.findById(1L))
           .thenReturn(Optional.empty());
 
       MemberException exception =
           catchThrowableOfType(() ->
-                  followService.changeFollow(loginMember.getMemberId(), loginMember.getMemberId()),
+                  followService.getRequestedFollowList(page, loginMember.getMemberId()),
               MemberException.class);
       assertEquals(exception.getErrorCode(), ErrorCode.MEMBER_NOT_FOUND);
 

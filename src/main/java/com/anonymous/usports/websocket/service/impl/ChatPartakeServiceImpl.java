@@ -41,11 +41,20 @@ public class ChatPartakeServiceImpl implements ChatPartakeService {
     ChatPartakeEntity chatPartake = chatPartakeRepository.findByChatRoomEntityAndMemberEntity(chatRoom, member)
         .orElseThrow(() -> new ChatException(ErrorCode.USER_NOT_IN_THE_CHAT));
 
+    // 해당 채팅방 가장 최근 ChattingEntity 가져오기
     ChattingEntity chattingEntity = chattingRepository.findTopByChatRoomIdOrderByCreatedAtDesc(chatRoomId);
 
-    chatPartake.setLastReadChatId(chattingEntity.getId().toString());
-
-    chatPartakeRepository.save(chatPartake);
+    if (chattingEntity != null) {
+      chatPartake.setLastReadChatId(chattingEntity.getId().toString());
+      chatPartakeRepository.save(chatPartake);
+    } else {
+//      chatPartake.setLastReadChatId(null);
+//      chatPartakeRepository.save(chatPartake);
+      //초기값이 null이고 채팅 삭제 기능이 없기 때문에 채팅이 없었다면 어차피 null이라 해당 부분 필요 없음
+      return MarkAsReadRequestDto.Response.builder()
+          .message(ChatConstant.NO_CHAT_AVAILABLE)
+          .build();
+    }
 
     return MarkAsReadRequestDto.Response.builder()
         .message(ChatConstant.MARK_READ_CHAT)

@@ -17,15 +17,12 @@ import com.anonymous.usports.domain.recruit.entity.RecruitEntity;
 import com.anonymous.usports.domain.recruit.repository.RecruitRepository;
 import com.anonymous.usports.domain.sportsskill.entity.SportsSkillEntity;
 import com.anonymous.usports.domain.sportsskill.repository.SportsSkillRepository;
-import com.anonymous.usports.global.constant.NotificationConstant;
 import com.anonymous.usports.global.constant.ResponseConstant;
 import com.anonymous.usports.global.exception.ErrorCode;
 import com.anonymous.usports.global.exception.MemberException;
 import com.anonymous.usports.global.exception.MyException;
 import com.anonymous.usports.global.exception.ParticipantException;
 import com.anonymous.usports.global.exception.RecruitException;
-import com.anonymous.usports.global.type.NotificationEntityType;
-import com.anonymous.usports.global.type.NotificationType;
 import com.anonymous.usports.global.type.ParticipantStatus;
 import com.anonymous.usports.global.type.RecruitStatus;
 import java.util.List;
@@ -118,7 +115,7 @@ public class ParticipantServiceImpl implements ParticipantService {
     //신청 가능 -> 신청
     ParticipantEntity saved = participantRepository.save(participant);
 
-    notificationService.notify(recruitEntity.getMember(), new NotificationCreateDto(saved, recruitEntity));
+    notificationService.notify(recruitEntity.getMember(), NotificationCreateDto.joinRecruit(saved, recruitEntity));
 
     return new ParticipateResponse(recruitId, memberId, ResponseConstant.JOIN_RECRUIT_COMPLETE);
   }
@@ -148,7 +145,7 @@ public class ParticipantServiceImpl implements ParticipantService {
       participantRepository.save(participantEntity);
 
       notificationService.notify(
-          participantEntity.getMember(), new NotificationCreateDto(recruitEntity, ParticipantStatus.REFUSED));
+          participantEntity.getMember(), NotificationCreateDto.participateRefused(recruitEntity));
       return new ParticipantManage.Response(recruitId, applicant.getMemberId(), false);
     }
 
@@ -162,7 +159,8 @@ public class ParticipantServiceImpl implements ParticipantService {
     recruitRepository.save(recruitEntity);
 
     notificationService.notify(
-        participantEntity.getMember(), new NotificationCreateDto(recruitEntity, ParticipantStatus.ACCEPTED));
+        participantEntity.getMember(), NotificationCreateDto.participateAccepted(recruitEntity));
+
 
     return new ParticipantManage.Response(recruitId, applicant.getMemberId(), true);
   }
