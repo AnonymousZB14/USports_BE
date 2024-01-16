@@ -84,7 +84,9 @@
 
 <h2 align=center>📄 Features</h2>
 
-<h3>회원 API By Je Joon</h3>
+<h3>회원 API</h3>
+`by JeJoon`
+
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/66efc2c6-1ca4-4a91-9b9b-9df329a65dd4" />
 <p><b>OAuth2.0</b>를 활용하여 간편 로그인을 구현했습니다.</p>
 <p>로그인을 할 때에 <b>JWT token</b>을 활용하여, <b>access token</b>과 <b>refresh token</b>을 유저에게 발급해줬습니다.</p>
@@ -93,7 +95,9 @@
 <p>블랙리스트는, 로그아웃 후에, 같은 <b>access token</b>을 사용하려고 할 때에, <b>Redis</b>에 해당 <b>access token</b>이 저장되어 있으면, 해당 토큰을 사용하지 못 하게 막는 것입니다.</p>
 <br>
 
-<h3>기록 API By Mun Jin</h3>
+<h3>기록 API</h3>
+`by MunJin`
+
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/a68222f4-4d56-457d-a61f-f10c61bcadf0"/>
 <p>인스타그램 피드처럼 운동을 한 기록을 남기는 페이지다.</p>
 <p>해당 페이지는 추천과 팔로잉, 두 페이지로 나누어져 있다.</p>
@@ -103,7 +107,9 @@
 <p>기록 상세 내용에 들어가서, 좋아요, 또는 댓글을 작성할 수 있다.</p>
 <br>
 
-<h3>운동 모집 API By Hyun Sik</h3>
+<h3>운동 모집 API</h3>
+`by HyunSik`
+
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/4f1832a9-4a9d-4e05-bc8c-6394d1dbecc9"/>
 <p>모집글 리스트 같은 경우 <b>검색어(제목), 지역, 운동 종목, 성별, 마감 여부</b>로 필터링 할 수 있다.</p>
 <p>모집 글의 상태가 있는데 <b>모집 중</b>, <b>마감 임박</b>, <b>마감</b>으로 3가지로 나누어져 있다.</p>
@@ -115,11 +121,17 @@
 <p>- 해당 글을 통해서, 운동 모임 그룹 채팅방을 만들 수 있다.</p>
 <br>
 
-<h3>알림 API By Hyun Sik</h3>
+<h3>알림 API</h3>
+`by HyunSik`
 <p>SSE를 활용하여 알림 기능을 구현했다.</p>
+<p>멤버에게 알림이 필요한 경우 실시간으로 알림이 전송되고, Notification 탭에서 알림 내역을 확인할 수 있다.</p>
+<p>안읽은 알림 여부는 로그인 시, 알림 발생 시, 알림 리스트 조회 시에 변경된다.</p>
+<p>- SSE(Server Sent Event) 사용</p>
 <br>
 
-<h3>마이 페이지 API By Hyun Sik</h3>
+<h3>마이 페이지 API</h3>
+`by HyunSik`
+
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/c5d3d861-c402-48a6-951f-19ccc49fc3ae"/>
 <p>유저의 정보를 볼 수 있는 페이지다</p>
 <p>유저의 관심 운동 종목, 매너 점수를 확인할 수 있고, 회원 정보와 운동 별 능력을 클릭하면 팝업으로 볼 수 있다.</p>
@@ -135,7 +147,9 @@
 <p>- 유저의 정보를 수정할 수 있는 탭이다.</p>
 <br>
 
-<h3>평가 API By Hyun Sik</h3>
+<h3>평가 API</h3>
+`by HyunSik`
+
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/01acc250-4de4-4b86-8281-3dd848366ced" width=500px/>
 <p><b>매너 점수</b>와 <b>운동 실력</b>을 평가하는 것이다.</p>
 <p>- 매너 점수는 <b>친절, 열정, 팀워크 점수</b>로 구성되어 있고, 3개의 지표의 평균이 해당 유저의 <b>매너 점수</b>로 기록된다.</p>
@@ -144,7 +158,9 @@
 <p>48시간 안에 모임을 했던 사람들 중, 최소 1명도 평가를 안 했으면 패널티가 부여된다. (1회당 매너 점수 총점에서 3점이 깎인다)</p>
 <br>
 
-<h3>프로필 API By Hyun Sik</h3>
+<h3>프로필 API</h3>
+`by HyunSik`
+
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/c2b837f5-e913-4c97-9b8d-096509c46924"/>
 <p>특정 유저의 <b>기록글과, 등록한 모집글</b>을 확인할 수 있다.</p>
 <p>- 회원 정보를 조회하여, 해당 회원에 대한 상세 정보를 알 수 있다.</p>
@@ -153,7 +169,9 @@
 <p>- 해당 유저가 작성한 모든 모집글들을 볼 수 있다.</p>
 <br>
 
-<h3>채팅 API By Je Joon & Mun Jin</h3>
+<h3>채팅 API </h3>
+`by JeJoon & MunJin`
+
 <img src="https://github.com/AnonymousZB14/USports_BE/assets/108650920/16f8b617-1c68-481c-a406-f8bf10e6e02c"/>
 <p><b>WebSocket</b>을 활용하여 실시간 채팅을 구현했습니다.</p>
 <p><b>STOMP</b>를 사용하여, 채팅방을 구현했습니다.</p>
@@ -164,13 +182,15 @@
 <p>외부 브로커를 사용하면, 어플리케이션 의존도를 느슨하게 만들어서, 서버 부담을 줄일 수 있다.</p>
 <br>
 
-<h3>팔로우 API By Mun Jin</h3>
+<h3>팔로우 API</h3>
+`by MunJin`
 <p>타 유저를 팔로우하는 기능이다.</p>
 <p>비공개 계정일 경우, 수락을 해야지, 팔로우가 성사가 된다.</p>
 <p>그 외에, 팔로우를 하면, 기록글에서, 내가 팔로우한 사람의 피드를 볼 수 있게 된다.</p>
 <br>
 
-<h3>신고/문의 API By Je Joon</h3>
+<h3>신고/문의 API</h3>
+`by JeJoon`
 <p>코드 상으로 해결하는 것이 어려운 것들을 해결하여, 어플리케이션에 대한 유저들의 신뢰도를 높이려는 기능이다.</p>
 <p>유저들이 어드민에게 문의 또는 신고를 할 것들이 있을 때를 위해 만든 API다.</p>
 <p>이 API를 통해 유저들은, 부적절한 내용을 발견하거나, 운동 모임에서 나쁜 일을 겪으면, 신고 또는 문의를 할 수 있다.</p>
